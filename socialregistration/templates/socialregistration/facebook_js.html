@@ -1,0 +1,16 @@
+<script src="http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php/en_US" type="text/javascript"></script>
+<script type="text/javascript">
+    FB_RequireFeatures(["XFBML"],
+        function() {
+            FB.Facebook.init("{{ facebook_api_key }}", "{% url facebook_xd_receiver %}")
+        }
+    );
+    function facebookConnect(form){
+        FB.Connect.requireSession();
+        FB.Facebook.get_sessionState().waitUntilReady(
+            function(){
+                form.submit();
+            }
+        );
+    }
+</script>

@@ -1,0 +1,7 @@
+{% load twitter_tags %}
+<form class="connect-button" name="login" method="post" action="{% url twitter_redirect %}">
+{% if next %}
+    <input type="hidden" name="next" value="{{ next }}" />
+{% endif %}
+<input type="image" onclick="this.form.submit();" src="http://apiwiki.twitter.com/f/1242697608/Sign-in-with-Twitter-lighter.png" />
+</form>

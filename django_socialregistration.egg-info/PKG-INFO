@@ -1,0 +1,82 @@
+Metadata-Version: 1.0
+Name: django-socialregistration
+Version: 0.1
+Summary: Django application enabling registration through a variety of APIs
+Home-page: http://code.google.com/p/django-socialregistration
+Author: Alen Mujezinovic
+Author-email: alen@caffeinehit.com
+License: UNKNOWN
+Description: ==========================
+        Django Social Registration
+        ==========================
+        
+        Django Social Registration enables developers to add alternative registration
+        methods based on third party sites.
+        
+        Requirements
+        ============
+        django
+        oauth
+        python-openid
+        
+        Installation
+        ============
+        
+        #. Add the *socialregistration* directory to your *PYTHON_PATH*.
+        #. Add *socialregistration* to your *INSTALLED_APPS* settings of Django.
+        #. Add *socialregistration.urls* to your *urls.py* file.
+        
+        Configuration
+        =============
+        
+        Facebook Connect
+        ----------------
+        #. Add *FACEBOOK_API_KEY* and *FACEBOOK_SECRET_KEY* to your settings file
+        representing the keys you were given by Facebook.
+        
+        #. Add tags to your template file:
+        
+        {% load facebook_tags %}
+        {% facebook_button %}
+        {% facebook_js %}
+        
+        Twitter
+        -------
+        #. Add the following variables to your *settings.py* file with the values you
+        were given by Twitter:
+        
+        TWITTER_CONSUMER_KEY
+        TWITTER_CONSUMER_SECRET_KEY
+        TWITTER_REQUEST_TOKEN_URL
+        TWITTER_ACCESS_TOKEN_URL
+        TWITTER_AUTHORIZATION_URL
+        
+        #. Add tags to your template file:
+        {% load twitter_tags %}
+        {% twitter_button %}
+        
+        Other OAuth Services
+        --------------------
+        There is an example of how FriendFeed integration could work.
+        *socialregistration.models* provides a *FriendFeedProfile* model to save account
+        data, *socialregistration.auth* provides examples for different auth backends for
+        different service providers, *socialregistration.utils* provides a Twitter
+        and FriendFeed interface and *socialregistration.urls* provides examples based
+        on Twitter and FriendFeed how to hook in more OAuth based services.
+        
+        OpenID
+        ------
+        #. Add tags to your template file:
+        {% load openid_tags %}
+        {% openid_form %}
+        
+Keywords: django facebook twitter oauth openid registration
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Environment :: Web Environment
+Classifier: Topic :: Internet
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Framework :: Django

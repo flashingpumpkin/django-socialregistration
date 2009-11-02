@@ -26,6 +26,7 @@ Facebook Connect
 ----------------
 #. Add *FACEBOOK_API_KEY* and *FACEBOOK_SECRET_KEY* to your settings file 
 representing the keys you were given by Facebook.
+#. Add *socialregistration.auth.FacebookAuth* to *AUTHENTICATION_BACKENDS* in your settings file.
 
 #. Add tags to your template file:
 
@@ -44,6 +45,8 @@ were given by Twitter:
 	TWITTER_ACCESS_TOKEN_URL
 	TWITTER_AUTHORIZATION_URL
 
+#. Add *socialregistration.auth.TwitterAuth* to *AUTHENTICATION_BACKENDS* in your settings file.
+
 #. Add tags to your template file:
 	{% load twitter_tags %}
 	{% twitter_button %}
@@ -59,6 +62,7 @@ on Twitter and FriendFeed how to hook in more OAuth based services.
 
 OpenID
 ------
+#. Add *socialregistration.auth.OpenIDAuth* to *AUTHENTICATION_BACKENDS* in your settings file.
 #. Add tags to your template file:
 	{% load openid_tags %}
 	{% openid_form %}

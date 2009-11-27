@@ -23,7 +23,8 @@ SETUPTOOLS_METADATA = dict(
         'Programming Language :: Python',
         'Framework :: Django',
     ],
-    packages=['socialregistration']
+    packages=['socialregistration', 'socialregistration.templatetags'],
+    package_data={'socialregistration': ['templates/socialregistration/*.html'],}
 )
 
 if __name__ == '__main__':

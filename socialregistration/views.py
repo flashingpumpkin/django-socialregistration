@@ -10,10 +10,11 @@ from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
 from django.utils.translation import gettext as _
+from django.utils.hashcompat import md5_constructor
 from django.http import HttpResponseRedirect, HttpResponse
 
 from django.contrib.auth.models import User
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.sites.models import Site
 
 from socialregistration.forms import UserForm
@@ -87,16 +88,25 @@ def facebook_login(request, template='socialregistration/facebook.html',
     user = authenticate(uid=request.facebook.uid)
     
     if user is None:
-        request.session['socialregistration_user'] = User()
-        request.session['socialregistration_profile'] = FacebookProfile(
-            uid=request.facebook.uid
-        )
-        request.session['next'] = _get_next(request)
-        return HttpResponseRedirect(reverse('socialregistration_setup'))
+        gen_name = md5_constructor(request.facebook.uid + 'social').hexdigest()[:6]
+        
+        # Create user to log into django
+        user = User.objects.create(username=gen_name)
+
+        # Create new facebook profile
+        fb_profile = request.facebook.users.getInfo([request.facebook.uid], ['first_name'])[0]['first_name']
+        profile = FacebookProfile.objects.create(uid=request.facebook.uid,
+                                                 user=user,
+                                                 name=fb_profile,)
+
+        user = profile.authenticate()
+        login(request, user)
+
+        return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', '/'))
     
     login(request, user)
     
-    return HttpResponseRedirect(_get_next(request))
+    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', '/'))
 
 def facebook_connect(request, template='socialregistration/facebook.html',
     extra_context=dict()):
@@ -119,6 +129,18 @@ def facebook_connect(request, template='socialregistration/facebook.html',
     )
     
     return HttpResponseRedirect(_get_next(request))
+
+def facebook_logout(request, redirect_url=None):
+    """
+    Logs the user out of facebook and django.
+    """
+    logout(request)
+    if getattr(request,'facebook',False):
+        request.facebook.session_key = None
+        request.facebook.uid = None
+    url = getattr(settings,'LOGOUT_REDIRECT_URL',redirect_url) or '/'
+
+    return HttpResponseRedirect(url)
 
 def twitter(request):
     """

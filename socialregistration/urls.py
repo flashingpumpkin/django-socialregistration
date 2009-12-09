@@ -24,6 +24,9 @@ if getattr(settings, 'FACEBOOK_API_KEY', None) is not None:
         url('^xd_receiver.html$', 'django.views.generic.simple.direct_to_template',
             {'template':'socialregistration/xd_receiver.html'},
             name='facebook_xd_receiver'),
+
+        url('^facebook/logout/$', 'socialregistration.views.facebook_logout',
+            name='facebook_logout'),
     )
 
 #Setup Twitter URLs if there's an API key specified

@@ -77,7 +77,7 @@ def setup(request, template='socialregistration/setup.html',
     else:
         # Generate user and profile
         user = request.session['socialregistration_user']
-        user.username = str(uuid.uuid4()[:30])
+        user.username = str(uuid.uuid4())[:30]
         user.save()
         
         profile = request.session['socialregistration_profile']

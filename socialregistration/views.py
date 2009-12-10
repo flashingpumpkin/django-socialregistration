@@ -3,6 +3,7 @@ Created on 22.09.2009
 
 @author: alen
 """
+import uuid
 from oauth import oauth
 
 from django.conf import settings
@@ -45,32 +46,51 @@ def setup(request, template='socialregistration/setup.html',
     """
     Setup view to create a username & set email address after authentication
     """
-    if not request.method == "POST":
-        form = form_class(
-            request.session['socialregistration_user'],
-            request.session['socialregistration_profile'],
+    if not getattr(settings, 'AUTO_GENERATE_USERNAME', False):
+        # User can pick own username
+        if not request.method == "POST":
+            form = form_class(
+                request.session['socialregistration_user'],
+                request.session['socialregistration_profile'],
+            )
+        else:
+            form = form_class(
+                request.session['socialregistration_user'],
+                request.session['socialregistration_profile'],
+                request.POST
+            )
+            if form.is_valid():
+                form.save()
+                user = form.profile.authenticate()
+                login(request, user)
+                del request.session['socialregistration_user']
+                del request.session['socialregistration_profile']
+                return HttpResponseRedirect(_get_next(request))
+    
+        extra_context.update(dict(form=form))
+    
+        return render_to_response(
+            template,
+            extra_context,
+            context_instance=RequestContext(request)
         )
     else:
-        form = form_class(
-            request.session['socialregistration_user'],
-            request.session['socialregistration_profile'],
-            request.POST
-        )
-        if form.is_valid():
-            form.save()
-            user = form.profile.authenticate()
-            login(request, user)
-            del request.session['socialregistration_user']
-            del request.session['socialregistration_profile']
-            return HttpResponseRedirect(_get_next(request))
-    
-    extra_context.update(dict(form=form))
-    
-    return render_to_response(
-        template,
-        extra_context,
-        context_instance=RequestContext(request)
-    )
+        # Generate user and profile
+        user = request.session['socialregistration_user']
+        user.username = str(uuid.uuid4())
+        user.save()
+        
+        profile = request.session['socialregistration_profile']
+        profile.user = user
+        profile.save()
+
+        # Authenticate and login
+        user = profile.authenticate()
+        login(request, user)
+        
+        # Redirect
+        return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+        
 
 def facebook_login(request, template='socialregistration/facebook.html',
     extra_context=dict()):
@@ -88,25 +108,19 @@ def facebook_login(request, template='socialregistration/facebook.html',
     user = authenticate(uid=request.facebook.uid)
     
     if user is None:
-        gen_name = md5_constructor(request.facebook.uid + 'social').hexdigest()[:6]
-        
-        # Create user to log into django
-        user = User.objects.create(username=gen_name)
+        request.session['socialregistration_user'] = User()
+        fb_username = request.facebook.users.getInfo([request.facebook.uid])[0]['name']
+        request.session['socialregistration_profile'] = FacebookProfile(
+            uid=request.facebook.uid,
+            username=fb_username
+            )
+        request.session['next'] = _get_next(request)
 
-        # Create new facebook profile
-        fb_profile = request.facebook.users.getInfo([request.facebook.uid], ['first_name'])[0]['first_name']
-        profile = FacebookProfile.objects.create(uid=request.facebook.uid,
-                                                 user=user,
-                                                 name=fb_profile,)
+        return HttpResponseRedirect(reverse('socialregistration_setup'))
 
-        user = profile.authenticate()
-        login(request, user)
-
-        return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', '/'))
-    
     login(request, user)
     
-    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', '/'))
+    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
 
 def facebook_connect(request, template='socialregistration/facebook.html',
     extra_context=dict()):

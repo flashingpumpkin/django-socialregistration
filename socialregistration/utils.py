@@ -23,6 +23,7 @@ from django.utils.translation import gettext as _
 from django.utils import simplejson
 
 from django.contrib.sites.models import Site
+from django.contrib.auth.models import User
 
 from socialregistration.models import OpenIDStore as OpenIDStoreModel, OpenIDNonce
 
@@ -299,3 +300,4 @@ class OAuthFriendFeed(OAuth):
     def get_user_info(self):
         user = simplejson.loads(self.query(self.url))
         return user
+

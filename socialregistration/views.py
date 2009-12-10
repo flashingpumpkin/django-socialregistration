@@ -77,7 +77,7 @@ def setup(request, template='socialregistration/setup.html',
     else:
         # Generate user and profile
         user = request.session['socialregistration_user']
-        user.username = str(uuid.uuid4())
+        user.username = str(uuid.uuid4()[:30])
         user.save()
         
         profile = request.session['socialregistration_profile']
@@ -175,7 +175,7 @@ def twitter(request):
     
     if user is None:
         profile = TwitterProfile(twitter_id=user_info['id'])
-        user = User(username=str(uuid.uuid4()))
+        user = User()
         request.session['socialregistration_profile'] = profile
         request.session['socialregistration_user'] = user
         request.session['next'] = _get_next(request)

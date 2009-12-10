@@ -170,11 +170,12 @@ def twitter(request):
     )
     
     user_info = client.get_user_info()
-    
+
     user = authenticate(twitter_id=user_info['id'])
     
     if user is None:
-        profile = TwitterProfile(twitter_id=user_info['id'])
+        profile = TwitterProfile(twitter_id=user_info['id'],
+                                 username=user_info['screen_name'])
         user = User()
         request.session['socialregistration_profile'] = profile
         request.session['socialregistration_user'] = user

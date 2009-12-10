@@ -1,7 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from facebook.djangofb import Facebook,get_facebook_client
 
-from socialregistration.models import FacebookProfile
+from socialregistration.models import FacebookProfile, TwitterProfile
 
 def settings(request):
     profile = None

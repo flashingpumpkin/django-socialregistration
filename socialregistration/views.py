@@ -183,7 +183,7 @@ def twitter(request):
 
     login(request, user)
     
-    return HttpResponseRedirect(_get_next(request))
+    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
 
 
 def friendfeed(request):

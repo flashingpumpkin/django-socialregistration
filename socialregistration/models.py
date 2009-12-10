@@ -17,18 +17,20 @@ class FacebookProfile(models.Model):
     site = models.ForeignKey(Site, default=Site.objects.get_current)
     uid = models.CharField(max_length=255, blank=False, null=False)
     username = models.CharField(max_length=255)
+    avatar = models.CharField(max_length=255)
     
     def __unicode__(self):
         return '%s: %s' % (self.user, self.uid)
     
     def authenticate(self):
         return authenticate(uid=self.uid)
-    
+
 class TwitterProfile(models.Model):
     user = models.ForeignKey(User)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
     twitter_id = models.PositiveIntegerField()
     username = models.CharField(max_length=255)
+    avatar = models.CharField(max_length=255)
     
     def __unicode__(self):
         return '%s: %s' % (self.user, self.twitter_id)

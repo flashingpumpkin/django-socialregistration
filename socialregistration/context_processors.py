@@ -8,6 +8,8 @@ def settings(request):
     if request.user.is_authenticated():
         if request.session['_auth_user_backend'].endswith('FacebookAuth'):
             profile = FacebookProfile.objects.get(user=request.user)
+        elif request.session['_auth_user_backend'].endswith('TwitterAuth'):
+            profile = TwitterProfile.objects.get(user=request.user)
         
     return {
         'request': request,

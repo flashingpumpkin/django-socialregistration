@@ -46,7 +46,7 @@ def setup(request, template='socialregistration/setup.html',
     """
     Setup view to create a username & set email address after authentication
     """
-    if not getattr(settings, 'AUTO_GENERATE_USERNAME', False):
+    if not getattr(settings, 'SOCIAL_GENERATE_USERNAME', False):
         # User can pick own username
         if not request.method == "POST":
             form = form_class(
@@ -88,7 +88,9 @@ def setup(request, template='socialregistration/setup.html',
         user = profile.authenticate()
         login(request, user)
         
-        # Redirect
+        # Clear & Redirect
+        del request.session['socialregistration_user']
+        del request.session['socialregistration_profile']
         return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
         
 
@@ -173,7 +175,7 @@ def twitter(request):
     
     if user is None:
         profile = TwitterProfile(twitter_id=user_info['id'])
-        user = User()
+        user = User(username=str(uuid.uuid4()))
         request.session['socialregistration_profile'] = profile
         request.session['socialregistration_user'] = user
         request.session['next'] = _get_next(request)

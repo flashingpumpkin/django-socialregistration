@@ -1,1 +1,4 @@
 *.pyc
+.DS_Store
+
+django_socialregistration.egg-info/*

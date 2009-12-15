@@ -176,6 +176,14 @@ class OAuthClient(oauth.OAuthClient):
         )
         oauth_request.sign_request(self.signature_method, self.consumer, self.token)
         response = self._get_response(oauth_request)
+
+        if response.startswith('{'):
+            # Response is in json convert to string
+            oauth_token = simplejson.loads(response)['oauth_token']
+            oauth_token_secret = simplejson.loads(response)['oauth_token_secret']
+
+            response = 'oauth_token='+oauth_token+'&oauth_token_secret='+oauth_token_secret
+        
         return oauth.OAuthToken.from_string(response)
     
     def token_prefix(self):

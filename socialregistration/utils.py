@@ -10,6 +10,7 @@ import time
 import base64
 import urllib
 import urllib2
+from xml.dom import minidom
 
 from oauth import oauth
 from openid.consumer import consumer as openid
@@ -157,7 +158,7 @@ class OAuthClient(oauth.OAuthClient):
         )
         oauth_request.sign_request(self.signature_method, self.consumer, None)
         response = self._get_response(oauth_request)
-
+        
         if response.startswith('{'):
             # Response is in json convert to string
             oauth_token = simplejson.loads(response)['oauth_token']
@@ -172,16 +173,18 @@ class OAuthClient(oauth.OAuthClient):
         Get an access token
         """
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(
-            self.consumer, http_url=self.access_token_url, token=self.token
+            self.consumer, http_url=self.access_token_url, token=self.token,
+            parameters=self.parameters
         )
         oauth_request.sign_request(self.signature_method, self.consumer, self.token)
         response = self._get_response(oauth_request)
 
-        if response.startswith('{'):
-            # Response is in json convert to string
-            oauth_token = simplejson.loads(response)['oauth_token']
-            oauth_token_secret = simplejson.loads(response)['oauth_token_secret']
-
+        if response.startswith('<?xml'):
+            # Response is in xml convert to string
+            xml = minidom.parseString(response)
+            oauth_token = xml.getElementsByTagName('oauth_token')[0].childNodes[0].nodeValue
+            oauth_token_secret = xml.getElementsByTagName('oauth_token_secret')[0].childNodes[0].nodeValue
+  
             response = 'oauth_token='+oauth_token+'&oauth_token_secret='+oauth_token_secret
         
         return oauth.OAuthToken.from_string(response)
@@ -243,7 +246,7 @@ class OAuthClient(oauth.OAuthClient):
         if not self.token.key == self.request.GET.get('oauth_token', 'no-token-given'):
             self.errors.append(_('The given authorization tokens do not match.'))
             return False
-
+        
         self._token = self.get_access_token()
         self.request.session['oauth_%s_access_token' % self.token_prefix()] = self.token.to_string()
         
@@ -291,8 +294,8 @@ class OAuth(object):
         TODO: Add POST support"""
         try:
             return urllib2.urlopen(oauth_request.to_url()).read()
-        except:
-            raise HttpResponseServerError(_('We couldn\'t reach the service. Please try again later'))
+        except urllib2.HTTPError, e:
+            raise Exception('%s on %s' % (e, oauth_request.to_url()))
 
     def query(self, url, parameters=None):
         return self.get_response(
@@ -324,8 +327,16 @@ class OAuthHyves(OAuth):
     Verifying hyves credentials
     """
     url = 'http://data.hyves-api.nl/'
+    parameters = {'ha_method': 'users.getLoggedin', 'ha_responsefields': 'profilepicture', 'ha_version': '1.2', 'ha_format': 'xml', 'ha_fancylayout': 'false' }
     
     def get_user_info(self):
-        user = simplejson.loads(self.query(self.url))
+        user = dict()
+        user_xml = self.query(self.url, self.parameters)
+
+        xml = minidom.parseString(user_xml)
+        user['id'] = xml.getElementsByTagName('userid')[0].childNodes[0].nodeValue
+        user['screen_name'] = xml.getElementsByTagName('displayname')[0].childNodes[0].nodeValue
+        user['avatar'] = xml.getElementsByTagName('icon_small')[0].getElementsByTagName('src')[0].childNodes[0].nodeValue
+
         return user
 

@@ -6,7 +6,7 @@ Created on 22.09.2009
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 
-from socialregistration.models import (FacebookProfile, TwitterProfile,
+from socialregistration.models import (FacebookProfile, TwitterProfile, HyvesProfile,
     FriendFeedProfile, OpenIDProfile)
 
 class Auth(object):
@@ -31,6 +31,16 @@ class TwitterAuth(Auth):
         try:
             return TwitterProfile.objects.get(
                 twitter_id=twitter_id,
+                site=Site.objects.get_current()
+            ).user
+        except:
+            return None
+
+class HyvesAuth(Auth):
+    def authenticate(self, hyves_id=None):
+        try:
+            return HyvesProfile.objects.get(
+                hyves_id=hyves_id,
                 site=Site.objects.get_current()
             ).user
         except:

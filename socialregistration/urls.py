@@ -68,7 +68,7 @@ if getattr(settings, 'HYVES_CONSUMER_KEY', None) is not None:
                 access_token_url=settings.HYVES_ACCESS_TOKEN_URL,
                 authorization_url=settings.HYVES_AUTHORIZATION_URL,
                 callback_url='hyves_callback',
-                parameters={'ha_method':'auth.requesttoken', 'ha_version': '1.2', 'ha_format': 'json', 'ha_fancylayout': 'false', 'methods': 'users.get'}
+                parameters={'ha_method':'auth.requesttoken', 'ha_version': '1.2', 'ha_format': 'json', 'ha_fancylayout': 'false', 'methods': 'users.getLoggedin'}
             ),
             name='hyves_redirect'),
         
@@ -80,7 +80,7 @@ if getattr(settings, 'HYVES_CONSUMER_KEY', None) is not None:
                 access_token_url=settings.HYVES_ACCESS_TOKEN_URL,
                 authorization_url=settings.HYVES_AUTHORIZATION_URL,
                 callback_url='hyves',
-                parameters={'ha_method':'auth.accesstoken', 'ha_version': '1.2', 'ha_format': 'json', 'ha_fancylayout': 'false', 'methods': 'users.get'}
+                parameters={'ha_method':'auth.accesstoken', 'ha_version': '1.2.1', 'ha_format': 'xml', 'ha_fancylayout': 'false'}
             ),
             name='hyves_callback'
         ),

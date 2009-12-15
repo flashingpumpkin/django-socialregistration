@@ -19,9 +19,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.sites.models import Site
 
 from socialregistration.forms import UserForm
-from socialregistration.utils import (OAuthClient, OAuthTwitter, OAuthFriendFeed,
+from socialregistration.utils import (OAuthClient, OAuthTwitter, OAuthHyves, OAuthFriendFeed,
     OpenID)
-from socialregistration.models import FacebookProfile, TwitterProfile, OpenIDProfile
+from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile, OpenIDProfile
 
 
 FB_ERROR = _('We couldn\'t validate your Facebook credentials')
@@ -155,7 +155,7 @@ def logout(request, redirect_url=None):
         request.facebook.session_key = None
         request.facebook.uid = None
     url = getattr(settings,'LOGOUT_REDIRECT_URL',redirect_url) or '/'
-
+    
     return HttpResponseRedirect(url)
 
 def twitter(request):
@@ -182,7 +182,7 @@ def twitter(request):
         request.session['socialregistration_user'] = user
         request.session['next'] = _get_next(request)
         return HttpResponseRedirect(reverse('socialregistration_setup'))
-
+    
     login(request, user)
     
     return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))

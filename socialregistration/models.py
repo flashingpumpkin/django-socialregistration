@@ -36,6 +36,12 @@ class TwitterProfile(models.Model):
     def authenticate(self):
         return authenticate(twitter_id=self.twitter_id)
 
+class HyvesProfile(models.Model):
+    user = models.ForeignKey(User)
+    site = models.ForeignKey(Site, default=Site.objects.get_current)
+    hyves_id = models.PositiveIntegerField()
+    username = models.CharField(max_length=255)
+
 class FriendFeedProfile(models.Model):
     user = models.ForeignKey(User)
     site = models.ForeignKey(Site, default=Site.objects.get_current)

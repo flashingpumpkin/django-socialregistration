@@ -124,7 +124,7 @@ class OAuthClient(oauth.OAuthClient):
     """
     
     def __init__(self, request, consumer_key, consumer_secret,
-        request_token_url, access_token_url, authorization_url, callback_url):
+        request_token_url, access_token_url, authorization_url, callback_url, parameters=None):
     
         self.request = request
     
@@ -134,11 +134,12 @@ class OAuthClient(oauth.OAuthClient):
     
         self.consumer = oauth.OAuthConsumer(consumer_key, consumer_secret)
         self.signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
+
+        self.parameters = parameters
         
         self.errors = []
         
         self.callback_url = callback_url
-
     
     def _get_response(self, oauth_request):
         try:
@@ -151,10 +152,19 @@ class OAuthClient(oauth.OAuthClient):
         Get a request token
         """
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(
-            self.consumer, http_url=self.request_token_url
+            self.consumer, http_url=self.request_token_url,
+            parameters=self.parameters
         )
         oauth_request.sign_request(self.signature_method, self.consumer, None)
         response = self._get_response(oauth_request)
+
+        if response.startswith('{'):
+            # Response is in json convert to string
+            oauth_token = simplejson.loads(response)['oauth_token']
+            oauth_token_secret = simplejson.loads(response)['oauth_token_secret']
+
+            response = 'oauth_token='+oauth_token+'&oauth_token_secret='+oauth_token_secret
+            
         return oauth.OAuthToken.from_string(response)
     
     def get_access_token(self):
@@ -198,7 +208,7 @@ class OAuthClient(oauth.OAuthClient):
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(
             self.consumer,
             http_url=self.authorization_url,
-            token=self.token
+            token=self.token,
         )
         oauth_request.sign_request(self.signature_method, self.consumer, self.token)
         return oauth_request.to_url()
@@ -221,11 +231,11 @@ class OAuthClient(oauth.OAuthClient):
             return False
         
         self._token = oauth.OAuthToken.from_string(self.session_token())
-        
+
         if not self.token.key == self.request.GET.get('oauth_token', 'no-token-given'):
             self.errors.append(_('The given authorization tokens do not match.'))
             return False
-        
+
         self._token = self.get_access_token()
         self.request.session['oauth_%s_access_token' % self.token_prefix()] = self.token.to_string()
         
@@ -241,7 +251,7 @@ class OAuth(object):
         self.signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
         
         self.request_token_url = request_token_url
-
+        
     def token_prefix(self):
         """ 
         Create a prefix for the token so we can hold multiple different oauth
@@ -296,6 +306,16 @@ class OAuthFriendFeed(OAuth):
     Verifying friendfeed credentials
     """
     url = 'http://friendfeed-api.com/v2/validate'
+    
+    def get_user_info(self):
+        user = simplejson.loads(self.query(self.url))
+        return user
+
+class OAuthHyves(OAuth):
+    """
+    Verifying hyves credentials
+    """
+    url = 'http://data.hyves-api.nl/'
     
     def get_user_info(self):
         user = simplejson.loads(self.query(self.url))

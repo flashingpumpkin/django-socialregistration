@@ -1,13 +1,21 @@
 from django.conf import settings
+from django.contrib.auth import logout
+
 from socialregistration.models import FacebookProfile, TwitterProfile
 
 def auth(request):
     profile = None
     if request.user.is_authenticated():
         if request.session['_auth_user_backend'].endswith('FacebookAuth'):
-            profile = FacebookProfile.objects.get(user=request.user)
+            try:
+                profile = FacebookProfile.objects.get(user=request.user)
+            except FacebookProfile.DoesNotExist:
+                logout(request)
         elif request.session['_auth_user_backend'].endswith('TwitterAuth'):
-            profile = TwitterProfile.objects.get(user=request.user)
+            try:
+                profile = TwitterProfile.objects.get(user=request.user)
+            except TwitterProfile.DoesNotExist:
+                logout(request)
         
     return {
         'request': request,

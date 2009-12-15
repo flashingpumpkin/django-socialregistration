@@ -146,7 +146,7 @@ def facebook_connect(request, template='socialregistration/facebook.html',
     
     return HttpResponseRedirect(_get_next(request))
 
-def facebook_logout(request, redirect_url=None):
+def logout(request, redirect_url=None):
     """
     Logs the user out of facebook and django.
     """
@@ -187,6 +187,35 @@ def twitter(request):
     
     return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
 
+def hyves(request):
+    """
+    Actually setup/login an account relating to a twitter user after the oauth 
+    process is finished successfully
+    """
+    client = OAuthHyves(
+        request, settings.HYVES_CONSUMER_KEY,
+        settings.HYVES_CONSUMER_SECRET_KEY,
+        settings.HYVES_REQUEST_TOKEN_URL,
+    )
+    
+    user_info = client.get_user_info()
+
+    user = authenticate(hyves_id=user_info['id'])
+    
+    if user is None:
+        profile = HyvesProfile(hyves_id=user_info['id'],
+                               username=user_info['screen_name'],
+                               )
+        user = User()
+        request.session['socialregistration_profile'] = profile
+        request.session['socialregistration_user'] = user
+        request.session['next'] = _get_next(request)
+        return HttpResponseRedirect(reverse('socialregistration_setup'))
+
+    login(request, user)
+    
+    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+
 
 def friendfeed(request):
     """
@@ -197,28 +226,28 @@ def friendfeed(request):
 
 def oauth_redirect(request, consumer_key=None, secret_key=None,
     request_token_url=None, access_token_url=None, authorization_url=None,
-    callback_url=None):
+    callback_url=None, parameters=None):
     """
     View to handle the OAuth based authentication redirect to the service provider
     """
     request.session['next'] = _get_next(request)
     client = OAuthClient(request, consumer_key, secret_key,
-        request_token_url, access_token_url, authorization_url, callback_url)
+        request_token_url, access_token_url, authorization_url, callback_url, parameters)
     return client.get_redirect()
 
 def oauth_callback(request, consumer_key=None, secret_key=None,
     request_token_url=None, access_token_url=None, authorization_url=None,
     callback_url=None, template='socialregistration/oauthcallback.html',
-    extra_context=dict()):
+    extra_context=dict(), parameters=None):
     """
     View to handle final steps of OAuth based authentication where the user 
     gets redirected back to from the service provider
     """
     client = OAuthClient(request, consumer_key, secret_key, request_token_url,
-        access_token_url, authorization_url, callback_url)
-    
+        access_token_url, authorization_url, callback_url, parameters)
+
     extra_context.update(dict(oauth_client=client))
-    
+
     if not client.is_valid():
         return render_to_response(
             template, extra_context, context_instance=RequestContext(request)

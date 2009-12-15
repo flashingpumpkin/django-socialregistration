@@ -10,6 +10,9 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns('',
     url('^setup/$', 'socialregistration.views.setup',
         name='socialregistration_setup'),
+
+    url('^logout/$', 'socialregistration.views.logout',
+        name='social_logout'),
 )
 
 # Setup Facebook URLs if there's an API key specified
@@ -24,9 +27,6 @@ if getattr(settings, 'FACEBOOK_API_KEY', None) is not None:
         url('^xd_receiver.html$', 'django.views.generic.simple.direct_to_template',
             {'template':'socialregistration/xd_receiver.html'},
             name='facebook_xd_receiver'),
-
-        url('^facebook/logout/$', 'socialregistration.views.facebook_logout',
-            name='facebook_logout'),
     )
 
 #Setup Twitter URLs if there's an API key specified
@@ -55,6 +55,36 @@ if getattr(settings, 'TWITTER_CONSUMER_KEY', None) is not None:
             name='twitter_callback'
         ),
         url('^twitter/$', 'socialregistration.views.twitter', name='twitter'),
+    )
+
+#Setup Hyves URLs if there's an API key specified
+if getattr(settings, 'HYVES_CONSUMER_KEY', None) is not None:
+    urlpatterns = urlpatterns + patterns('',
+        url('^hyves/redirect/$', 'socialregistration.views.oauth_redirect',
+            dict(
+                consumer_key=settings.HYVES_CONSUMER_KEY,
+                secret_key=settings.HYVES_CONSUMER_SECRET_KEY,
+                request_token_url=settings.HYVES_REQUEST_TOKEN_URL,
+                access_token_url=settings.HYVES_ACCESS_TOKEN_URL,
+                authorization_url=settings.HYVES_AUTHORIZATION_URL,
+                callback_url='hyves_callback',
+                parameters={'ha_method':'auth.requesttoken', 'ha_version': '1.2', 'ha_format': 'json', 'ha_fancylayout': 'false', 'methods': 'users.get'}
+            ),
+            name='hyves_redirect'),
+        
+        url('^hyves/callback/$', 'socialregistration.views.oauth_callback',
+            dict(
+                consumer_key=settings.HYVES_CONSUMER_KEY,
+                secret_key=settings.HYVES_CONSUMER_SECRET_KEY,
+                request_token_url=settings.HYVES_REQUEST_TOKEN_URL,
+                access_token_url=settings.HYVES_ACCESS_TOKEN_URL,
+                authorization_url=settings.HYVES_AUTHORIZATION_URL,
+                callback_url='hyves',
+                parameters={'ha_method':'auth.accesstoken', 'ha_version': '1.2', 'ha_format': 'json', 'ha_fancylayout': 'false', 'methods': 'users.get'}
+            ),
+            name='hyves_callback'
+        ),
+        url('^hyves/$', 'socialregistration.views.hyves', name='hyves'),
     )
     
 # Setup FriendFeed URLs if there's an API key specified

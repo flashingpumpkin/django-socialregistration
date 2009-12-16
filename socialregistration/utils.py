@@ -221,6 +221,9 @@ class OAuthClient(oauth.OAuthClient):
             http_url=self.authorization_url,
             token=self.token,
         )
+        if self.callback_url:
+            oauth_request.parameters['oauth_callback'] = reverse(self.callback_url)
+            
         oauth_request.sign_request(self.signature_method, self.consumer, self.token)
         return oauth_request.to_url()
     
@@ -230,6 +233,7 @@ class OAuthClient(oauth.OAuthClient):
         where authorization of the current application is handled.
         """
         self.request.session['oauth_%s_unauthed_token' % self.token_prefix()] = self.token.to_string()
+        print self.get_authorization_url()
         return HttpResponseRedirect(self.get_authorization_url())
     
     def is_valid(self):

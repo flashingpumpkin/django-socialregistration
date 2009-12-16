@@ -233,7 +233,6 @@ class OAuthClient(oauth.OAuthClient):
         where authorization of the current application is handled.
         """
         self.request.session['oauth_%s_unauthed_token' % self.token_prefix()] = self.token.to_string()
-        print self.get_authorization_url()
         return HttpResponseRedirect(self.get_authorization_url())
     
     def is_valid(self):

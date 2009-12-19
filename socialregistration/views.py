@@ -114,7 +114,6 @@ def facebook_login(request, template='socialregistration/facebook.html',
         fb_profile = request.facebook.users.getInfo([request.facebook.uid], ['name', 'pic_square'])[0]
         request.session['socialregistration_profile'] = FacebookProfile(
             uid=request.facebook.uid,
-            username=fb_profile['name'],
             )
         request.session['next'] = _get_next(request)
 
@@ -175,7 +174,6 @@ def twitter(request):
     
     if user is None:
         profile = TwitterProfile(twitter_id=user_info['id'],
-                                 username=user_info['screen_name'],
                                  )
         user = User()
         request.session['socialregistration_profile'] = profile

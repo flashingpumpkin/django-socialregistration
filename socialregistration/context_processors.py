@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.contrib.auth import logout
 
-from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile
-from socialregistration.utils import (OAuthTwitter, OAuthHyves)
+from socialregistration.models import FacebookProfile, TwitterProfile
+from socialregistration.utils import (OAuthTwitter)
 
 def auth(request):
     profile = None
@@ -16,11 +16,6 @@ def auth(request):
             try:
                 profile = TwitterProfile.objects.get(user=request.user)
             except TwitterProfile.DoesNotExist:
-                logout(request)
-        elif request.session['_auth_user_backend'].endswith('HyvesAuth'):
-            try:
-                profile = HyvesProfile.objects.get(user=request.user)
-            except HyvesProfile.DoesNotExist:
                 logout(request)
         
     return {
@@ -42,14 +37,5 @@ def get_avatar(request, profile):
     
         user_info = client.get_user_info()
         avatar_url = user_info['profile_image_url']
-    elif profile.__class__.__name__ == 'HyvesProfile':
-        client = OAuthHyves(
-            request, settings.HYVES_CONSUMER_KEY,
-            settings.HYVES_CONSUMER_SECRET_KEY,
-            settings.HYVES_REQUEST_TOKEN_URL,
-            )
-    
-        user_info = client.get_user_info()
-        avatar_url = user_info['avatar']
 
     return avatar_url

@@ -34,18 +34,6 @@ class TwitterProfile(models.Model):
     def authenticate(self):
         return authenticate(twitter_id=self.twitter_id)
 
-class HyvesProfile(models.Model):
-    user = models.ForeignKey(User)
-    site = models.ForeignKey(Site, default=Site.objects.get_current)
-    hyves_id = models.CharField(max_length=255, blank=False, null=False)
-    username = models.CharField(max_length=255)
-
-    def __unicode__(self):
-        return '%s: %s' % (self.user, self.hyves_id)
-
-    def authenticate(self):
-        return authenticate(hyves_id=self.hyves_id)
-
 class FriendFeedProfile(models.Model):
     user = models.ForeignKey(User)
     site = models.ForeignKey(Site, default=Site.objects.get_current)

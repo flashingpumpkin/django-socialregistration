@@ -19,9 +19,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.sites.models import Site
 
 from socialregistration.forms import UserForm
-from socialregistration.utils import (OAuthClient, OAuthTwitter, OAuthHyves, OAuthFriendFeed,
+from socialregistration.utils import (OAuthClient, OAuthTwitter, OAuthFriendFeed,
     OpenID)
-from socialregistration.models import FacebookProfile, TwitterProfile, HyvesProfile, OpenIDProfile
+from socialregistration.models import FacebookProfile, TwitterProfile, OpenIDProfile
 
 
 FB_ERROR = _('We couldn\'t validate your Facebook credentials')
@@ -184,36 +184,6 @@ def twitter(request):
     login(request, user)
     
     return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
-
-def hyves(request):
-    """
-    Actually setup/login an account relating to a twitter user after the oauth 
-    process is finished successfully
-    """
-    client = OAuthHyves(
-        request, settings.HYVES_CONSUMER_KEY,
-        settings.HYVES_CONSUMER_SECRET_KEY,
-        settings.HYVES_REQUEST_TOKEN_URL,
-    )
-    
-    user_info = client.get_user_info()
-
-    user = authenticate(hyves_id=user_info['id'])
-    
-    if user is None:
-        profile = HyvesProfile(hyves_id=user_info['id'],
-                               username=user_info['screen_name'],
-                               )
-        user = User()
-        request.session['socialregistration_profile'] = profile
-        request.session['socialregistration_user'] = user
-        request.session['next'] = _get_next(request)
-        return HttpResponseRedirect(reverse('socialregistration_setup'))
-
-    login(request, user)
-    
-    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
-
 
 def friendfeed(request):
     """

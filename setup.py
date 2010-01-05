@@ -2,12 +2,12 @@
 
 METADATA = dict(
     name='django-socialregistration',
-    version='0.1',
+    version='0.2',
     author='Alen Mujezinovic',
     author_email='alen@caffeinehit.com',
     description='Django application enabling registration through a variety of APIs',
     long_description=open('README').read(),
-    url='http://code.google.com/p/django-socialregistration',
+    url='http://github.com/flashingpumpkin/django-socialregistration',
     keywords='django facebook twitter oauth openid registration',
 )
 SETUPTOOLS_METADATA = dict(

@@ -66,3 +66,8 @@ OpenID
 #. Add tags to your template file:
 	{% load openid_tags %}
 	{% openid_form %}
+
+Other Information
+-----------------
+If you don't wish your users to be redirected to the setup view to create a username but rather have 
+a username generated for them, set *SOCIAL_GENERATE_USERNAME* in your settings file to True

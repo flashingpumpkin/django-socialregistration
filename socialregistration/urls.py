@@ -21,11 +21,11 @@ if getattr(settings, 'FACEBOOK_API_KEY', None) is not None:
     urlpatterns = urlpatterns + patterns('',
         url('^facebook/login/$', 'socialregistration.views.facebook_login',
             name='facebook_login'),
-        
+
         url('^facebook/connect/$', 'socialregistration.views.facebook_connect',
             name='facebook_connect'),
-        
-        url('^xd_receiver.html$', 'django.views.generic.simple.direct_to_template',
+
+        url('^xd_receiver.htm$', 'django.views.generic.simple.direct_to_template',
             {'template':'socialregistration/xd_receiver.html'},
             name='facebook_xd_receiver'),
     )
@@ -43,7 +43,7 @@ if getattr(settings, 'TWITTER_CONSUMER_KEY', None) is not None:
                 callback_url='twitter_callback'
             ),
             name='twitter_redirect'),
-        
+
         url('^twitter/callback/$', 'socialregistration.views.oauth_callback',
             dict(
                 consumer_key=settings.TWITTER_CONSUMER_KEY,
@@ -71,7 +71,7 @@ if getattr(settings, 'FRIENDFEED_CONSUMER_KEY', None) is not None:
                 callback_url='friendfeed_callback'
             ),
             name='friendfeed_redirect'),
-        
+
         url('^friendfeed/callback/$', 'socialregistration.views.oauth_callback',
             dict(
                 consumer_key=settings.FRIENDFEED_CONSUMER_KEY,

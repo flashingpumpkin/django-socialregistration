@@ -15,7 +15,7 @@ from django.utils.hashcompat import md5_constructor
 from django.http import HttpResponseRedirect, HttpResponse
 
 from django.contrib.auth.models import User
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate, logout as auth_logout
 from django.contrib.sites.models import Site
 
 from socialregistration.forms import UserForm
@@ -147,13 +147,14 @@ def facebook_connect(request, template='socialregistration/facebook.html',
 
 def logout(request, redirect_url=None):
     """
-    Logs the user out of facebook and django.
+    Logs the user out of django. This is only a wrapper around 
+    django.contrib.auth.logout. Logging users out of Facebook for instance
+    should be done like described in the developer wiki on facebook.
+    http://wiki.developers.facebook.com/index.php/Connect/Authorization_Websites#Logging_Out_Users
     """
-    logout(request)
-    if getattr(request,'facebook',False):
-        request.facebook.session_key = None
-        request.facebook.uid = None
-    url = getattr(settings,'LOGOUT_REDIRECT_URL',redirect_url) or '/'
+    auth_logout(request)
+
+    url = getattr(settings, 'LOGOUT_REDIRECT_URL', redirect_url) or '/'
     
     return HttpResponseRedirect(url)
 

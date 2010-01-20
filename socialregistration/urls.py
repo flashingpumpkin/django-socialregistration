@@ -25,7 +25,7 @@ if getattr(settings, 'FACEBOOK_API_KEY', None) is not None:
         url('^facebook/connect/$', 'socialregistration.views.facebook_connect',
             name='facebook_connect'),
 
-        url('^xd_receiver.htm$', 'django.views.generic.simple.direct_to_template',
+        url('^xd_receiver.htm', 'django.views.generic.simple.direct_to_template',
             {'template':'socialregistration/xd_receiver.html'},
             name='facebook_xd_receiver'),
     )
@@ -87,6 +87,6 @@ if getattr(settings, 'FRIENDFEED_CONSUMER_KEY', None) is not None:
     )
 
 urlpatterns = urlpatterns + patterns('',
-    url('^openid/redirect/', 'socialregistration.views.openid_redirect', name='openid_redirect'),
-    url('^openid/callback/', 'socialregistration.views.openid_callback', name='openid_callback')
+    url('^openid/redirect/$', 'socialregistration.views.openid_redirect', name='openid_redirect'),
+    url('^openid/callback/$', 'socialregistration.views.openid_callback', name='openid_callback')
 )

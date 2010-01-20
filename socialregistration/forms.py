@@ -9,7 +9,7 @@ from django.utils.translation import gettext as _
 from django.contrib.auth.models import User
 
 class UserForm(forms.Form):
-    username = forms.RegexField(r'\w+', max_length=255,)
+    username = forms.RegexField(r'\w+', max_length=32)
     email = forms.EmailField(required=False)
     
     def __init__(self, user, profile, *args, **kwargs):

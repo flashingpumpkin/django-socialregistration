@@ -30,11 +30,14 @@ representing the keys you were given by Facebook.
 #. Add 'facebook.djangofb.FacebookMiddleware' to *MIDDLEWARE_CLASSES* in your settings file.
    -> http://wiki.developers.facebook.com/index.php/User:PyFacebook_Tutorial#Add_the_middleware
 
-#. Add tags to your template file:
+#.  Add tags to your template file:
 
     {% load facebook_tags %}
     {% facebook_button %}
     {% facebook_js %}
+
+#. If you wish on using the pyfacebook library to do API calls instead of the JavaScript
+   lib, add *socialregistration.middleware.FacebookMiddleware* to *MIDDLEWARE_CLASSES*
 
 Twitter
 -------
@@ -72,11 +75,11 @@ OpenID
 Logging users out
 -----------------
 You can use the standard {% url auth_logout %} url to log users out of Django.
-Please note that this will not log users out of third party sites though. 
+Please note that this will not log users out of third party sites though.
 When using Facebook Connect, it is recommended to follow the FBConnect developer
 wiki ->
-	http://wiki.developers.facebook.com/index.php/Connect/Authorization_Websites#Logging_Out_Users
-	<a href="#" onclick="FB.Connect.logoutAndRedirect('{% url auth_logout %}')">Logout</a>
+    http://wiki.developers.facebook.com/index.php/Connect/Authorization_Websites#Logging_Out_Users
+    <a href="#" onclick="FB.Connect.logoutAndRedirect('{% url auth_logout %}')">Logout</a>
 
 Other Information
 -----------------

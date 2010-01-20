@@ -69,6 +69,15 @@ OpenID
     {% load openid_tags %}
     {% openid_form %}
 
+Logging users out
+-----------------
+You can use the standard {% url auth_logout %} url to log users out of Django.
+Please note that this will not log users out of third party sites though. 
+When using Facebook Connect, it is recommended to follow the FBConnect developer
+wiki ->
+	http://wiki.developers.facebook.com/index.php/Connect/Authorization_Websites#Logging_Out_Users
+	<a href="#" onclick="FB.Connect.logoutAndRedirect('{% url auth_logout %}')">Logout</a>
+
 Other Information
 -----------------
 If you don't wish your users to be redirected to the setup view to create a username but rather have

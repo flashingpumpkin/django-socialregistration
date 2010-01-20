@@ -1,4 +1,5 @@
 *.pyc
 .DS_Store
 
-django_socialregistration.egg-info/*socialregistration.tar.gz
+django_socialregistration.egg-info
+socialregistration.tar.gz

@@ -136,7 +136,7 @@ def facebook_connect(request, template='socialregistration/facebook.html',
         return render_to_response(
             template,
             extra_context,
-            context_dict=RequestContext(request)
+            context_instance=RequestContext(request)
         )
     
     profile, created = FacebookProfile.objects.get_or_create(

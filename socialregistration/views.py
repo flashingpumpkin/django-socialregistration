@@ -91,7 +91,7 @@ def setup(request, template='socialregistration/setup.html',
         # Clear & Redirect
         del request.session['socialregistration_user']
         del request.session['socialregistration_profile']
-        return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+        return HttpResponseRedirect(_get_next(request))
         
 
 def facebook_login(request, template='socialregistration/facebook.html',
@@ -121,7 +121,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
 
     login(request, user)
     
-    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+    return HttpResponseRedirect(_get_next(request))
 
 def facebook_connect(request, template='socialregistration/facebook.html',
     extra_context=dict()):
@@ -154,7 +154,7 @@ def logout(request, redirect_url=None):
     """
     auth_logout(request)
 
-    url = getattr(settings, 'LOGOUT_REDIRECT_URL', redirect_url) or '/'
+    url = redirect_url or getattr(settings, 'LOGOUT_REDIRECT_URL', '/') 
     
     return HttpResponseRedirect(url)
 
@@ -184,7 +184,7 @@ def twitter(request):
     
     login(request, user)
     
-    return HttpResponseRedirect(getattr(settings, 'LOGIN_REDIRECT_URL', _get_next(request)))
+    return HttpResponseRedirect(_get_next(request))
 
 def friendfeed(request):
     """

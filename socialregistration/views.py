@@ -95,7 +95,7 @@ def setup(request, template='socialregistration/setup.html',
         
 
 def facebook_login(request, template='socialregistration/facebook.html',
-    extra_context=dict()):
+    extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
     """
     View to handle the Facebook login 
     """
@@ -118,6 +118,13 @@ def facebook_login(request, template='socialregistration/facebook.html',
         request.session['next'] = _get_next(request)
 
         return HttpResponseRedirect(reverse('socialregistration_setup'))
+
+    if not user.is_active:
+        return render_to_response(
+            account_inactive_template,
+            extra_context,
+            context_instance=RequestContext(request)
+        )
 
     login(request, user)
     
@@ -158,7 +165,8 @@ def logout(request, redirect_url=None):
     
     return HttpResponseRedirect(url)
 
-def twitter(request):
+def twitter(request, account_inactive_template='socialregistration/account_inactive.html',
+    extra_context=dict()):
     """
     Actually setup/login an account relating to a twitter user after the oauth 
     process is finished successfully
@@ -181,6 +189,13 @@ def twitter(request):
         request.session['socialregistration_user'] = user
         request.session['next'] = _get_next(request)
         return HttpResponseRedirect(reverse('socialregistration_setup'))
+    
+    if not user.is_active:
+        return render_to_response(
+            account_inactive_template,
+            extra_context,
+            context_instance=RequestContext(request)
+        )
     
     login(request, user)
     
@@ -243,7 +258,7 @@ def openid_redirect(request):
     return client.get_redirect()
 
 def openid_callback(request, template='socialregistration/openid.html',
-    extra_context=dict()):
+    extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
     """
     Catches the user when he's redirected back from the provider to our site
     """
@@ -264,9 +279,16 @@ def openid_callback(request, template='socialregistration/openid.html',
                 identity=request.GET.get('openid.claimed_id')
             )
             return HttpResponseRedirect(reverse('socialregistration_setup'))
-        else:
-            login(request, user)
-            return HttpResponseRedirect(_get_next(request))            
+        
+        if not user.is_active:
+            return render_to_response(
+                account_inactive_template,
+                extra_context,
+                context_instance=RequestContext(request)
+            )
+        
+        login(request, user)
+        return HttpResponseRedirect(_get_next(request))            
     
     return render_to_response(
         template,

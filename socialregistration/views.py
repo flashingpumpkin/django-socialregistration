@@ -178,12 +178,15 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
     )
     
     user_info = client.get_user_info()
+    
+    if request.user.is_authenticated():
+        profile, created = TwitterProfile.objects.get_or_create(user=request.user, twitter_id=user_info['id'])
+        return HttpResponseRedirect(_get_next(request))
 
     user = authenticate(twitter_id=user_info['id'])
     
     if user is None:
-        profile = TwitterProfile(twitter_id=user_info['id'],
-                                 )
+        profile = TwitterProfile(twitter_id=user_info['id'])
         user = User()
         request.session['socialregistration_profile'] = profile
         request.session['socialregistration_user'] = user

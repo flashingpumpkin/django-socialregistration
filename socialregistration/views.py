@@ -147,9 +147,12 @@ def facebook_connect(request, template='socialregistration/facebook.html',
             context_instance=RequestContext(request)
         )
     
-    profile, created = FacebookProfile.objects.get_or_create(
-        user=request.user, uid=request.facebook.uid
-    )
+    try:
+        profile = FacebookProfile.objects.get(uid=request.facebook.uid)
+    except FacebookProfile.DoesNotExist:
+        profile = FacebookProfile.objects.create(user=request.user,
+            uid=request.facebook.uid)
+    
     
     return HttpResponseRedirect(_get_next(request))
 
@@ -182,7 +185,11 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
     
     if request.user.is_authenticated():
         # Handling already logged in users connecting their accounts
-        profile, created = TwitterProfile.objects.get_or_create(user=request.user, twitter_id=user_info['id'])
+        try:
+            profile = TwitterProfile.objects.get(twitter_id=user_info['id'])
+        except TwitterProfile.DoesNotExist: # There can only be one profile!
+            profile = TwitterProfile.objects.create(user=request.user, twitter_id=user_info['id'])
+
         return HttpResponseRedirect(_get_next(request))
 
     user = authenticate(twitter_id=user_info['id'])
@@ -281,8 +288,12 @@ def openid_callback(request, template='socialregistration/openid.html',
     if client.is_valid():
         if request.user.is_authenticated(): 
             # Handling already logged in users just connecting their accounts
-            openidprofile, created = OpenIDProfile(
-                user=request.user, identity=request.GET.get('openid.claimed_id'))
+            try:
+                profile = OpenIDProfile.objects.get(identity=request.GET.get('ppenid.claimed_id'))
+            except OpenIDProfile.DoesNotExist: # There can only be one profile with the same identity
+                profile = OpenIDProfile.objects.create(user=request.user,
+                    identity=request.GET.get('openid.claimed_id'))
+                
             return HttpResponseRedirect(_get_next(request))
         
         user = authenticate(identity=request.GET.get('openid.claimed_id'))

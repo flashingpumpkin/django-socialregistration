@@ -4,27 +4,28 @@ Created on 22.09.2009
 @author: alen
 """
 import uuid
-from oauth import oauth
 
 from django.conf import settings
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
 from django.utils.translation import gettext as _
-from django.utils.hashcompat import md5_constructor
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout as auth_logout
 from django.contrib.sites.models import Site
 
 from socialregistration.forms import UserForm
-from socialregistration.utils import (OAuthClient, OAuthTwitter, OAuthFriendFeed,
-    OpenID)
+from socialregistration.utils import (OAuthClient, OAuthTwitter,
+    OpenID, _https)
 from socialregistration.models import FacebookProfile, TwitterProfile, OpenIDProfile
 
 
 FB_ERROR = _('We couldn\'t validate your Facebook credentials')
+
+GENERATE_USERNAME = bool(getattr(settings, 'SOCIAL_GENERATE_USERNAME', getattr(
+    settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False))) # SOCIAL_GENERATE_USERNAME will deprecate
 
 def _get_next(request):
     """
@@ -46,7 +47,7 @@ def setup(request, template='socialregistration/setup.html',
     """
     Setup view to create a username & set email address after authentication
     """
-    if not getattr(settings, 'SOCIAL_GENERATE_USERNAME', False):
+    if not GENERATE_USERNAME:
         # User can pick own username
         if not request.method == "POST":
             form = form_class(
@@ -180,6 +181,7 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
     user_info = client.get_user_info()
     
     if request.user.is_authenticated():
+        # Handling already logged in users connecting their accounts
         profile, created = TwitterProfile.objects.get_or_create(user=request.user, twitter_id=user_info['id'])
         return HttpResponseRedirect(_get_next(request))
 
@@ -252,7 +254,8 @@ def openid_redirect(request):
     
     client = OpenID(
         request,
-        'http://%s%s' % (
+        'http%s://%s%s' % (
+            _https(),
             Site.objects.get_current().domain,
             reverse('openid_callback')
         ),
@@ -267,7 +270,8 @@ def openid_callback(request, template='socialregistration/openid.html',
     """
     client = OpenID(
         request,
-        'http://%s%s' % (
+        'http%s://%s%s' % (
+            _https(),
             Site.objects.get_current().domain,
             reverse('openid_callback')
         ),
@@ -275,6 +279,12 @@ def openid_callback(request, template='socialregistration/openid.html',
     )
     
     if client.is_valid():
+        if request.user.is_authenticated(): 
+            # Handling already logged in users just connecting their accounts
+            openidprofile, created = OpenIDProfile(
+                user=request.user, identity=request.GET.get('openid.claimed_id'))
+            return HttpResponseRedirect(_get_next(request))
+        
         user = authenticate(identity=request.GET.get('openid.claimed_id'))
         if user is None:
             request.session['socialregistration_user'] = User()

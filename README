@@ -81,7 +81,12 @@ wiki ->
     http://wiki.developers.facebook.com/index.php/Connect/Authorization_Websites#Logging_Out_Users
     <a href="#" onclick="FB.Connect.logoutAndRedirect('{% url auth_logout %}')">Logout</a>
 
+HTTPS
+-----
+If you wish everything to go through HTTPS, set *SOCIALREGISTRATION_USE_HTTPS* in your settings file to
+True
+
 Other Information
 -----------------
 If you don't wish your users to be redirected to the setup view to create a username but rather have
-a username generated for them, set *SOCIAL_GENERATE_USERNAME* in your settings file to True
+a username generated for them, set *SOCIALREGISTRATION_GENERATE_USERNAME* in your settings file to True

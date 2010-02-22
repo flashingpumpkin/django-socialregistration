@@ -16,7 +16,7 @@ class FacebookProfile(models.Model):
     uid = models.CharField(max_length=255, blank=False, null=False)
     
     def __unicode__(self):
-        return '%s: %s' % (self.user, self.uid)
+        return u'%s: %s' % (self.user, self.uid)
     
     def authenticate(self):
         return authenticate(uid=self.uid)
@@ -27,7 +27,7 @@ class TwitterProfile(models.Model):
     twitter_id = models.PositiveIntegerField()
     
     def __unicode__(self):
-        return '%s: %s' % (self.user, self.twitter_id)
+        return u'%s: %s' % (self.user, self.twitter_id)
     
     def authenticate(self):
         return authenticate(twitter_id=self.twitter_id)

@@ -2,4 +2,4 @@ django
 oauth
 python-openid
 
--e svn+http://pyfacebook.googlecode.com/svn/trunk/#egg=pyfacebook
+-e git+git://github.com/sciyoshi/pyfacebook.git#egg=pyfacebook

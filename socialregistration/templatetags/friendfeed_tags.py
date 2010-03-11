@@ -1,7 +1,6 @@
 """
-Created on 25.09.2009
 
-@author: alen
+
 """
 from django import template
 

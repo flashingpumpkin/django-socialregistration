@@ -1,7 +1,6 @@
 """
-Created on 22.09.2009
 
-@author: alen
+
 """
 
 from django.db import models

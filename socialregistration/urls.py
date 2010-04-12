@@ -58,34 +58,6 @@ if getattr(settings, 'TWITTER_CONSUMER_KEY', None) is not None:
         url('^twitter/$', 'socialregistration.views.twitter', name='twitter'),
     )
 
-# Setup FriendFeed URLs if there's an API key specified
-if getattr(settings, 'FRIENDFEED_CONSUMER_KEY', None) is not None:
-    urlpatterns = urlpatterns + patterns('',
-        url('^friendfeed/redirect/$', 'socialregistration.views.oauth_redirect',
-            dict(
-                consumer_key=settings.FRIENDFEED_CONSUMER_KEY,
-                secret_key=settings.FRIENDFEED_CONSUMER_SECRET_KEY,
-                request_token_url=settings.FRIENDFEED_REQUEST_TOKEN_URL,
-                access_token_url=settings.FRIENDFEED_ACCESS_TOKEN_URL,
-                authorization_url=settings.FRIENDFEED_AUTHORIZATION_URL,
-                callback_url='friendfeed_callback'
-            ),
-            name='friendfeed_redirect'),
-
-        url('^friendfeed/callback/$', 'socialregistration.views.oauth_callback',
-            dict(
-                consumer_key=settings.FRIENDFEED_CONSUMER_KEY,
-                secret_key=settings.FRIENDFEED_CONSUMER_SECRET_KEY,
-                request_token_url=settings.FRIENDFEED_REQUEST_TOKEN_URL,
-                access_token_url=settings.FRIENDFEED_ACCESS_TOKEN_URL,
-                authorization_url=settings.FRIENDFEED_AUTHORIZATION_URL,
-                callback_url='friendfeed'
-            ),
-            name='friendfeed_callback'
-        ),
-        url('^friendfeed/$', 'socialregistration.views.friendfeed', name='friendfeed'),
-    )
-
 urlpatterns = urlpatterns + patterns('',
     url('^openid/redirect/$', 'socialregistration.views.openid_redirect', name='openid_redirect'),
     url('^openid/callback/$', 'socialregistration.views.openid_callback', name='openid_callback')

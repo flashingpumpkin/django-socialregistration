@@ -324,13 +324,3 @@ class OAuthTwitter(OAuth):
     def get_user_info(self):
         user = simplejson.loads(self.query(self.url))
         return user
-    
-class OAuthFriendFeed(OAuth):
-    """
-    Verifying friendfeed credentials
-    """
-    url = 'http://friendfeed-api.com/v2/validate'
-    
-    def get_user_info(self):
-        user = simplejson.loads(self.query(self.url))
-        return user

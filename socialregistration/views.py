@@ -211,13 +211,6 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
 
     return HttpResponseRedirect(_get_next(request))
 
-def friendfeed(request):
-    """
-    Actually setup an account relating to a friendfeed user after the oauth process
-    is finished successfully
-    """
-    raise NotImplementedError()
-
 def oauth_redirect(request, consumer_key=None, secret_key=None,
     request_token_url=None, access_token_url=None, authorization_url=None,
     callback_url=None, parameters=None):

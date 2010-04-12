@@ -26,10 +26,6 @@ class TwitterProfile(models.Model):
     def authenticate(self):
         return authenticate(twitter_id=self.twitter_id)
 
-class FriendFeedProfile(models.Model):
-    user = models.ForeignKey(User)
-    site = models.ForeignKey(Site, default=Site.objects.get_current)
-
 class OpenIDProfile(models.Model):
     user = models.ForeignKey(User)
     site = models.ForeignKey(Site, default=Site.objects.get_current)

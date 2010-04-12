@@ -11,7 +11,7 @@ METADATA = dict(
     keywords='django facebook twitter oauth openid registration',
 )
 SETUPTOOLS_METADATA = dict(
-    install_requires=['setuptools', 'django', 'oauth', 'python-openid'],
+    install_requires=['setuptools', 'django', 'oauth2', 'python-openid'],
     include_package_data=True,
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -24,7 +24,7 @@ SETUPTOOLS_METADATA = dict(
         'Framework :: Django',
     ],
     packages=['socialregistration', 'socialregistration.templatetags'],
-    package_data={'socialregistration': ['templates/socialregistration/*.html'],}
+    package_data={'socialregistration': ['templates/socialregistration/*.html'], }
 )
 
 if __name__ == '__main__':

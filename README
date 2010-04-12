@@ -58,12 +58,11 @@ were given by Twitter:
 
 Other OAuth Services
 --------------------
-There is an example of how FriendFeed integration could work.
-*socialregistration.models* provides a *FriendFeedProfile* model to save account
-data, *socialregistration.auth* provides examples for different auth backends for
-different service providers, *socialregistration.utils* provides a Twitter
-and FriendFeed interface and *socialregistration.urls* provides examples based
-on Twitter and FriendFeed how to hook in more OAuth based services.
+Please refer to the Twitter implementation of the signup / login process to 
+extend your own application to act as a consumer of other OAuth providers.
+Basically it's just plugging together some urls and creating an auth backend,
+a model and a view.
+
 
 OpenID
 ------

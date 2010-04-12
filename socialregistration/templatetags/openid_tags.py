@@ -1,8 +1,3 @@
-"""
-
-
-@author: alen, tom
-"""
 from django import template
 
 register = template.Library()

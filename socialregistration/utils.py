@@ -190,6 +190,9 @@ class OAuthClient(object):
         return self.request_token
 
     def _get_access_token(self):
+        """
+        Obtain the access token to access private resources at the API endpoint.
+        """
         if self.access_token is None:
             request_token = self._get_rt_from_session() 
             token = oauth.Token(request_token['oauth_token'], request_token['oauth_token_secret'])
@@ -236,6 +239,12 @@ class OAuthClient(object):
         return HttpResponseRedirect(self._get_authorization_url())
 
 class OAuth(object):
+    """ 
+    Base class to perform oauth signed requests from access keys saved in a user's
+    session.
+    See the ``OAuthTwitter`` class below for an example.
+    """
+    
     def __init__(self, request, consumer_key, secret_key, request_token_url):
         self.request = request
         
@@ -255,16 +264,21 @@ class OAuth(object):
             raise OAuthError(
                 _('No access token saved for "%s".') % get_token_prefix(self.request_token_url))
     
-    def query(self, url, method="GET", params=dict()):
-        # TODO: Params
+    def query(self, url, method="GET", params=dict(), headers=dict()):
+        """
+        Request a API endpoint at ``url`` with ``params`` being either the 
+        POST or GET data.
+        """
+        access_token = self._get_at_from_session()
         
-        at = self._get_at_from_session()
-        
-        token = oauth.Token(at['oauth_token'], at['oauth_token_secret'])
+        token = oauth.Token(access_token['oauth_token'], access_token['oauth_token_secret'])
         
         client = oauth.Client(self.consumer, token)
         
-        response, content = client.request(url, method=method)
+        body = urllib.urlencode(params)
+        
+        response, content = client.request(url, method=method, headers=headers,
+            body=body)
         
         if response['status'] != '200':
             raise OAuthError(

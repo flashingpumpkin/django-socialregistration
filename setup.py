@@ -6,7 +6,7 @@ METADATA = dict(
     author='Alen Mujezinovic',
     author_email='alen@caffeinehit.com',
     description='Django application enabling registration through a variety of APIs',
-    long_description=open('README').read(),
+    long_description=open('README.rst').read(),
     url='http://github.com/flashingpumpkin/django-socialregistration',
     keywords='django facebook twitter oauth openid registration',
 )

@@ -11,7 +11,14 @@ import time
 import base64
 import urllib
 import urllib2
-from urlparse import parse_qsl
+
+# parse_qsl was moved from the cgi namespace to urlparse in Python2.6.
+# this allows backwards compatibility
+try:
+    from urlparse import parse_qsl
+except ImportError:
+    from cgi import parse_qsl
+
 from xml.dom import minidom
 
 import oauth2 as oauth

@@ -6,7 +6,12 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
 from django.utils.translation import gettext as _
 from django.http import HttpResponseRedirect
-from django.views.decorators.csrf import csrf_protect 
+
+try:
+    from django.views.decorators.csrf import csrf_protect
+    has_csrf = True
+except ImportError:
+    has_csrf = False
 
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout as auth_logout
@@ -38,7 +43,6 @@ def _get_next(request):
     else:
         return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
 
-@csrf_protect
 def setup(request, template='socialregistration/setup.html',
     form_class=UserForm, extra_context=dict()):
     """
@@ -92,6 +96,8 @@ def setup(request, template='socialregistration/setup.html',
         del request.session['socialregistration_user']
         del request.session['socialregistration_profile']
         return HttpResponseRedirect(_get_next(request))
+if has_csrf:
+    setup = csrf_protect(setup)
 
 def facebook_login(request, template='socialregistration/facebook.html',
     extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):

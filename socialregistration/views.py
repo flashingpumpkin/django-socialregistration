@@ -283,21 +283,22 @@ def openid_callback(request, template='socialregistration/openid.html',
     )
 
     if client.is_valid():
+        identity = client.result.identity_url
         if request.user.is_authenticated():
             # Handling already logged in users just connecting their accounts
             try:
-                profile = OpenIDProfile.objects.get(identity=request.GET.get('openid.claimed_id'))
+                profile = OpenIDProfile.objects.get(identity=identity)
             except OpenIDProfile.DoesNotExist: # There can only be one profile with the same identity
                 profile = OpenIDProfile.objects.create(user=request.user,
-                    identity=request.GET.get('openid.claimed_id'))
+                    identity=identity)
 
             return HttpResponseRedirect(_get_next(request))
 
-        user = authenticate(identity=request.GET.get('openid.claimed_id'))
+        user = authenticate(identity=identity)
         if user is None:
             request.session['socialregistration_user'] = User()
             request.session['socialregistration_profile'] = OpenIDProfile(
-                identity=request.GET.get('openid.claimed_id')
+                identity=identity
             )
             return HttpResponseRedirect(reverse('socialregistration_setup'))
 

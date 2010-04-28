@@ -5,10 +5,6 @@ Django Social Registration
 Django Social Registration enables developers to add alternative registration
 methods based on third party sites.
 
-.. note::
-
-    | v0.3 requires Django 1.2
-    | v0.2 requires Django 1.1.1 or earlier
 
 Requirements
 ============

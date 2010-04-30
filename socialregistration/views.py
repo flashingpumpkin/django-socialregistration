@@ -17,7 +17,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout as auth_logout
 from django.contrib.sites.models import Site
 
-from socialregistration.forms import UserForm
+from socialregistration.forms import UserForm, ClaimForm, ExistingUser
 from socialregistration.utils import (OAuthClient, OAuthTwitter,
     OpenID, _https)
 from socialregistration.models import FacebookProfile, TwitterProfile, OpenIDProfile
@@ -44,7 +44,7 @@ def _get_next(request):
         return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
 
 def setup(request, template='socialregistration/setup.html',
-    form_class=UserForm, extra_context=dict()):
+    form_class=UserForm, extra_context=dict(), claim_form_class=ClaimForm):
     """
     Setup view to create a username & set email address after authentication
     """
@@ -61,15 +61,45 @@ def setup(request, template='socialregistration/setup.html',
                 request.session['socialregistration_profile'],
                 request.POST
             )
-            if form.is_valid():
-                form.save()
-                user = form.profile.authenticate()
-                login(request, user)
+            try:
+                if form.is_valid():
+                    form.save()
+                    user = form.profile.authenticate()
+                    login(request, user)
 
-                del request.session['socialregistration_user']
-                del request.session['socialregistration_profile']
+                    del request.session['socialregistration_user']
+                    del request.session['socialregistration_profile']
 
-                return HttpResponseRedirect(_get_next(request))
+                    return HttpResponseRedirect(_get_next(request))
+            except ExistingUser:
+                # see what the error is. if it's just an existing user, we want to let them claim it.
+                if 'submitted' in request.POST:
+                    form = claim_form_class(
+                        request.session['socialregistration_user'],
+                        request.session['socialregistration_profile'],
+                        request.POST
+                    )
+                else:
+                    form = claim_form_class(
+                        request.session['socialregistration_user'],
+                        request.session['socialregistration_profile'],
+                        initial=request.POST
+                    )
+
+                if form.is_valid():
+                    form.save()
+                    log = open('/home/adamfast/openid.log', 'w')
+                    log.write('success. need to tie the accounts together.\n')
+
+                    user = form.profile.authenticate()
+                    login(request, user)
+
+                    del request.session['socialregistration_user']
+                    del request.session['socialregistration_profile']
+
+                    return HttpResponseRedirect(_get_next(request))
+
+                extra_context['claim_account'] = True
 
         extra_context.update(dict(form=form))
 

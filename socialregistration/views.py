@@ -88,8 +88,6 @@ def setup(request, template='socialregistration/setup.html',
 
                 if form.is_valid():
                     form.save()
-                    log = open('/home/adamfast/openid.log', 'w')
-                    log.write('success. need to tie the accounts together.\n')
 
                     user = form.profile.authenticate()
                     login(request, user)

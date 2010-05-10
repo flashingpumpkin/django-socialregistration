@@ -48,17 +48,24 @@ def setup(request, template='socialregistration/setup.html',
     """
     Setup view to create a username & set email address after authentication
     """
+    try:
+        social_user = request.session['socialregistration_user']
+        social_profile = request.session['socialregistration_profile']
+    except KeyError:
+        return render_to_response(
+            template, dict(error = True), context_instance = RequestContext(request))
+
     if not GENERATE_USERNAME:
         # User can pick own username
         if not request.method == "POST":
             form = form_class(
-                request.session['socialregistration_user'],
-                request.session['socialregistration_profile'],
+                social_user,
+                social_profile,
             )
         else:
             form = form_class(
-                request.session['socialregistration_user'],
-                request.session['socialregistration_profile'],
+                social_user,
+                social_profile,
                 request.POST
             )
             if form.is_valid():
@@ -80,16 +87,14 @@ def setup(request, template='socialregistration/setup.html',
         )
     else:
         # Generate user and profile
-        user = request.session['socialregistration_user']
-        user.username = str(uuid.uuid4())[:30]
-        user.save()
+        social_user.username = str(uuid.uuid4())[:30]
+        social_user.save()
 
-        profile = request.session['socialregistration_profile']
-        profile.user = user
-        profile.save()
+        social_profile.user = social_user
+        social_profile.save()
 
         # Authenticate and login
-        user = profile.authenticate()
+        user = social_profile.authenticate()
         login(request, user)
 
         # Clear & Redirect

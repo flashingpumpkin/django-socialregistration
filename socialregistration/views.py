@@ -25,8 +25,7 @@ from socialregistration.models import FacebookProfile, TwitterProfile, OpenIDPro
 
 FB_ERROR = _('We couldn\'t validate your Facebook credentials')
 
-GENERATE_USERNAME = bool(getattr(settings, 'SOCIAL_GENERATE_USERNAME', getattr(
-    settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False))) # SOCIAL_GENERATE_USERNAME will deprecate
+GENERATE_USERNAME = bool(getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False))
 
 def _get_next(request):
     """
@@ -53,21 +52,15 @@ def setup(request, template='socialregistration/setup.html',
         social_profile = request.session['socialregistration_profile']
     except KeyError:
         return render_to_response(
-            template, dict(error = True), context_instance = RequestContext(request))
+            template, dict(error=True), context_instance=RequestContext(request))
 
     if not GENERATE_USERNAME:
         # User can pick own username
         if not request.method == "POST":
-            form = form_class(
-                social_user,
-                social_profile,
-            )
+            form = form_class(social_user, social_profile,)
         else:
-            form = form_class(
-                social_user,
-                social_profile,
-                request.POST
-            )
+            form = form_class(social_user, social_profile, request.POST)
+            
             if form.is_valid():
                 form.save()
                 user = form.profile.authenticate()
@@ -80,11 +73,9 @@ def setup(request, template='socialregistration/setup.html',
 
         extra_context.update(dict(form=form))
 
-        return render_to_response(
-            template,
-            extra_context,
-            context_instance=RequestContext(request)
-        )
+        return render_to_response(template, extra_context,
+            context_instance=RequestContext(request))
+        
     else:
         # Generate user and profile
         social_user.username = str(uuid.uuid4())[:30]
@@ -101,6 +92,7 @@ def setup(request, template='socialregistration/setup.html',
         del request.session['socialregistration_user']
         del request.session['socialregistration_profile']
         return HttpResponseRedirect(_get_next(request))
+
 if has_csrf:
     setup = csrf_protect(setup)
 
@@ -109,32 +101,23 @@ def facebook_login(request, template='socialregistration/facebook.html',
     """
     View to handle the Facebook login
     """
-    if not request.facebook.check_session(request):
-        extra_context.update(
-            dict(error=FB_ERROR)
-        )
-        return render_to_response(
-            template, extra_context, context_instance=RequestContext(request)
-        )
+    
+    if request.facebook.uid is None:
+        extra_context.update(dict(error=FB_ERROR))
+        return render_to_response(template, extra_context,
+            context_instance=RequestContext(request))
 
-    user = authenticate(uid=str(request.facebook.uid))
+    user = authenticate(uid=request.facebook.uid)
 
     if user is None:
         request.session['socialregistration_user'] = User()
-        fb_profile = request.facebook.users.getInfo([request.facebook.uid], ['name', 'pic_square'])[0]
-        request.session['socialregistration_profile'] = FacebookProfile(
-            uid=request.facebook.uid,
-            )
+        request.session['socialregistration_profile'] = FacebookProfile(uid=request.facebook.uid)
         request.session['next'] = _get_next(request)
-
         return HttpResponseRedirect(reverse('socialregistration_setup'))
 
     if not user.is_active:
-        return render_to_response(
-            account_inactive_template,
-            extra_context,
-            context_instance=RequestContext(request)
-        )
+        return render_to_response(account_inactive_template, extra_context,
+            context_instance=RequestContext(request))
 
     login(request, user)
 
@@ -143,25 +126,18 @@ def facebook_login(request, template='socialregistration/facebook.html',
 def facebook_connect(request, template='socialregistration/facebook.html',
     extra_context=dict()):
     """
-    View to handle connecting existing accounts with facebook
+    View to handle connecting existing django accounts with facebook
     """
-    if not request.facebook.check_session(request) \
-        or not request.user.is_authenticated():
-        extra_context.update(
-            dict(error=FB_ERROR)
-        )
-        return render_to_response(
-            template,
-            extra_context,
-            context_instance=RequestContext(request)
-        )
-
+    if request.facebook.uid is None or request.user.is_authenticated() is False:
+        extra_context.update(dict(error=FB_ERROR))
+        return render_to_response(template, extra_context,
+            context_instance=RequestContext(request))
+    
     try:
         profile = FacebookProfile.objects.get(uid=request.facebook.uid)
     except FacebookProfile.DoesNotExist:
         profile = FacebookProfile.objects.create(user=request.user,
             uid=request.facebook.uid)
-
 
     return HttpResponseRedirect(_get_next(request))
 

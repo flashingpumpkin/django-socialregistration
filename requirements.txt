@@ -2,4 +2,4 @@ django
 oauth2
 python-openid
 
--e git+git://github.com/sciyoshi/pyfacebook.git#egg=pyfacebook
+-e git+http://github.com/facebook/python-sdk.git#egg=facebook-sdk

@@ -11,7 +11,7 @@ Requirements
 - django
 - oauth2
 - python-openid
-- pyfacebook
+- python-sdk_ 
 
 Installation
 ============
@@ -27,15 +27,12 @@ Facebook Connect
 ----------------
 #. Add ``FACEBOOK_API_KEY`` and ``FACEBOOK_SECRET_KEY`` to your settings file representing the keys you were given by Facebook.
 #. Add ``socialregistration.auth.FacebookAuth`` to ``AUTHENTICATION_BACKENDS`` in your settings file.
-#. Add ``facebook.djangofb.FacebookMiddleware`` to ``MIDDLEWARE_CLASSES`` in your settings file. See: http://wiki.developers.facebook.com/index.php/User:PyFacebook_Tutorial#Add_the_middleware
+#. Add ``socialregistration.middleware.FacebookMiddleware`` to ``MIDDLEWARE_CLASSES`` in your settings file.
 #.  Add tags to your template file::
 
     {% load facebook_tags %}
     {% facebook_button %}
     {% facebook_js %}
-
-#. If you want to use the pyfacebook library to do API calls to Facebook, add ``socialregistration.middleware.FacebookMiddleware`` to your ``MIDDLEWARE_CLASSES`` setting.
-
 
 Twitter
 -------
@@ -74,11 +71,10 @@ OpenID
 Logging users out
 -----------------
 You can use the standard {% url auth_logout %} url to log users out of Django.
-Please note that this will not log users out of third party sites though.
-When using Facebook Connect, it is recommended to follow the FBConnect developer
-wiki. See: http://wiki.developers.facebook.com/index.php/Connect/Authorization_Websites#Logging_Out_Users ::
+Please note that this will not log users out of third party sites though. Logging out a 
+Facebook user might look something like this:: 
 
-    <a href="#" onclick="FB.Connect.logoutAndRedirect('{% url auth_logout %}')">Logout</a>
+    <a href="#" onclick="javascript:FB.logout(function(response){ document.location = '{% url auth_logout %}' })">Logout</a>
 
 To log users out of other third party sites, I recommend redirecting them further to the OAuth / OpenID providers after they logged out of your site.
 
@@ -91,3 +87,5 @@ Other Information
 -----------------
 If you don't wish your users to be redirected to the setup view to create a username but rather have
 a random username generated for them, set ``SOCIALREGISTRATION_GENERATE_USERNAME`` in your settings file to ``True``.
+
+.. _python-sdk: http://github.com/facebook/python-sdk

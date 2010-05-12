@@ -1,16 +1,15 @@
-<script src="http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php/en_US" type="text/javascript"></script>
-<script type="text/javascript">
-    FB_RequireFeatures(["XFBML"],
-        function() {
-            FB.Facebook.init("{{ facebook_api_key }}", "{% url facebook_xd_receiver %}")
-        }
-    );
-    function facebookConnect(form){
-        FB.Connect.requireSession();
-        FB.Facebook.get_sessionState().waitUntilReady(
-            function(){
-                form.submit();
-            }
-        );
-    }
+<div id="fb-root">
+    <script src="http://connect.facebook.net/en_US/all.js"></script>
+</div>
+<script>
+  // initialize the library with the API key
+  FB.init({ apiKey: '{{ facebook_api_key }}', status: true, cookie: true, xfbml: true});
+
+  function facebookConnect(form){
+      function handleResponse(response){
+          form.submit();
+      }
+      FB.login(handleResponse/*,{perms:'publish_stream,sms,offline_access,email,read_stream,status_update,etc'}*/);
+  }
+
 </script>

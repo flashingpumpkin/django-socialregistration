@@ -5,9 +5,6 @@
   // initialize the library with the API key
   FB.init({ apiKey: '{{ facebook_api_key }}', status: true, cookie: true, xfbml: true});
 
-  // fetch the status on load
-  FB.getLoginStatus(handleSessionResponse);
-
   function facebookConnect(form){
       function handleResponse(response){
           form.submit();

@@ -19,7 +19,7 @@ from django.contrib.sites.models import Site
 
 from socialregistration.forms import UserForm, ClaimForm, ExistingUser
 from socialregistration.utils import (OAuthClient, OAuthTwitter,
-    OpenID, _https)
+    OpenID, _https, DiscoveryFailure)
 from socialregistration.models import FacebookProfile, TwitterProfile, OpenIDProfile
 
 
@@ -273,7 +273,11 @@ def openid_redirect(request):
         ),
         request.GET.get('openid_provider')
     )
-    return client.get_redirect()
+    try:
+        return client.get_redirect()
+    except DiscoveryFailure:
+        request.session['openid_error'] = True
+        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
 
 def openid_callback(request, template='socialregistration/openid.html',
     extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):

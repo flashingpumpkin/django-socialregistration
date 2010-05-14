@@ -23,6 +23,7 @@ from xml.dom import minidom
 
 import oauth2 as oauth
 from openid.consumer import consumer as openid
+from openid.consumer.discover import DiscoveryFailure
 from openid.store.interface import OpenIDStore as OIDStore
 from openid.association import Association as OIDAssociation
 

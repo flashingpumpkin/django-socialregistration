@@ -1,5 +1,5 @@
 <div id="fb-root">
-    <script src="http://connect.facebook.net/en_US/all.js"></script>
+    {% if is_https %}<script src="https://connect.facebook.net/en_US/all.js"></script>{% else %}<script src="http://connect.facebook.net/en_US/all.js"></script>{% endif %}
 </div>
 <script>
   // initialize the library with the API key

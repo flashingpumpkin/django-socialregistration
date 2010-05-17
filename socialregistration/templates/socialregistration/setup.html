@@ -1,19 +1,15 @@
 {% load socialregistration_tags %}
 <h1>Setup</h1>
+
 {% if error %}
 	<p>Your session timed out. Please try again.</p>
 {% else %}
-  {% if claim_account %}
-  To use your existing account, please enter its credentials below:
-  {% else %}
-  Please choose a username for your account. You can optionally provide an email address.
-  {% endif %}
-
-  <form action="." method="post">
-      <table>
-          {{ form }}
-      </table>
-      {% social_csrf_token %}
-      <input type="submit" value="save" />
-  </form>
+	<form action="." method="post">
+	    <table>
+	        {{ form }}
+	    </table>
+	    {% social_csrf_token %}
+	    <input type="submit" value="save" />
+	</form>
 {% endif %}
+

@@ -277,7 +277,7 @@ def openid_redirect(request):
         return client.get_redirect()
     except DiscoveryFailure:
         request.session['openid_error'] = True
-        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
+        return HttpResponseRedirect(settings.LOGIN_URL)
 
 def openid_callback(request, template='socialregistration/openid.html',
     extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):

@@ -57,12 +57,12 @@ def setup(request, template='socialregistration/setup.html',
     if not GENERATE_USERNAME:
         # User can pick own username
         if not request.method == "POST":
-            form = form_class(social_user, social_profile,)
+            form = form_class(social_user, social_profile)
         else:
             form = form_class(social_user, social_profile, request.POST)
             
             if form.is_valid():
-                form.save()
+                form.save(request=request)
                 user = form.profile.authenticate()
                 login(request, user)
 

@@ -21,7 +21,7 @@ class UserForm(forms.Form):
         else:
             raise forms.ValidationError(_('This username is already in use.'))
 
-    def save(self):
+    def save(self, request=None):
         self.user.username = self.cleaned_data.get('username')
         self.user.email = self.cleaned_data.get('email')
         self.user.save()

@@ -50,7 +50,9 @@ class OpenIDErrorsNode(template.Node):
         context['openid_provider'] = request.session.get('openid_provider', '')
 
         # clear the error once it's been displayed once
-        request.session['openid_error'] = ''
-        request.session['openid_provider'] = ''
+        if request.session.get('openid_error', False):
+            del request.session['openid_error']
+        if request.session.get('openid_provider', False):
+            del request.session['openid_provider']
 
         return u''

@@ -11,4 +11,4 @@ def twitter_button(context):
         next = context['next']
     else:
         next = None
-    return dict(next=next, logged_in=logged_in)
+    return dict(next=next, logged_in=logged_in, request=context['request'])

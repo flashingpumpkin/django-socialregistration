@@ -66,8 +66,8 @@ def setup(request, template='socialregistration/setup.html',
                 user = form.profile.authenticate()
                 login(request, user)
 
-                del request.session['socialregistration_user']
-                del request.session['socialregistration_profile']
+                if 'socialregistration_user' in request.session: del request.session['socialregistration_user']
+                if 'socialregistration_profile' in request.session: del request.session['socialregistration_profile']
 
                 return HttpResponseRedirect(_get_next(request))
 
@@ -89,8 +89,8 @@ def setup(request, template='socialregistration/setup.html',
         login(request, user)
 
         # Clear & Redirect
-        del request.session['socialregistration_user']
-        del request.session['socialregistration_profile']
+        if 'socialregistration_user' in request.session: del request.session['socialregistration_user']
+        if 'socialregistration_profile' in request.session: del request.session['socialregistration_profile']
         return HttpResponseRedirect(_get_next(request))
 
 if has_csrf:

@@ -205,7 +205,15 @@ class OAuthClient(object):
         sign the request to obtain the access token
         """
         if self.request_token is None:
-            response, content = self.client.request(self.request_token_url, "GET")
+            if self.callback_url is not None:
+                params = urllib.urlencode([
+                    ('oauth_callback', 'http://%s%s' % (Site.objects.get_current(),
+                        reverse(self.callback_url))),
+                ])
+                request_token_url = '%s?%s' % (self.request_token_url, params)
+            else:
+                request_token_url = self.request_token_url
+            response, content = self.client.request(request_token_url, "GET")
             if response['status'] != '200':
                 raise OAuthError(
                     _('Invalid response while obtaining request token from "%s".') % get_token_prefix(self.request_token_url))
@@ -220,6 +228,9 @@ class OAuthClient(object):
         if self.access_token is None:
             request_token = self._get_rt_from_session()
             token = oauth.Token(request_token['oauth_token'], request_token['oauth_token_secret'])
+            if self.callback_url is not None:
+                # If a callback_url is provided, the callback has to include a verifier.
+                token.set_verifier(self.request.GET.get('oauth_verifier'))
             self.client = oauth.Client(self.consumer, token)
             response, content = self.client.request(self.access_token_url, "GET")
             if response['status'] != '200':
@@ -241,9 +252,8 @@ class OAuthClient(object):
 
     def _get_authorization_url(self):
         request_token = self._get_request_token()
-        return '%s?oauth_token=%s&oauth_callback=%s' % (self.authorization_url,
-            request_token['oauth_token'], '%s%s' % (Site.objects.get_current().domain,
-                reverse(self.callback_url)))
+        return '%s?oauth_token=%s' % (self.authorization_url,
+            request_token['oauth_token'])
 
     def is_valid(self):
         try:

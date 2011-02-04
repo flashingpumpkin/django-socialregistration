@@ -43,7 +43,7 @@ def _get_next(request):
         return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
 
 def setup(request, template='socialregistration/setup.html',
-    form_class=UserForm, extra_context=dict()):
+    form_class=UserForm, extra_context=dict(), initial=dict()):
     """
     Setup view to create a username & set email address after authentication
     """
@@ -57,10 +57,10 @@ def setup(request, template='socialregistration/setup.html',
     if not GENERATE_USERNAME:
         # User can pick own username
         if not request.method == "POST":
-            form = form_class(social_user, social_profile)
+            form = form_class(social_user, social_profile, initial=initial)
         else:
             form = form_class(social_user, social_profile, request.POST)
-            
+
             if form.is_valid():
                 form.save(request=request)
                 user = form.profile.authenticate()
@@ -75,7 +75,7 @@ def setup(request, template='socialregistration/setup.html',
 
         return render_to_response(template, extra_context,
             context_instance=RequestContext(request))
-        
+
     else:
         # Generate user and profile
         social_user.username = str(uuid.uuid4())[:30]
@@ -101,7 +101,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
     """
     View to handle the Facebook login
     """
-    
+
     if request.facebook.uid is None:
         extra_context.update(dict(error=FB_ERROR))
         return render_to_response(template, extra_context,
@@ -132,7 +132,7 @@ def facebook_connect(request, template='socialregistration/facebook.html',
         extra_context.update(dict(error=FB_ERROR))
         return render_to_response(template, extra_context,
             context_instance=RequestContext(request))
-    
+
     try:
         profile = FacebookProfile.objects.get(uid=request.facebook.uid)
     except FacebookProfile.DoesNotExist:

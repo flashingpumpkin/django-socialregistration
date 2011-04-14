@@ -10,11 +10,10 @@ class FacebookProfile(models.Model):
     uid = models.CharField(max_length=255, blank=False, null=False)
 
     def __unicode__(self):
-        if self.pk:
-            user = self.user
-        else:
-            user = u'<no-user>'
-        return u'%s: %s' % (user, self.uid)
+        try:
+            return u'%s: %s' % (self.user, self.uid)
+        except User.DoesNotExist:
+            return u'None'
 
     def authenticate(self):
         return authenticate(uid=self.uid)
@@ -25,7 +24,10 @@ class TwitterProfile(models.Model):
     twitter_id = models.PositiveIntegerField()
 
     def __unicode__(self):
-        return u'%s: %s' % (self.user, self.twitter_id)
+        try:
+            return u'%s: %s' % (self.user, self.twitter_id)
+        except User.DoesNotExist:
+            return u'None'
 
     def authenticate(self):
         return authenticate(twitter_id=self.twitter_id)
@@ -36,7 +38,10 @@ class OpenIDProfile(models.Model):
     identity = models.TextField()
 
     def __unicode__(self):
-        return u'OpenID Profile for %s, via provider %s' % (self.user, self.identity)
+        try:
+            return 'OpenID profile for %s, via provider %s' % (self.user, self.identity)
+        except User.DoesNotExist:
+            return 'OpenID profile for None, via provider None' 
 
     def authenticate(self):
         return authenticate(identity=self.identity)

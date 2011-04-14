@@ -41,14 +41,13 @@ Supported methods currently are:
 			return render_to_response('login.html',
 				{}, context_instance = RequestContext(request))
 
----
-
-### Facebook Connect
+## Facebook Connect
 
 #### Configuration
 
 1. Add the Facebook API keys to the your settings, variable names are
 
+		FACEBOOK_APP_ID = ''
 		FACEBOOK_API_KEY = ''
 		FACEBOOK_SECRET_KEY = ''
 
@@ -69,9 +68,7 @@ Supported methods currently are:
   Also make sure you followed the steps to include a `RequestContext` in your template that 
   is using these tags.
   
----
-
-### Twitter
+## Twitter
 
 #### Configuration  
 
@@ -94,18 +91,14 @@ Supported methods currently are:
 		{% twitter_button %}
 		
   Same note here. Make sure you're serving the page with a `RequestContext`
-  
-  
----
 
-### OAuth
+
+## OAuth
 
 Check out how the Twitter authentication works. Basically it's just plugging
 together some urls and creating an auth backend, a model and a view.
 
----
-
-### OpenID
+## OpenID
 
 #### Configuration
 
@@ -118,9 +111,7 @@ together some urls and creating an auth backend, a model and a view.
 		{% load openid_tags %}
 		{% openid_form %}
 		
----
-
-### Logging users out
+## Logging users out
 
 You can use the standard `{% url auth_logout %}`. Alternatively there is also `{% url social_logout %}`
 which is basically a wrapper around `auth_logout`.
@@ -133,9 +124,7 @@ To make sure they're logged out of other sites too, use something like this:
 		
 Or redirect them to the provider they logged in from.
 
----
-
-### Settings
+## Additional Settings
 
 		SOCIALREGISTRATION_USE_HTTP = False
 		SOCIALREGISTRATION_GENERATE_USERNAME = False

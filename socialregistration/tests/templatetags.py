@@ -39,5 +39,5 @@ class SocialRegistrationTemplateTagTests(TestCase):
         # but accessing it a second time, the error should have cleared.
         template = """{% load socialregistration_tags %}{% open_id_errors request %}{{ openid_error }}|{{ openid_provider }}"""
         result = self.render(template, {'request': request,})
-        self.assertEqual(result, u'|')
+        self.assertEqual(result, u'False|')
 

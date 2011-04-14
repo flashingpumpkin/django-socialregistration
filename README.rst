@@ -56,11 +56,12 @@ Configuration
            return render_to_response('login.html',
                {}, context_instance = RequestContext(request))
 
+5. Once you're done, and configured, etc, don't forget to
+   ``python manage.py syncdb`` your project.
 
---------------
 
 Facebook Connect
-~~~~~~~~~~~~~~~~
+----------------
 
 Configuration
 ^^^^^^^^^^^^^
@@ -71,6 +72,7 @@ Configuration
 
    ::
 
+       FACEBOOK_APP_ID = ''
        FACEBOOK_API_KEY = ''
        FACEBOOK_SECRET_KEY = ''
 
@@ -99,10 +101,8 @@ structure as possible to not impact the load time of the page.
 Also make sure you followed the steps to include a
 ``RequestContext`` in your template that is using these tags.
 
---------------
-
 Twitter
-~~~~~~~
+-------
 
 Configuration
 ^^^^^^^^^^^^^
@@ -139,19 +139,15 @@ Usage
 Same note here. Make sure you're serving the page with a
 ``RequestContext``
 
---------------
-
 OAuth
-~~~~~
+-----
 
 Check out how the Twitter authentication works. Basically it's just
 plugging together some urls and creating an auth backend, a model
 and a view.
 
---------------
-
 OpenID
-~~~~~~
+------
 
 Configuration
 ^^^^^^^^^^^^^
@@ -172,10 +168,8 @@ Usage
        {% openid_form %}
 
 
---------------
-
 Logging users out
-~~~~~~~~~~~~~~~~~
+-----------------
 
 You can use the standard ``{% url auth_logout %}``. Alternatively
 there is also ``{% url social_logout %}`` which is basically a
@@ -192,10 +186,8 @@ like this:
 
 Or redirect them to the provider they logged in from.
 
---------------
-
-Settings
-~~~~~~~~
+Additional Settings
+-------------------
 
 ::
 

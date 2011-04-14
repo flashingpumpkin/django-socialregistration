@@ -197,4 +197,36 @@ Additional Settings
 Set either ``True`` if you want to enable HTTPS or have the users
 skip the username form.
 
+Signals
+-------
+
+The app provides two signals that fire when users connect their
+accounts and log in:
+
+::
+
+        socialregistration.signals.connect
+        socialregistration.signals.login
+
+The signal handles needs to handle three arguments, and can listen
+on specific profiles:
+
+::
+
+        from socialregistration import signals
+        from socialregistration import models
+    
+        def connect_facebook(user, profile, client, **kwargs):
+            # Do fancy stuff like fetching more user info with the client
+            pass
+    
+        def login_facebook(user, profile, client, **kwargs):
+            # Do fancy stuff like finding logged in friends
+            pass
+    
+        signals.connect(connect_facebook, sender = models.FacebookProfile)
+        signals.login(login_facebook, sender = models.FacebookProfile)
+
+This works too with OpenID and OAuth profiles.
+
 

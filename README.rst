@@ -15,19 +15,34 @@ Requirements
 
 Installation
 ============
+::
+	pip install django-socialregistration
+	pip install -e git+https://github.com/facebook/python-sdk.git#egg=FacebookSDK
 
-#. Add the ``socialregistration`` directory to your ``PYTHON_PATH``.
-#. Add ``socialregistration`` to your ``INSTALLED_APPS`` settings of Django.
-#. Add ``socialregistration.urls`` to your ``urls.py`` file.
 
 Configuration
-=============
+============= 
+
+#. Add ``socialregistration`` to your ``INSTALLED_APPS`` 
+#. Add ``django.core.context_processors.request`` to your ``TEMPLATE_CONTEXT_PROCESSORS``
+#. Include ``socialregistration.urls`` in your top level urls::
+   
+   urlpatterns = patterns('',
+       # ... 	
+   	   url('^social/',include('socialregistration.urls')))
+
+#. Make sure you are using a ``RequestContext``_ wherever you are displaying the buttons::
+
+   from django.template import RequestContext
+   def login(request):
+       return render_to_response('login.html', {}, context_instance = RequestContext(request))   
+
 
 Facebook Connect
 ----------------
 #. Add ``FACEBOOK_API_KEY`` and ``FACEBOOK_SECRET_KEY`` to your settings file representing the keys you were given by Facebook.
-#. Add ``socialregistration.auth.FacebookAuth`` to ``AUTHENTICATION_BACKENDS`` in your settings file.
-#. Add ``socialregistration.middleware.FacebookMiddleware`` to ``MIDDLEWARE_CLASSES`` in your settings file.
+#. Add ``socialregistration.auth.FacebookAuth`` to ``AUTHENTICATION_BACKENDS`` in your settings
+#. Add ``socialregistration.middleware.FacebookMiddleware`` to ``MIDDLEWARE_CLASSES`` in your settings
 #.  Add tags to your template file::
 
     {% load facebook_tags %}
@@ -36,7 +51,7 @@ Facebook Connect
 
 Twitter
 -------
-#. Add the following variables to your ``settings.py`` file with the values you were given by Twitter::
+#. Add the following variables to your settings with the values you were given by Twitter::
 
     TWITTER_CONSUMER_KEY
     TWITTER_CONSUMER_SECRET_KEY
@@ -44,7 +59,7 @@ Twitter
     TWITTER_ACCESS_TOKEN_URL
     TWITTER_AUTHORIZATION_URL
 
-#. Add ``socialregistration.auth.TwitterAuth`` to your ``AUTHENTICATION_BACKENDS`` settings.
+#. Add ``socialregistration.auth.TwitterAuth`` to your ``AUTHENTICATION_BACKENDS`` settings
 
 #. Add tags to your template file::
 
@@ -90,3 +105,4 @@ If you don't wish your users to be redirected to the setup view to create a user
 a random username generated for them, set ``SOCIALREGISTRATION_GENERATE_USERNAME`` in your settings file to ``True``.
 
 .. _python-sdk: http://github.com/facebook/python-sdk
+.. _``RequestContext``: http://docs.djangoproject.com/en/1.3/ref/templates/api/#subclassing-context-requestcontext

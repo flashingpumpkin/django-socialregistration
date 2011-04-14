@@ -21,6 +21,7 @@ from socialregistration.forms import UserForm
 from socialregistration.utils import (OAuthClient, OAuthTwitter,
     OpenID, _https, DiscoveryFailure)
 from socialregistration.models import FacebookProfile, TwitterProfile, OpenIDProfile
+from socialregistration import signals 
 
 
 FB_ERROR = _('We couldn\'t validate your Facebook credentials')
@@ -42,6 +43,19 @@ def _get_next(request):
     else:
         return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
 
+def _login(request, user, profile, client):
+    login(request, user)
+    signals.login.send(sender = profile.__class__, 
+                                  user = user,
+                                  profile = profile, 
+                                  client = client)
+
+def _connect(user, profile, client):
+    signals.connect.send(sender = profile.__class__,
+                                    user = user,
+                                    profile = profile,
+                                    client = client)
+
 def setup(request, template='socialregistration/setup.html',
     form_class=UserForm, extra_context=dict(), initial=dict()):
     """
@@ -50,48 +64,52 @@ def setup(request, template='socialregistration/setup.html',
     try:
         social_user = request.session['socialregistration_user']
         social_profile = request.session['socialregistration_profile']
+        social_client = request.session['socialregistration_client']
     except KeyError:
         return render_to_response(
             template, dict(error=True), context_instance=RequestContext(request))
 
-    if not GENERATE_USERNAME:
-        # User can pick own username
-        if not request.method == "POST":
-            form = form_class(social_user, social_profile, initial=initial)
-        else:
-            form = form_class(social_user, social_profile, request.POST)
-
-            if form.is_valid():
-                form.save(request=request)
-                user = form.profile.authenticate()
-                login(request, user)
-
-                if 'socialregistration_user' in request.session: del request.session['socialregistration_user']
-                if 'socialregistration_profile' in request.session: del request.session['socialregistration_profile']
-
-                return HttpResponseRedirect(_get_next(request))
-
-        extra_context.update(dict(form=form))
-
-        return render_to_response(template, extra_context,
-            context_instance=RequestContext(request))
-
-    else:
-        # Generate user and profile
+    if GENERATE_USERNAME:
         social_user.username = str(uuid.uuid4())[:30]
         social_user.save()
 
         social_profile.user = social_user
         social_profile.save()
 
-        # Authenticate and login
         user = social_profile.authenticate()
-        login(request, user)
 
-        # Clear & Redirect
-        if 'socialregistration_user' in request.session: del request.session['socialregistration_user']
-        if 'socialregistration_profile' in request.session: del request.session['socialregistration_profile']
-        return HttpResponseRedirect(_get_next(request))
+    else:
+        if not request.method == "POST":
+            form = form_class(social_user, social_profile, initial=initial)
+            extra_context.update({'form': form})
+            return render_to_response(template, extra_context,
+                                      context_instance = RequestContext(request))
+
+        form = form_class(social_user, social_profile, request.POST, initial=initial)
+
+        if form.is_valid():
+            form.save(request = request)
+            user = form.profile.authenticate()
+            
+        else:
+            extra_context.update({'form': form})
+            return render_to_response(template, extra_context,
+                                      context_instance = RequestContext(request))
+    
+    social_client.request = request
+    _connect(user, social_profile, social_client)
+    _login(request, user, social_profile, social_client)
+
+    
+    if 'socialregistration_user' in request.session:
+        del request.session['socialregistration_user']
+    if 'socialregistration_profile' in request.session:
+        del request.session['socialregistration_profile']
+    if 'socialregistration_client' in request.session:
+        del request.session['socialregistration_client']
+
+    return HttpResponseRedirect(_get_next(request))
+
 
 if has_csrf:
     setup = csrf_protect(setup)
@@ -112,6 +130,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
     if user is None:
         request.session['socialregistration_user'] = User()
         request.session['socialregistration_profile'] = FacebookProfile(uid=request.facebook.uid)
+        request.session['socialregistration_client'] = request.facebook
         request.session['next'] = _get_next(request)
         return HttpResponseRedirect(reverse('socialregistration_setup'))
 
@@ -119,7 +138,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
         return render_to_response(account_inactive_template, extra_context,
             context_instance=RequestContext(request))
 
-    login(request, user)
+    _login(request, user, FacebookProfile.objects.get(user = user), request.facebook)
 
     return HttpResponseRedirect(_get_next(request))
 
@@ -138,6 +157,7 @@ def facebook_connect(request, template='socialregistration/facebook.html',
     except FacebookProfile.DoesNotExist:
         profile = FacebookProfile.objects.create(user=request.user,
             uid=request.facebook.uid)
+        _connect(user, profile, request.facebook)
 
     return HttpResponseRedirect(_get_next(request))
 
@@ -174,6 +194,7 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
             profile = TwitterProfile.objects.get(twitter_id=user_info['id'])
         except TwitterProfile.DoesNotExist: # There can only be one profile!
             profile = TwitterProfile.objects.create(user=request.user, twitter_id=user_info['id'])
+            _connect(user, profile, client)
 
         return HttpResponseRedirect(_get_next(request))
 
@@ -184,6 +205,9 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
         user = User()
         request.session['socialregistration_profile'] = profile
         request.session['socialregistration_user'] = user
+        # Client is not pickleable with the request on it
+        client.request = None
+        request.session['socialregistration_client'] = client
         request.session['next'] = _get_next(request)
         return HttpResponseRedirect(reverse('socialregistration_setup'))
 
@@ -194,7 +218,7 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
             context_instance=RequestContext(request)
         )
 
-    login(request, user)
+    _login(request, user, profile, client)
 
     return HttpResponseRedirect(_get_next(request))
 
@@ -276,6 +300,7 @@ def openid_callback(request, template='socialregistration/openid.html',
             except OpenIDProfile.DoesNotExist: # There can only be one profile with the same identity
                 profile = OpenIDProfile.objects.create(user=request.user,
                     identity=identity)
+                _connect(user, profile, client)
 
             return HttpResponseRedirect(_get_next(request))
 
@@ -285,6 +310,9 @@ def openid_callback(request, template='socialregistration/openid.html',
             request.session['socialregistration_profile'] = OpenIDProfile(
                 identity=identity
             )
+            # Client is not pickleable with the request on it
+            client.request = None
+            request.session['socialregistration_client'] = client
             return HttpResponseRedirect(reverse('socialregistration_setup'))
 
         if not user.is_active:
@@ -294,7 +322,7 @@ def openid_callback(request, template='socialregistration/openid.html',
                 context_instance=RequestContext(request)
             )
 
-        login(request, user)
+        _login(request, user, OpenIDProfile.objects.get(user = user), client)
         return HttpResponseRedirect(_get_next(request))
 
     return render_to_response(

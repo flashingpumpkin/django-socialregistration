@@ -130,9 +130,8 @@ class OpenID(object):
         self.endpoint = endpoint
         self.store = OpenIDStore()
         self.consumer = openid.Consumer(self.request.session, self.store)
-
         self.result = None
-
+                    
     def get_redirect(self):
         auth_request = self.consumer.begin(self.endpoint)
         redirect_url = auth_request.redirectURL(

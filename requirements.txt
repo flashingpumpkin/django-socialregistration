@@ -1,4 +1,3 @@
-django
 oauth2
 python-openid
 

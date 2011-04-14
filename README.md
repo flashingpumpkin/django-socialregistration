@@ -40,6 +40,8 @@ Supported methods currently are:
 			# ...
 			return render_to_response('login.html',
 				{}, context_instance = RequestContext(request))
+				
+5. Once you're done, and configured, etc, don't forget to `python manage.py syncdb` your project.
 
 ## Facebook Connect
 

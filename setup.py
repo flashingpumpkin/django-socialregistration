@@ -22,7 +22,7 @@ METADATA = dict(
         'Programming Language :: Python',
         'Framework :: Django',
     ],
-    zip_safe = False
+    zip_safe = False,
     packages=find_packages(),
     package_data={'socialregistration': ['templates/socialregistration/*.html'], }
 )

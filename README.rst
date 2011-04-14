@@ -208,7 +208,7 @@ accounts and log in:
         socialregistration.signals.connect
         socialregistration.signals.login
 
-The signal handles needs to handle three arguments, and can listen
+The signal handlers needs to accept three arguments, and can listen
 on specific profiles:
 
 ::

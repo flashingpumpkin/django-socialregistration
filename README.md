@@ -141,7 +141,7 @@ The app provides two signals that fire when users connect their accounts and log
 		socialregistration.signals.connect
 		socialregistration.signals.login
 
-The signal handles needs to handle three arguments, and can listen on specific profiles:
+The signal handlers needs to accept three arguments, and can listen on specific profiles:
 
 		from socialregistration import signals
 		from socialregistration import models

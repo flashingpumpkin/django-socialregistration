@@ -175,12 +175,12 @@ def logout(request, redirect_url=None):
     return HttpResponseRedirect(url)
 
 def twitter(request, account_inactive_template='socialregistration/account_inactive.html',
-    extra_context=dict()):
+    extra_context=dict(), client_class=None):
     """
     Actually setup/login an account relating to a twitter user after the oauth
     process is finished successfully
     """
-    client = OAuthTwitter(
+    client = client_class(
         request, settings.TWITTER_CONSUMER_KEY,
         settings.TWITTER_CONSUMER_SECRET_KEY,
         settings.TWITTER_REQUEST_TOKEN_URL,
@@ -218,30 +218,30 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
             context_instance=RequestContext(request)
         )
 
-    _login(request, user, profile, client)
+    _login(request, user, TwitterProfile.objects.get(user = user), client)
 
     return HttpResponseRedirect(_get_next(request))
 
 def oauth_redirect(request, consumer_key=None, secret_key=None,
     request_token_url=None, access_token_url=None, authorization_url=None,
-    callback_url=None, parameters=None):
+    callback_url=None, parameters=None, client_class = None):
     """
     View to handle the OAuth based authentication redirect to the service provider
     """
     request.session['next'] = _get_next(request)
-    client = OAuthClient(request, consumer_key, secret_key,
+    client = client_class(request, consumer_key, secret_key,
         request_token_url, access_token_url, authorization_url, callback_url, parameters)
     return client.get_redirect()
 
 def oauth_callback(request, consumer_key=None, secret_key=None,
     request_token_url=None, access_token_url=None, authorization_url=None,
     callback_url=None, template='socialregistration/oauthcallback.html',
-    extra_context=dict(), parameters=None):
+    extra_context=dict(), parameters=None, client_class = None):
     """
     View to handle final steps of OAuth based authentication where the user
     gets redirected back to from the service provider
     """
-    client = OAuthClient(request, consumer_key, secret_key, request_token_url,
+    client = client_class(request, consumer_key, secret_key, request_token_url,
         access_token_url, authorization_url, callback_url, parameters)
 
     extra_context.update(dict(oauth_client=client))
@@ -254,14 +254,14 @@ def oauth_callback(request, consumer_key=None, secret_key=None,
     # We're redirecting to the setup view for this oauth service
     return HttpResponseRedirect(reverse(client.callback_url))
 
-def openid_redirect(request):
+def openid_redirect(request, client_class = None):
     """
     Redirect the user to the openid provider
     """
     request.session['next'] = _get_next(request)
     request.session['openid_provider'] = request.GET.get('openid_provider')
 
-    client = OpenID(
+    client = client_class(
         request,
         'http%s://%s%s' % (
             _https(),
@@ -277,11 +277,12 @@ def openid_redirect(request):
         return HttpResponseRedirect(settings.LOGIN_URL)
 
 def openid_callback(request, template='socialregistration/openid.html',
-    extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
+    extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html',
+    client_class = None):
     """
     Catches the user when he's redirected back from the provider to our site
     """
-    client = OpenID(
+    client = client_class(
         request,
         'http%s://%s%s' % (
             _https(),

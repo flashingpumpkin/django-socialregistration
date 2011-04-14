@@ -7,6 +7,8 @@ Updated on 19.12.2009
 from django.conf import settings
 from django.conf.urls.defaults import *
 
+from socialregistration.utils import OpenID, OAuthClient, OAuthTwitter
+
 
 urlpatterns = patterns('',
     url('^setup/$', 'socialregistration.views.setup',
@@ -40,7 +42,8 @@ if getattr(settings, 'TWITTER_CONSUMER_KEY', None) is not None:
                 request_token_url=settings.TWITTER_REQUEST_TOKEN_URL,
                 access_token_url=settings.TWITTER_ACCESS_TOKEN_URL,
                 authorization_url=settings.TWITTER_AUTHORIZATION_URL,
-                callback_url='twitter_callback'
+                callback_url='twitter_callback',
+                client_class = OAuthClient
             ),
             name='twitter_redirect'),
 
@@ -51,14 +54,15 @@ if getattr(settings, 'TWITTER_CONSUMER_KEY', None) is not None:
                 request_token_url=settings.TWITTER_REQUEST_TOKEN_URL,
                 access_token_url=settings.TWITTER_ACCESS_TOKEN_URL,
                 authorization_url=settings.TWITTER_AUTHORIZATION_URL,
-                callback_url='twitter'
+                callback_url='twitter',
+                client_class = OAuthClient
             ),
             name='twitter_callback'
         ),
-        url('^twitter/$', 'socialregistration.views.twitter', name='twitter'),
+        url('^twitter/$', 'socialregistration.views.twitter', {'client_class': OAuthTwitter}, name='twitter'),
     )
 
 urlpatterns = urlpatterns + patterns('',
-    url('^openid/redirect/$', 'socialregistration.views.openid_redirect', name='openid_redirect'),
-    url('^openid/callback/$', 'socialregistration.views.openid_callback', name='openid_callback')
+    url('^openid/redirect/$', 'socialregistration.views.openid_redirect', { 'client_class': OpenID}, name='openid_redirect'),
+    url('^openid/callback/$', 'socialregistration.views.openid_callback', { 'client_class': OpenID}, name='openid_callback')
 )

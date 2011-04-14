@@ -33,7 +33,7 @@ Configuration
     	# ... 	
    	   	url('^social/',include('socialregistration.urls')))
 
-#. Make sure you are using a ``RequestContext``_ wherever you are displaying the buttons::
+#. Make sure you are using a RequestContext_ wherever you are displaying the buttons::
 
 	from django.template import RequestContext
 	def login(request):
@@ -107,4 +107,4 @@ If you don't wish your users to be redirected to the setup view to create a user
 a random username generated for them, set ``SOCIALREGISTRATION_GENERATE_USERNAME`` in your settings file to ``True``.
 
 .. _python-sdk: http://github.com/facebook/python-sdk
-.. _``RequestContext``: http://docs.djangoproject.com/en/1.3/ref/templates/api/#subclassing-context-requestcontext
+.. _RequestContext: http://docs.djangoproject.com/en/1.3/ref/templates/api/#subclassing-context-requestcontext

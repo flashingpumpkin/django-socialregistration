@@ -37,7 +37,7 @@ Configuration
 
 	from django.template import RequestContext
 	def login(request):
-    	return render_to_response('login.html', {}, context_instance = RequestContext(request))   
+		return render_to_response('login.html', {}, context_instance = RequestContext(request))   
 
 
 Facebook Connect
@@ -88,7 +88,7 @@ OpenID
 Logging users out
 -----------------
 You can use the standard ``{% url auth_logout %}`` url to log users out of Django. 
-Alternatively there is also a wrapper around `auth_logout`: ``{% url social_logout %}``
+Alternatively there is also a wrapper around ``auth_logout``: ``{% url social_logout %}``
 Please note that this will not log users out of third party sites though. Logging out a 
 Facebook user might look something like this:: 
 

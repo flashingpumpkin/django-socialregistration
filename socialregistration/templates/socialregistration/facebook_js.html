@@ -1,7 +1,11 @@
 <div id="fb-root">
-    {% if is_https %}<script src="https://connect.facebook.net/en_US/all.js"></script>{% else %}<script src="http://connect.facebook.net/en_US/all.js"></script>{% endif %}
+    {% if is_https %}
+	<script type="text/javascript" src="https://connect.facebook.net/en_US/all.js"></script>
+	{% else %}
+	<script type="text/javascript" src="http://connect.facebook.net/en_US/all.js"></script>
+	{% endif %}
 </div>
-<script>
+<script type="text/javascript" >
   // initialize the library with the API key
   FB.init({ apiKey: '{{ facebook_api_key }}', status: true, cookie: true, xfbml: true});
 

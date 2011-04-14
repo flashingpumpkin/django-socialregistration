@@ -11,7 +11,6 @@ def facebook_js():
     key = getattr(settings, 'FACEBOOK_API_KEY', None)
     if not id:
         warnings.warn("django-socialregistration: Please update your settings.py and add a FACEBOOK_APP_ID key", Warning)
-        id = key
     return {'facebook_app_id': id, 'facebook_api_key': key, 'is_https' : bool(_https())}
 
 @register.inclusion_tag('socialregistration/facebook_button.html', takes_context=True)

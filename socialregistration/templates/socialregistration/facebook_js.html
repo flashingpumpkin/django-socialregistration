@@ -7,7 +7,10 @@
 </div>
 <script type="text/javascript" >
   // initialize the library with the API key
-  FB.init({ appId: '{{ facebook_app_id }}', status: true, cookie: true, xfbml: true});
+  FB.init({ 
+  	{% if facebook_app_id %} appId: '{{ facebook_app_id }}', {% endif %}
+  	{% if facebook_api_key %} apiKey: '{{ facebook_api_key }}', {% endif %}
+  	status: true, cookie: true, xfbml: true});
 
   function facebookConnect(form){
       function handleResponse(response){

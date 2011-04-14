@@ -166,7 +166,10 @@ def get_token_prefix(url):
         returns ``twitter.com``
 
     """
-    return urllib2.urlparse.urlparse(url).netloc
+    try:
+        return urllib2.urlparse.urlparse(url).netloc
+    except AttributeError:
+        return urllib2.rulparse.urlparse(url)[1]
 
 
 class OAuthError(Exception):

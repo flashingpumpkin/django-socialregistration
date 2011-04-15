@@ -98,6 +98,11 @@ def setup(request, template='socialregistration/setup.html',
     
     social_client.request = request
      
+    # Removing unused bits. It's important to remove the
+    # client from the session because the session gets written
+    # to the storage on login and the client holds the request,
+    # which is going to fail. Might be worth to change the 
+    # clients to not hold the whole request.
     if 'socialregistration_user' in request.session:
         del request.session['socialregistration_user']
     if 'socialregistration_profile' in request.session:

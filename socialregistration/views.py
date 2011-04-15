@@ -97,16 +97,16 @@ def setup(request, template='socialregistration/setup.html',
                                       context_instance = RequestContext(request))
     
     social_client.request = request
-    _connect(user, social_profile, social_client)
-    _login(request, user, social_profile, social_client)
-
-    
+     
     if 'socialregistration_user' in request.session:
         del request.session['socialregistration_user']
     if 'socialregistration_profile' in request.session:
         del request.session['socialregistration_profile']
     if 'socialregistration_client' in request.session:
         del request.session['socialregistration_client']
+
+    _connect(user, social_profile, social_client)
+    _login(request, user, social_profile, social_client)
 
     return HttpResponseRedirect(_get_next(request))
 

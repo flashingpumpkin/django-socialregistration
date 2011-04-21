@@ -9,9 +9,10 @@ register = template.Library()
 def facebook_js():
     id = getattr(settings, 'FACEBOOK_APP_ID', None)
     key = getattr(settings, 'FACEBOOK_API_KEY', None)
+    perms = getattr(settings, 'FACEBOOK_REQUEST_PERMISSIONS', None)
     if not id:
         warnings.warn("django-socialregistration: Please update your settings.py and add a FACEBOOK_APP_ID key", Warning)
-    return {'facebook_app_id': id, 'facebook_api_key': key, 'is_https' : bool(_https())}
+    return {'facebook_app_id': id, 'facebook_api_key': key, 'is_https' : bool(_https()), 'facebook_req_perms' : perms }
 
 @register.inclusion_tag('socialregistration/facebook_button.html', takes_context=True)
 def facebook_button(context):

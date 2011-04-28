@@ -159,7 +159,7 @@ The signal handlers needs to accept three arguments, and can listen on specific 
 			# Do fancy stuff like finding logged in friends
 			pass
 		
-		signals.connect(connect_facebook, sender = models.FacebookProfile)
-		signals.login(login_facebook, sender = models.FacebookProfile)
+		signals.connect.connect(connect_facebook, sender = models.FacebookProfile)
+		signals.login.connect(login_facebook, sender = models.FacebookProfile)
 
 This works too with OpenID and OAuth profiles.

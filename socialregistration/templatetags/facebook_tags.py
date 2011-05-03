@@ -15,7 +15,7 @@ def facebook_js():
     return {'facebook_app_id': id, 'facebook_api_key': key, 'is_https' : bool(_https()), 'facebook_req_perms' : perms }
 
 @register.inclusion_tag('socialregistration/facebook_button.html', takes_context=True)
-def facebook_button(context):
+def facebook_button(context, button=None):
     if not 'request' in context:
         raise AttributeError, 'Please add the ``django.core.context_processors.request`` context processors to your settings.TEMPLATE_CONTEXT_PROCESSORS set'
     logged_in = context['request'].user.is_authenticated()
@@ -23,4 +23,4 @@ def facebook_button(context):
         next = context['next']
     else:
         next = None
-    return dict(next=next, logged_in=logged_in, request=context['request'])
+    return dict(next=next, logged_in=logged_in, button=button, request=context['request'])

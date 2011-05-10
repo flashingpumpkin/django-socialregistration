@@ -290,6 +290,17 @@ class OAuth(object):
 
         self.request_token_url = request_token_url
 
+    def _get_rt_from_session(self):
+        """
+        Returns the request token cached in the session by ``_get_request_token``
+        """
+        try:
+            return self.request.session['oauth_%s_request_token' % get_token_prefix(self.request_token_url)]
+        except KeyError:
+            raise OAuthError(_('No request token saved for "%s".') % get_token_prefix(self.request_token_url))
+
+    request_token = property(_get_rt_from_session)
+    
     def _get_at_from_session(self):
         """
         Get the saved access token for private resources from the session.
@@ -300,14 +311,16 @@ class OAuth(object):
             raise OAuthError(
                 _('No access token saved for "%s".') % get_token_prefix(self.request_token_url))
 
+    access_token = property(_get_at_from_session)
+
     def query(self, url, method="GET", params=dict(), headers=dict()):
         """
         Request a API endpoint at ``url`` with ``params`` being either the
         POST or GET data.
         """
-        access_token = self._get_at_from_session()
+        at = self.access_token
 
-        token = oauth.Token(access_token['oauth_token'], access_token['oauth_token_secret'])
+        token = oauth.Token(at['oauth_token'], at['oauth_token_secret'])
 
         client = oauth.Client(self.consumer, token)
 

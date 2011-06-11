@@ -162,7 +162,7 @@ def facebook_connect(request, template='socialregistration/facebook.html',
     except FacebookProfile.DoesNotExist:
         profile = FacebookProfile.objects.create(user=request.user,
             uid=request.facebook.uid)
-        _connect(user, profile, request.facebook)
+        _connect(request.user, profile, request.facebook)
 
     return HttpResponseRedirect(_get_next(request))
 
@@ -250,7 +250,6 @@ def oauth_callback(request, consumer_key=None, secret_key=None,
         access_token_url, authorization_url, callback_url, parameters)
 
     extra_context.update(dict(oauth_client=client))
-
     if not client.is_valid():
         return render_to_response(
             template, extra_context, context_instance=RequestContext(request)

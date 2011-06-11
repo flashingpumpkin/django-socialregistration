@@ -4,5 +4,5 @@
 {% if next %}
     <input type="hidden" name="next" value="{{ next }}" />
 {% endif %}
-<input type="image" onclick="this.form.submit();" src="http://apiwiki.twitter.com/f/1242697608/Sign-in-with-Twitter-lighter.png" />
+<input type="image" onclick="this.form.submit();" src="{% if button %}{{ button }}{% else %}http://apiwiki.twitter.com/f/1242697608/Sign-in-with-Twitter-lighter.png{% endif %}" />
 </form>

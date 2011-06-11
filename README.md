@@ -55,6 +55,11 @@ Supported methods currently are:
 
 2. Add `socialregistration.auth.FacebookAuth` to [AUTHENTICATION_BACKENDS](http://docs.djangoproject.com/en/1.3/ref/settings/#authentication-backends)
 3. Add `socialregistration.middleware.FacebookMiddleware` to [MIDDLEWARE_CLASSES](http://docs.djangoproject.com/en/1.3/ref/settings/#middleware-classes)
+4. (Optional) Add `FACEBOOK_REQUEST_PERMISSIONS` to your settings. This is a comma seperated list of the permissions you need. e.g:
+
+		FACEBOOK_REQUEST_PERMISSIONS = 'email,user_about_me'
+        
+
 
 #### Usage
 
@@ -64,6 +69,10 @@ Supported methods currently are:
 		{% facebook_button %}
 		{% facebook_js %}
 	
+  You can also specify your own custom button image by appending it to the `facebook_button` template tag:
+
+		{% facebook_button 'http://example.com/other_facebook_button.png' %}
+
   You want to keep the `{% facebook_js %}` as far down in your HTML structure as possible to 
   not impact the load time of the page.
   
@@ -93,6 +102,10 @@ Supported methods currently are:
 		{% twitter_button %}
 		
   Same note here. Make sure you're serving the page with a `RequestContext`
+
+  You can also specify your own custom button image by appending it to the `twitter_button` template tag:
+
+		{% twitter_button 'http://example.com/other_twitter_button.png' %}
 
 
 ## OAuth
@@ -154,7 +167,7 @@ The signal handlers needs to accept three arguments, and can listen on specific 
 			# Do fancy stuff like finding logged in friends
 			pass
 		
-		signals.connect(connect_facebook, sender = models.FacebookProfile)
-		signals.login(login_facebook, sender = models.FacebookProfile)
+		signals.connect.connect(connect_facebook, sender = models.FacebookProfile)
+		signals.login.connect(login_facebook, sender = models.FacebookProfile)
 
 This works too with OpenID and OAuth profiles.

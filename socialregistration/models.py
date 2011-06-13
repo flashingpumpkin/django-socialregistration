@@ -18,6 +18,10 @@ class FacebookProfile(models.Model):
     def authenticate(self):
         return authenticate(uid=self.uid)
 
+class FacebookAccessToken(models.Model):
+    profile = models.OneToOneField(FacebookProfile,related_name='access_token')
+    access_token = models.CharField(max_length=255)
+
 class TwitterProfile(models.Model):
     user = models.ForeignKey(User, unique = True)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
@@ -31,6 +35,16 @@ class TwitterProfile(models.Model):
 
     def authenticate(self):
         return authenticate(twitter_id=self.twitter_id)
+
+class TwitterRequestToken(models.Model):
+    profile = models.OneToOneField(TwitterProfile,related_name='request_token')
+    oauth_token = models.CharField(max_length=80)
+    oauth_token_secret = models.CharField(max_length=80)
+
+class TwitterAccessToken(models.Model):
+    profile = models.OneToOneField(TwitterProfile,related_name='access_token')
+    oauth_token = models.CharField(max_length=80)
+    oauth_token_secret = models.CharField(max_length=80)
 
 class OpenIDProfile(models.Model):
     user = models.ForeignKey(User, unique = True)

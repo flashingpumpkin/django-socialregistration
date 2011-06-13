@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 
 class FacebookProfile(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, unique = True)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
     uid = models.CharField(max_length=255, blank=False, null=False)
 
@@ -19,7 +19,7 @@ class FacebookProfile(models.Model):
         return authenticate(uid=self.uid)
 
 class TwitterProfile(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, unique = True)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
     twitter_id = models.PositiveIntegerField()
 
@@ -33,7 +33,7 @@ class TwitterProfile(models.Model):
         return authenticate(twitter_id=self.twitter_id)
 
 class OpenIDProfile(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, unique = True)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
     identity = models.TextField()
 

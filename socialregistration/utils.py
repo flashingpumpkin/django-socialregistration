@@ -233,7 +233,7 @@ class OAuthClient(object):
                 # If a callback_url is provided, the callback has to include a verifier.
                 token.set_verifier(self.request.GET.get('oauth_verifier'))
             self.client = oauth.Client(self.consumer, token)
-            response, content = self.client.request(self.access_token_url, "GET")
+            response, content = self.client.request(self.access_token_url, "POST")
             if response['status'] != '200':
                 raise OAuthError(
                     _('Invalid response while obtaining access token from "%s" - "%s".') % (get_token_prefix(self.request_token_url), content))

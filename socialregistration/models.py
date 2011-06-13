@@ -4,6 +4,8 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 
+from socialregistration.signals import login, connect
+
 class FacebookProfile(models.Model):
     user = models.ForeignKey(User, unique = True)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
@@ -80,3 +82,38 @@ class OpenIDNonce(models.Model):
 
     def __unicode__(self):
         return u'OpenID Nonce for %s' % self.server_url
+
+def save_facebook_token(sender, user, profile, client, **kwargs):
+    if not 'offline_access' in getattr(settings, 'FACEBOOK_REQUEST_PERMISSIONS', ''):
+        return
+    
+    try:
+        FacebookAccessToken.objects.get(profile = profile).delete()
+    except FacebookAccessToken.DoesNotExist:
+        pass
+    
+    FacebookAccessToken.objects.create(profile = profile, 
+        access_token = client.graph.access_token)
+
+def save_twitter_token(sender, user, profile, client, **kwargs):
+    try:
+        TwitterRequestToken.objects.get(profile=profile).delete()
+    except TwitterRequestToken.DoesNotExist:
+        pass
+    try:
+        TwitterAccessToken.objects.get(profile=profile).delete()
+    except TwitterAccessToken.DoesNotExist:
+        pass
+    
+    TwitterRequestToken.objects.create(profile=profile, 
+        oauth_token = client.request_token['oauth_token'],
+        oauth_token_secret = client.request_token['oauth_token_secret'])
+    
+    TwitterAccessToken.objects.create(profile=profile,
+        oauth_token = client.access_token['oauth_token'],
+        oauth_token_secret = client.access_token['oauth_token_secret'])
+    
+connect.connect(save_facebook_token, sender = FacebookProfile, 
+    dispatch_uid = 'socialregistration_facebook_token')
+connect.connect(save_twitter_token, sender = TwitterProfile, 
+    dispatch_uid = 'socialregistration_twitter_token')

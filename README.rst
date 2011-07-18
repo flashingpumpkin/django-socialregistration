@@ -92,6 +92,13 @@ Usage
        {% facebook_button %}
        {% facebook_js %}
 
+You can also specify your own custom button image by appending it to the
+``facebook_button`` template tag:
+
+::
+
+        {% facebook_button 'http://example.com/other_facebook_button.png' %}
+
 You want to keep the ``{% facebook_js %}`` as far down in your HTML
 structure as possible to not impact the load time of the page.
 
@@ -131,6 +138,13 @@ Usage
 
 Same note here. Make sure you're serving the page with a
 ``RequestContext``
+
+You can also specify your own custom button image by appending it to the
+``twitter_button`` template tag:
+
+::
+
+        {% twitter_button 'http://example.com/other_twitter_button.png' %}
 
 OAuth
 -----

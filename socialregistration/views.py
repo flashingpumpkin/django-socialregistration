@@ -305,7 +305,7 @@ def openid_callback(request, template='socialregistration/openid.html',
             except OpenIDProfile.DoesNotExist: # There can only be one profile with the same identity
                 profile = OpenIDProfile.objects.create(user=request.user,
                     identity=identity)
-                _connect(user, profile, client)
+                _connect(request.user, profile, client)
 
             return HttpResponseRedirect(_get_next(request))
 

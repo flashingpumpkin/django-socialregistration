@@ -44,7 +44,12 @@ def _get_next(request):
         return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
 
 def _login(request, user, profile, client):
+    # we need to persist 'next' across the call to login() as
+    # it appears to reset the session data.
+    next = client.request.session.get('next')
     login(request, user)
+    if next:
+        request.session['next'] = next
     signals.login.send(sender = profile.__class__, 
                                   user = user,
                                   profile = profile, 

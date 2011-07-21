@@ -46,7 +46,7 @@ def _get_next(request):
 def _login(request, user, profile, client):
     # we need to persist 'next' across the call to login() as
     # it appears to reset the session data.
-    next = client.request.session.get('next')
+    next = request.session.get('next')
     login(request, user)
     if next:
         request.session['next'] = next

@@ -7,7 +7,7 @@ Updated on 19.12.2009
 from django.conf import settings
 from django.conf.urls.defaults import *
 
-from socialregistration.utils import OpenID, OAuthClient, OAuthTwitter
+from socialregistration.utils import OpenID, OAuthClient, OAuthTwitter, OAuthLinkedIn
 
 
 urlpatterns = patterns('',
@@ -60,6 +60,36 @@ if getattr(settings, 'TWITTER_CONSUMER_KEY', None) is not None:
             name='twitter_callback'
         ),
         url('^twitter/$', 'socialregistration.views.twitter', {'client_class': OAuthTwitter}, name='twitter'),
+    )
+
+#Setup LinkedIn URLs if there's an API key specified
+if getattr(settings, 'LINKEDIN_CONSUMER_KEY', None) is not None:
+    urlpatterns = urlpatterns + patterns('',
+        url('^linkedin/redirect/$', 'socialregistration.views.oauth_redirect',
+            dict(
+                consumer_key=settings.LINKEDIN_CONSUMER_KEY,
+                secret_key=settings.LINKEDIN_CONSUMER_SECRET_KEY,
+                request_token_url=settings.LINKEDIN_REQUEST_TOKEN_URL,
+                access_token_url=settings.LINKEDIN_ACCESS_TOKEN_URL,
+                authorization_url=settings.LINKEDIN_AUTHORIZATION_URL,
+                callback_url='linkedin_callback',
+                client_class = OAuthClient
+            ),
+            name='linkedin_redirect'),
+
+        url('^linkedin/callback/$', 'socialregistration.views.oauth_callback',
+            dict(
+                consumer_key=settings.LINKEDIN_CONSUMER_KEY,
+                secret_key=settings.LINKEDIN_CONSUMER_SECRET_KEY,
+                request_token_url=settings.LINKEDIN_REQUEST_TOKEN_URL,
+                access_token_url=settings.LINKEDIN_ACCESS_TOKEN_URL,
+                authorization_url=settings.LINKEDIN_AUTHORIZATION_URL,
+                callback_url='linkedin',
+                client_class = OAuthClient
+            ),
+            name='linkedin_callback'
+        ),
+        url('^linkedin/$', 'socialregistration.views.linkedin', {'client_class': OAuthLinkedIn}, name='linkedin'),
     )
 
 urlpatterns = urlpatterns + patterns('',

@@ -20,7 +20,7 @@ from django.contrib.sites.models import Site
 from socialregistration.forms import UserForm
 from socialregistration.utils import (OAuthClient, OAuthTwitter,
     OpenID, _https, DiscoveryFailure)
-from socialregistration.models import FacebookProfile, TwitterProfile, OpenIDProfile
+from socialregistration.models import FacebookProfile, TwitterProfile, LinkedInProfile, OpenIDProfile
 from socialregistration import signals 
 
 
@@ -229,6 +229,55 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
         )
 
     _login(request, user, TwitterProfile.objects.get(user = user), client)
+
+    return HttpResponseRedirect(_get_next(request))
+
+
+def linkedin(request, account_inactive_template='socialregistration/account_inactive.html',
+    extra_context=dict(), client_class=None):
+    """
+    Actually setup/login an account relating to a linkedin user after the oauth
+    process is finished successfully
+    """
+    client = client_class(
+        request, settings.LINKEDIN_CONSUMER_KEY,
+        settings.LINKEDIN_CONSUMER_SECRET_KEY,
+        settings.LINKEDIN_REQUEST_TOKEN_URL,
+    )
+
+    user_info = client.get_user_info()
+
+    if request.user.is_authenticated():
+        # Handling already logged in users connecting their accounts
+        try:
+            profile = LinkedInProfile.objects.get(linkedin_id=user_info['id'])
+        except LinkedInProfile.DoesNotExist: # There can only be one profile!
+            profile = LinkedInProfile.objects.create(user=request.user, linkedin_id=user_info['id'])
+            _connect(request.user, profile, client)
+
+        return HttpResponseRedirect(_get_next(request))
+
+    user = authenticate(linkedin_id=user_info['id'])
+
+    if user is None:
+        profile = LinkedInProfile(linkedin_id=user_info['id'])
+        user = User()
+        request.session['socialregistration_profile'] = profile
+        request.session['socialregistration_user'] = user
+        # Client is not pickleable with the request on it
+        client.request = None
+        request.session['socialregistration_client'] = client
+        request.session['next'] = _get_next(request)
+        return HttpResponseRedirect(reverse('socialregistration_setup'))
+
+    if not user.is_active:
+        return render_to_response(
+            account_inactive_template,
+            extra_context,
+            context_instance=RequestContext(request)
+        )
+
+    _login(request, user, LinkedInProfile.objects.get(user = user), client)
 
     return HttpResponseRedirect(_get_next(request))
 

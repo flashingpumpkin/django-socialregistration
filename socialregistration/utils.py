@@ -343,3 +343,9 @@ class OAuthTwitter(OAuth):
     def get_user_info(self):
         user = simplejson.loads(self.query(self.url))
         return user
+
+class OAuthLinkedIn(OAuthTwitter):
+    """
+    Verifying linkedin credentials
+    """
+    url = "http://api.linkedin.com/v1/people/~:(id)?format=json"

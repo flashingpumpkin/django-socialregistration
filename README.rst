@@ -146,6 +146,47 @@ You can also specify your own custom button image by appending it to the
 
         {% twitter_button 'http://example.com/other_twitter_button.png' %}
 
+LinkedIn
+--------
+
+Configuration
+^^^^^^^^^^^^^
+
+1. Add the LinkedIn API keys and endpoints to your settings, variable
+   names are
+
+   ::
+
+       LINKEDIN_CONSUMER_KEY = ''
+       LINKEDIN_CONSUMER_SECRET_KEY = ''
+       LINKEDIN_REQUEST_TOKEN_URL = ''
+       LINKEDIN_ACCESS_TOKEN_URL = ''
+       LINKEDIN_AUTHORIZATION_URL = ''
+
+2. Add ``socialregistration.auth.LinkedInAuth`` to
+   ``AUTHENTICATION_BACKENDS``
+3. Add the right callback URL to your LinkedIn account
+
+Usage
+^^^^^
+
+-  Add tags to your template file
+
+   ::
+
+       {% load linkedin_tags %}
+       {% linkedin_button %}
+
+Same note here. Make sure you're serving the page with a
+``RequestContext``
+
+You can also specify your own custom button image by appending it to the
+``linkedin_button`` template tag:
+
+::
+
+        {% linkedin_button 'http://example.com/other_linkedin_button.png' %}
+
 OAuth
 -----
 

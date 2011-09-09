@@ -1,0 +1,8 @@
+{% load linkedin_tags socialregistration_tags %}
+<form class="connect-button" name="login" method="post" action="{% url linkedin_redirect %}">
+{% social_csrf_token %}
+{% if next %}
+    <input type="hidden" name="next" value="{{ next }}" />
+{% endif %}
+<input type="image" onclick="this.form.submit();" src="{% if button %}{{ button }}{% else %}http://developer.linkedin.com/sites/default/files/linkedin-small.png{% endif %}" />
+</form>

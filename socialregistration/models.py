@@ -49,6 +49,30 @@ class TwitterAccessToken(models.Model):
     oauth_token = models.CharField(max_length=80)
     oauth_token_secret = models.CharField(max_length=80)
 
+class LinkedInProfile(models.Model):
+    user = models.ForeignKey(User, unique = True)
+    site = models.ForeignKey(Site, default=Site.objects.get_current)
+    linkedin_id = models.CharField(max_length=25)
+
+    def __unicode__(self):
+        try:
+            return u'%s: %s' % (self.user, self.linkedin_id)
+        except User.DoesNotExist:
+            return u'None'
+
+    def authenticate(self):
+        return authenticate(linkedin_id=self.linkedin_id)
+
+class LinkedInRequestToken(models.Model):
+    profile = models.OneToOneField(LinkedInProfile,related_name='request_token')
+    oauth_token = models.CharField(max_length=80)
+    oauth_token_secret = models.CharField(max_length=80)
+
+class LinkedInAccessToken(models.Model):
+    profile = models.OneToOneField(LinkedInProfile,related_name='access_token')
+    oauth_token = models.CharField(max_length=80)
+    oauth_token_secret = models.CharField(max_length=80)
+
 class OpenIDProfile(models.Model):
     user = models.ForeignKey(User, unique = True)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
@@ -114,7 +138,27 @@ def save_twitter_token(sender, user, profile, client, **kwargs):
         oauth_token = client.access_token['oauth_token'],
         oauth_token_secret = client.access_token['oauth_token_secret'])
     
+def save_linkedin_token(sender, user, profile, client, **kwargs):
+    try:
+        LinkedInRequestToken.objects.get(profile=profile).delete()
+    except LinkedInRequestToken.DoesNotExist:
+        pass
+    try:
+        LinkedInAccessToken.objects.get(profile=profile).delete()
+    except LinkedInAccessToken.DoesNotExist:
+        pass
+    
+    LinkedInRequestToken.objects.create(profile=profile, 
+        oauth_token = client.request_token['oauth_token'],
+        oauth_token_secret = client.request_token['oauth_token_secret'])
+    
+    LinkedInAccessToken.objects.create(profile=profile,
+        oauth_token = client.access_token['oauth_token'],
+        oauth_token_secret = client.access_token['oauth_token_secret'])
+    
 connect.connect(save_facebook_token, sender = FacebookProfile, 
     dispatch_uid = 'socialregistration_facebook_token')
 connect.connect(save_twitter_token, sender = TwitterProfile, 
     dispatch_uid = 'socialregistration_twitter_token')
+connect.connect(save_linkedin_token, sender = LinkedInProfile, 
+    dispatch_uid = 'socialregistration_linkedin_token')

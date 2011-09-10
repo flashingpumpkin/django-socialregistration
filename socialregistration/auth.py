@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 
-from socialregistration.models import (FacebookProfile, TwitterProfile, OpenIDProfile)
+from socialregistration.models import (FacebookProfile, TwitterProfile, 
+                                       OpenIDProfile, LinkedInProfile)
 
 class Auth(object):
     supports_object_permissions = False
@@ -30,6 +31,16 @@ class TwitterAuth(Auth):
                 site=Site.objects.get_current()
             ).user
         except TwitterProfile.DoesNotExist:
+            return None
+
+class LinkedInAuth(Auth):
+    def authenticate(self, linkedin_id=None):
+        try:
+            return LinkedInProfile.objects.get(
+                linkedin_id=linkedin_id,
+                site=Site.objects.get_current()
+            ).user
+        except LinkedInProfile.DoesNotExist:
             return None
 
 class OpenIDAuth(Auth):

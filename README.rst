@@ -38,7 +38,7 @@ Configuration
 
        urlpatterns = patterns('', 
            # ...
-           url(r'^social/', include('socialregistration.urls')))
+           url(r'^social/', include('socialregistration.urls'))
 
 4. Make sure you are using a
    `RequestContext <http://docs.djangoproject.com/en/1.3/ref/templates/api/#subclassing-context-requestcontext>`_

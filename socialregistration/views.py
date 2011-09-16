@@ -167,6 +167,7 @@ def facebook_connect(request, template='socialregistration/facebook.html',
     except FacebookProfile.DoesNotExist:
         profile = FacebookProfile.objects.create(user=request.user,
             uid=request.facebook.uid)
+        request.facebook.request = request
         _connect(request.user, profile, request.facebook)
 
     return HttpResponseRedirect(_get_next(request))

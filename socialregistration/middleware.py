@@ -23,6 +23,26 @@ class FacebookMiddleware(object):
         fb_user = facebook.get_user_from_cookie(request.COOKIES,
             getattr(settings, 'FACEBOOK_APP_ID', settings.FACEBOOK_API_KEY), settings.FACEBOOK_SECRET_KEY)
 
+        if fb_user is None:
+            # maybe OAuth 2
+            data = facebook.parse_signed_request(
+                request.COOKIES.get(
+                    'fbsr_' + getattr(
+                        settings,
+                        'FACEBOOK_APP_ID',
+                        settings.FACEBOOK_API_KEY
+                        ),
+                    '',
+                    ),
+                settings.FACEBOOK_SECRET_KEY,
+                )
+            if not data:
+                return None
+            fb_user = {
+                'access_token': data['code'],
+                'uid': data['user_id'],
+                }
+
         request.facebook = Facebook(fb_user)
         
         return None

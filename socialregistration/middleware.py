@@ -9,7 +9,6 @@ class Facebook(object):
         else:
             self.uid = user['uid']
             self.user = user
-            self.graph = facebook.GraphAPI(user['access_token'])
 
 
 class FacebookMiddleware(object):

@@ -36,12 +36,13 @@ class FacebookMiddleware(object):
                     ),
                 settings.FACEBOOK_SECRET_KEY,
                 )
-            if not data:
-                return None
-            fb_user = {
-                'access_token': data['code'],
-                'uid': data['user_id'],
-                }
+            if data:
+                fb_user = {
+                    'code': data['code'],
+                    'uid': data['user_id'],
+                    }
+            else:
+                fb_user = None
 
         request.facebook = Facebook(fb_user)
         

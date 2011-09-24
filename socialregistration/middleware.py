@@ -1,6 +1,7 @@
 import facebook
 from django.conf import settings
 
+
 class Facebook(object):
     def __init__(self, user=None):
         if user is None:

@@ -10,18 +10,21 @@ class Facebook(object):
             self.uid = user['uid']
             self.user = user
 
+        self.access_token = None
+
     def get_graph(self):
-        return facebook.GraphAPI(
-            facebook.get_user_access_token(
-                self.user['code'],
+        if not self.access_token:
+            self.access_token = facebook.get_user_access_token(
+                self.user.get('code', ''),
                 getattr(
                     settings,
                     'FACEBOOK_APP_ID',
                     settings.FACEBOOK_API_KEY
-                    ),
-                settings.FACEBOOK_SECRET_KEY,
-                ).get('access_token', None)
-            )
+                ),
+                settings.FACEBOOK_SECRET_KEY
+            ).get('access_token', None)
+
+        return facebook.GraphAPI(self.access_token)
 
 
 class FacebookMiddleware(object):

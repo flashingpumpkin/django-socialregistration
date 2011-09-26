@@ -10,6 +10,19 @@ class Facebook(object):
             self.uid = user['uid']
             self.user = user
 
+    def get_graph(self):
+        return facebook.GraphAPI(
+            facebook.get_user_access_token(
+                self.user['code'],
+                getattr(
+                    settings,
+                    'FACEBOOK_APP_ID',
+                    settings.FACEBOOK_API_KEY
+                    ),
+                settings.FACEBOOK_SECRET_KEY,
+                ).get('access_token', None)
+            )
+
 
 class FacebookMiddleware(object):
     def process_request(self, request):
@@ -20,10 +33,10 @@ class FacebookMiddleware(object):
         javascript library.
         """
         
-        fb_user = facebook.get_user_from_cookie(request.COOKIES,
+        data = facebook.get_user_from_cookie(request.COOKIES,
             getattr(settings, 'FACEBOOK_APP_ID', settings.FACEBOOK_API_KEY), settings.FACEBOOK_SECRET_KEY)
 
-        if fb_user is None:
+        if data is None:
             # maybe OAuth 2
             data = facebook.parse_signed_request(
                 request.COOKIES.get(
@@ -37,13 +50,11 @@ class FacebookMiddleware(object):
                 settings.FACEBOOK_SECRET_KEY,
                 )
             if data:
-                fb_user = {
-                    'code': data['code'],
-                    'uid': data['user_id'],
-                    }
+                data['uid'] = data['user_id']
             else:
-                fb_user = None
+                data = None
 
-        request.facebook = Facebook(fb_user)
+        if data is not None:
+            request.facebook = Facebook(data)
         
         return None

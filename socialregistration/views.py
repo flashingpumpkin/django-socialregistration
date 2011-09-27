@@ -130,7 +130,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
     View to handle the Facebook login
     """
 
-    if request.facebook.uid is None:
+    if not hasattr(request.facebook, 'uid'):
         extra_context.update(dict(error=FB_ERROR))
         return render_to_response(template, extra_context,
             context_instance=RequestContext(request))

@@ -1,0 +1,38 @@
+<html><head><title>Socialregistration example</title></head>
+<body>
+{% load facebook_tags %}
+{% load twitter_tags %}
+{% load linkedin_tags %}
+{% load openid_tags %}
+
+{% if not request.user.is_authenticated %}
+	<h1>django-socialregistration login</h2>
+{% else %}
+	<h1>Hi, {{ request.user }}</h1>
+{% endif %}
+
+<ol>
+	<li>
+		{% facebook_button 'http://static.ak.fbcdn.net/rsrc.php/zB6N8/hash/4li2k73z.gif' %}
+	</li>
+	<li>
+		{% twitter_button 'https://si0.twimg.com/images/dev/buttons/sign-in-with-twitter-l.png' %}
+	</li>
+	<li>
+		{% linkedin_button 'https://developer.linkedin.com/sites/default/files/linkedin-small.png' %}
+	</li>
+	<li>
+		{% openid_form %}
+	</li>
+	<li>
+		<form action="{% url openid_redirect %}" method="GET">
+			<input type="hidden" name="openid_provider" value="https://www.google.com/accounts/o8/id" />
+			<input type="submit" value="Sign in with Google OpenID" />
+		</form>
+	</li>
+</ol>
+{% if request.user.is_authenticated %}
+	<a href="{% url social_logout %}">Logout</a>
+{% endif %}
+</body>
+</html>

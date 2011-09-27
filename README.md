@@ -200,3 +200,10 @@ The signal handlers needs to accept three arguments, and can listen on specific 
 		signals.login.connect(login_facebook, sender = models.FacebookProfile)
 
 This works too with OpenID and OAuth profiles.
+
+# Release Notes
+
+### *v0.4.6* 
+* Added LinkedIn support
+* Bugfixes and OAuth2 beginnings for Facebook
+

@@ -57,7 +57,6 @@ class FacebookMiddleware(object):
             else:
                 data = None
 
-        if data is not None:
-            request.facebook = Facebook(data)
+        request.facebook = Facebook(data)
         
         return None

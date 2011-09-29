@@ -31,9 +31,21 @@
 		</form>
 	</li>
 </ol>
+
+<h4>Connected profiles:</h4>
+
+<ol>
+	<li>Facebook: {{ facebook.count }}</li>
+	<li>Twitter: {{ twitter.count }}</li>
+	<li>OpenID: {{ openid.count }}</li>
+	<li>LinkedIn: {{ linkedin.count }}</li>
+</ol>
+
 {% if request.user.is_authenticated %}
 	<a href="{% url social_logout %}">Logout</a>
 {% endif %}
 {% facebook_js %}
+
+<p><a href="https://github.com/flashingpumpkin/django-socialregistration">Code on Github</a></p>
 </body>
 </html>

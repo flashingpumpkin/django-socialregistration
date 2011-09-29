@@ -34,5 +34,6 @@
 {% if request.user.is_authenticated %}
 	<a href="{% url social_logout %}">Logout</a>
 {% endif %}
+{% facebook_js %}
 </body>
 </html>

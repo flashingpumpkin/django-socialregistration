@@ -148,6 +148,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
         return render_to_response(account_inactive_template, extra_context,
             context_instance=RequestContext(request))
 
+    request.facebook.request = request
     _login(request, user, FacebookProfile.objects.get(user = user), request.facebook)
 
     return HttpResponseRedirect(_get_next(request))

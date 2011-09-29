@@ -1,11 +1,22 @@
+from django.conf import settings
+from django.contrib.auth import login, authenticate, logout as auth_logout
+from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.utils import importlib
+from django.utils.translation import gettext as _
+from django.views.generic.base import View, TemplateResponseMixin
+from socialregistration import signals
+from socialregistration.forms import UserForm
+from socialregistration.models import FacebookProfile, TwitterProfile, \
+    LinkedInProfile, OpenIDProfile
+from socialregistration.utils import OAuthClient, OAuthTwitter, OpenID, _https, \
+    DiscoveryFailure
 import uuid
 
-from django.conf import settings
-from django.template import RequestContext
-from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response
-from django.utils.translation import gettext as _
-from django.http import HttpResponseRedirect
 
 try:
     from django.views.decorators.csrf import csrf_protect
@@ -13,117 +24,217 @@ try:
 except ImportError:
     has_csrf = False
 
-from django.contrib.auth.models import User
-from django.contrib.auth import login, authenticate, logout as auth_logout
-from django.contrib.sites.models import Site
 
-from socialregistration.forms import UserForm
-from socialregistration.utils import (OAuthClient, OAuthTwitter,
-    OpenID, _https, DiscoveryFailure)
-from socialregistration.models import FacebookProfile, TwitterProfile, LinkedInProfile, OpenIDProfile
-from socialregistration import signals 
+SESSION_KEY = getattr(settings, 'SOCIALREGISTRATION_SESSION_KEY', 'socialregistration_')
+GENERATE_USERNAME = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False)
+USERNAME_FUNCTION = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME_FUNCTION',
+    'socialregistration.utils.generate_username')
 
+class ClientMixin(object):
+    # The client class we'll be working with
+    client = None
 
-FB_ERROR = _('We couldn\'t validate your Facebook credentials')
+    def get_client(self):
+        if self.client is None:
+            raise AttributeError('`self.client` is `None`')
+        return self.client
 
-GENERATE_USERNAME = bool(getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False))
+class ProfileMixin(object):
+    # The profile model that we'll be working with
+    model = None
+        
+    def get_model(self):
+        if self.model is None:
+            raise AttributeError('`self.model` is `None`')
+        return self.model
 
-def _get_next(request):
-    """
-    Returns a url to redirect to after the login
-    """
-    if 'next' in request.session:
-        next = request.session['next']
-        del request.session['next']
-        return next
-    elif 'next' in request.GET:
-        return request.GET.get('next')
-    elif 'next' in request.POST:
-        return request.POST.get('next')
-    else:
-        return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+    def create_user(self):
+        return User()
 
-def _login(request, user, profile, client):
-    # we need to persist 'next' across the call to login() as
-    # it appears to reset the session data.
-    next = request.session.get('next')
-    login(request, user)
-    if next:
-        request.session['next'] = next
-    signals.login.send(sender = profile.__class__, 
-                                  user = user,
-                                  profile = profile, 
-                                  client = client)
-
-def _connect(user, profile, client):
-    signals.connect.send(sender = profile.__class__,
-                                    user = user,
-                                    profile = profile,
-                                    client = client)
-
-def setup(request, template='socialregistration/setup.html',
-    form_class=UserForm, extra_context=dict(), initial=dict()):
-    """
-    Setup view to create a username & set email address after authentication
-    """
-    try:
-        social_user = request.session['socialregistration_user']
-        social_profile = request.session['socialregistration_profile']
-        social_client = request.session['socialregistration_client']
-    except KeyError:
-        return render_to_response(
-            template, dict(error=True), context_instance=RequestContext(request))
-
-    if GENERATE_USERNAME:
-        social_user.username = str(uuid.uuid4())[:30]
-        social_user.save()
-
-        social_profile.user = social_user
-        social_profile.save()
-
-        user = social_profile.authenticate()
-
-    else:
-        if not request.method == "POST":
-            form = form_class(social_user, social_profile, initial=initial)
-            extra_context.update({'form': form})
-            return render_to_response(template, extra_context,
-                                      context_instance = RequestContext(request))
-
-        form = form_class(social_user, social_profile, request.POST, initial=initial)
-
-        if form.is_valid():
-            form.save(request = request)
-            user = form.profile.authenticate()
-            
-        else:
-            extra_context.update({'form': form})
-            return render_to_response(template, extra_context,
-                                      context_instance = RequestContext(request))
+    def create_profile(self, user, save=False, **kwargs):
+        profile = self.get_model()(user=user, **kwargs)
+        
+        if save:
+            profile.save()
+        
+        return profile
     
-    social_client.request = request
-     
-    # Removing unused bits. It's important to remove the
-    # client from the session because the session gets written
-    # to the storage on login and the client holds the request,
-    # which is going to fail. Might be worth to change the 
-    # clients to not hold the whole request.
-    if 'socialregistration_user' in request.session:
-        del request.session['socialregistration_user']
-    if 'socialregistration_profile' in request.session:
-        del request.session['socialregistration_profile']
-    if 'socialregistration_client' in request.session:
-        del request.session['socialregistration_client']
+    def get_profile(self, **kwargs):
+        self.get_model().objects.get(**kwargs)
+        
+    def get_or_create_profile(self, user, save=False, **kwargs):
+        try:
+            profile = self.get_model().objects.get(user=user, **kwargs)
+            return profile, False
+        except self.get_model().DoesNotExist:
+            profile = self.create_profile(user, save=save, **kwargs)
+            return profile, True
 
-    _connect(user, social_profile, social_client)
-    _login(request, user, social_profile, social_client)
+class SessionMixin(object):
+    def store_profile(self, request, profile):
+        request.session['%sprofile' % SESSION_KEY] = profile
+    
+    def store_user(self, request, user):
+        request.session['%suser' % SESSION_KEY] = user
+    
+    def store_client(self, request, client):
+        request.session['%sclient' % SESSION_KEY] = client
+        
+    def get_session_data(self, request):
+        user = request.session['%s_user' % SESSION_KEY]
+        profile = request.session['%s_profile' % SESSION_KEY]
+        client = request.session['%s_client' % SESSION_KEY]
+        return user, profile, client
+    
+    def delete_session_data(self, request):
+        del request.session['%s_user' % SESSION_KEY]
+        del request.session['%s_profile' % SESSION_KEY]
+        del request.session['%s_client' % SESSION_KEY] 
 
-    return HttpResponseRedirect(_get_next(request))
+class SignalMixin(object):
+    def send_login_signal(self, request, user, profile, client):
+        signals.login.send(sender=profile.__class__, user=user,
+            profile=profile, client=client, request=request)
+        
+    def send_connect_signal(self, request, user, profile, client):
+        signals.connect.send(sender=profile.__class__, user=user, profile=profile,
+            client=client, request=request)
+
+class SocialRegistration(TemplateResponseMixin, View):    
+    def get_next(self, request):
+        """
+        Returns a url to redirect to after the login
+        """
+        if 'next' in request.session:
+            next = request.session['next']
+            del request.session['next']
+            return next
+        elif 'next' in request.GET:
+            return request.GET.get('next')
+        elif 'next' in request.POST:
+            return request.POST.get('next')
+        else:
+            return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+
+    def authenticate(self, **kwargs):
+        return authenticate(**kwargs)
+    
+    def login(self, request, user):
+        return login(request, user)
+    
+    def inactive_response(self):
+        return self.render_to_response({
+            'error': _("This user account is marked as inactive.")})
+            
+    def redirect(self, request):
+        return HttpResponseRedirect(self.get_next(request))
+        
+def Setup(SocialReg):
+    template_name = 'socialregistration/setup.html'
+    
+    def get_username_function(self):
+        """
+        Return a function that can generate a username. 
+        """
+        module = '.'.join(USERNAME_FUNCTION.split('.')[:-1])
+        function = USERNAME_FUNCTION.split('.')[-1]
+        
+        module = importlib.import_module(module)
+        
+        return getattr(module, function)
+    
+    def get_initial_data(self, request, user, profile, client):
+        """
+        Fetch some initial data for the user setup form.
+        """
+        return {}
+    
 
 
-if has_csrf:
-    setup = csrf_protect(setup)
+    def generate_username_and_redirect(self, request, user, profile, client):
+        """
+        Generate a username, save the profile, login and redirect to the next
+        page.
+        """
+        func = self.get_username_function()
+        
+        user.username = func(user, profile, client)
+        user.save()
+        
+        profile.user = user
+        profile.save()
+        
+        user = profile.authenticate()
+        
+        self.send_connect_signal(request, user, profile, client)
+        
+        self.login(request, user)
+        
+        self.send_login_signal(request, user, profile, client)
+        
+        self.delete_session_data(request)
+        
+        return HttpResponseRedirect(self.get_next(request))
+        
+    def get(self, request):
+        try:
+            user, profile, client = self.get_models(request)
+        except KeyError:
+            return self.render_to_response(dict(
+                error=_("A social profile is missing from your session.")))
+         
+        if GENERATE_USERNAME:
+            return self.generate_username_and_redirect(user, profile, client)
+            
+        form = self.form(initial=self.get_initial(request, user, profile, client))
+        
+        return self.render_to_response(dict(form=form))
+        
+    def post(self, request):
+        try:
+            user, profile, client = self.get_models(request)
+        except KeyError:
+            return self.render_to_response(dict(
+                error=_("A social profile is missing from your session.")))
+        
+        form = self.form(request.POST, initial=self.get_initial(request, user, profile, client))
+        
+        if not form.is_valid():
+            return self.render_to_response(dict(form=form))
+        
+        (user, profile) = form.save(request)
+        
+        user = profile.authenticate()
+        
+        self.send_connect_signal(request, user, profile, client)
+        
+        self.login(request, user, profile, client)
+        
+        self.send_login_signal(request, user, profile, client)
+        
+        self.delete_session_data(request)
+        
+        return HttpResponseRedirect(self.get_next(request))
 
+class OAuthRedirect(SocialReg):
+    def get(self, request):
+        request.session['next'] = self.get_next(request)
+        client = self.client(request, self.api_key, self.secret_key)
+        request.session[self.client.get_session_key()] = client
+        return HttpResponseRedirect(client.get_redirect_url())
+
+class OAuthCallback(SocialReg):
+    def get(self, request):
+        request.session['next'] = self.get_next(request)
+        client = request.session[self.client.get_session_key()]
+        client.get_auth_token()
+        return HttpResponseRedirect(reverse(self.callback_url))
+
+
+            
+            
+        
+        
 def facebook_login(request, template='socialregistration/facebook.html',
     extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
     """
@@ -149,7 +260,7 @@ def facebook_login(request, template='socialregistration/facebook.html',
             context_instance=RequestContext(request))
 
     request.facebook.request = request
-    _login(request, user, FacebookProfile.objects.get(user = user), request.facebook)
+    _login(request, user, FacebookProfile.objects.get(user=user), request.facebook)
 
     return HttpResponseRedirect(_get_next(request))
 
@@ -230,7 +341,7 @@ def twitter(request, account_inactive_template='socialregistration/account_inact
             context_instance=RequestContext(request)
         )
 
-    _login(request, user, TwitterProfile.objects.get(user = user), client)
+    _login(request, user, TwitterProfile.objects.get(user=user), client)
 
     return HttpResponseRedirect(_get_next(request))
 
@@ -279,13 +390,13 @@ def linkedin(request, account_inactive_template='socialregistration/account_inac
             context_instance=RequestContext(request)
         )
 
-    _login(request, user, LinkedInProfile.objects.get(user = user), client)
+    _login(request, user, LinkedInProfile.objects.get(user=user), client)
 
     return HttpResponseRedirect(_get_next(request))
 
 def oauth_redirect(request, consumer_key=None, secret_key=None,
     request_token_url=None, access_token_url=None, authorization_url=None,
-    callback_url=None, parameters=None, client_class = None):
+    callback_url=None, parameters=None, client_class=None):
     """
     View to handle the OAuth based authentication redirect to the service provider
     """
@@ -297,7 +408,7 @@ def oauth_redirect(request, consumer_key=None, secret_key=None,
 def oauth_callback(request, consumer_key=None, secret_key=None,
     request_token_url=None, access_token_url=None, authorization_url=None,
     callback_url=None, template='socialregistration/oauthcallback.html',
-    extra_context=dict(), parameters=None, client_class = None):
+    extra_context=dict(), parameters=None, client_class=None):
     """
     View to handle final steps of OAuth based authentication where the user
     gets redirected back to from the service provider
@@ -314,7 +425,7 @@ def oauth_callback(request, consumer_key=None, secret_key=None,
     # We're redirecting to the setup view for this oauth service
     return HttpResponseRedirect(reverse(client.callback_url))
 
-def openid_redirect(request, client_class = None):
+def openid_redirect(request, client_class=None):
     """
     Redirect the user to the openid provider
     """
@@ -338,7 +449,7 @@ def openid_redirect(request, client_class = None):
 
 def openid_callback(request, template='socialregistration/openid.html',
     extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html',
-    client_class = None):
+    client_class=None):
     """
     Catches the user when he's redirected back from the provider to our site
     """
@@ -383,7 +494,7 @@ def openid_callback(request, template='socialregistration/openid.html',
                 context_instance=RequestContext(request)
             )
 
-        _login(request, user, OpenIDProfile.objects.get(user = user), client)
+        _login(request, user, OpenIDProfile.objects.get(user=user), client)
         return HttpResponseRedirect(_get_next(request))
 
     return render_to_response(

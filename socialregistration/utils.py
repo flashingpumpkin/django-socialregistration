@@ -7,10 +7,26 @@ Inspired by:
     http://github.com/leah/python-oauth/blob/master/oauth/example/client.py
     http://github.com/facebook/tornado/blob/master/tornado/auth.py
 """
-import time
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.utils import simplejson
+from django.utils.translation import gettext as _
+from openid.association import Association as OIDAssociation
+from openid.consumer import consumer as openid
+from openid.consumer.discover import DiscoveryFailure
+from openid.store.interface import OpenIDStore as OIDStore
+from socialregistration.models import OpenIDStore as OpenIDStoreModel, \
+    OpenIDNonce
+from urlparse import urlparse
+from xml.dom import minidom
 import base64
+import oauth2 as oauth
+import time
 import urllib
 import urllib2
+import uuid
 
 # parse_qsl was moved from the cgi namespace to urlparse in Python2.6.
 # this allows backwards compatibility
@@ -19,26 +35,12 @@ try:
 except ImportError:
     from cgi import parse_qsl
 
-from xml.dom import minidom
-
-import oauth2 as oauth
-from openid.consumer import consumer as openid
-from openid.consumer.discover import DiscoveryFailure
-from openid.store.interface import OpenIDStore as OIDStore
-from openid.association import Association as OIDAssociation
-
-from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
-from django.utils.translation import gettext as _
-
-from django.conf import settings
-from django.utils import simplejson
-
-from django.contrib.sites.models import Site
 
 
-from socialregistration.models import OpenIDStore as OpenIDStoreModel, OpenIDNonce
-from urlparse import urlparse
+
+
+
+
 
 USE_HTTPS = bool(getattr(settings, 'SOCIALREGISTRATION_USE_HTTPS', False))
 
@@ -47,6 +49,9 @@ def _https():
         return 's'
     else:
         return ''
+
+def generate_username(user, profile, client):
+    return str(uuid.uuid4())[:30]
 
 class OpenIDStore(OIDStore):
     max_nonce_age = 6 * 60 * 60

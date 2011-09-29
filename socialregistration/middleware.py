@@ -32,7 +32,7 @@ class FacebookMiddleware(object):
         """
         Enables ``request.facebook`` and ``request.facebook.get_graph`` in your views
         once the user authenticated the  application and connected with facebook. 
-        You might want to use this if you don't feel confortable with the 
+        You might want to use this if you don't feel comfortable with the
         javascript library.
         """
         data = facebook.parse_signed_request(

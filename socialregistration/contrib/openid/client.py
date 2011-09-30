@@ -6,15 +6,15 @@ from socialregistration.contrib.openid.storage import OpenIDStore
 import urlparse
 
 class OpenIDClient(Client):
-    def init(self, session_data, endpoint_url):
+    def __init__(self, session_data, endpoint_url):
         self.endpoint_url = endpoint_url
         self.store = OpenIDStore()
         self.consumer = consumer.Consumer(session_data, self.store)
     
     def get_realm(self):
         if self.is_https():
-            return 'https://%s/' % self.realm or Site.objects.get_current().domain
-        return 'http://%s/' % self.realm or Site.objects.get_current().domain
+            return 'https://%s/' % Site.objects.get_current().domain
+        return 'http://%s/' % Site.objects.get_current().domain
     
     def get_callback_url(self):
         return urlparse.urljoin(self.get_realm(),
@@ -29,7 +29,7 @@ class OpenIDClient(Client):
         return redirect_url
     
     def complete(self, GET, path):
-        self.result = self.consumer.complete(GET, urlparse.urljoin(self.realm(),
+        self.result = self.consumer.complete(GET, urlparse.urljoin(self.get_realm(),
             path))
     
     def is_valid(self):

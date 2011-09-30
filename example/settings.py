@@ -112,6 +112,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'socialregistration',
+    'socialregistration.contrib.openid',
     'example.app',
 )
 
@@ -143,10 +144,7 @@ LOGGING = {
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'socialregistration.auth.FacebookAuth',
-    'socialregistration.auth.TwitterAuth',
-    'socialregistration.auth.LinkedInAuth',
-    'socialregistration.auth.OpenIDAuth',
+    'socialregistration.contrib.openid.auth.OpenIDAuth',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -155,7 +153,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'socialregistration.middleware.FacebookMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (

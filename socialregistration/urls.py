@@ -1,25 +1,32 @@
 from django.conf import settings
 from django.conf.urls.defaults import *
+from socialregistration.views import Logout, Setup
 
 urlpatterns = patterns('',)
 
 if 'socialregistration.contrib.openid' in settings.INSTALLED_APPS:
     urlpatterns = urlpatterns + patterns('',
-        url('openid/', include('socialregistration.contrib.openid.urls',
+        url(r'^openid/', include('socialregistration.contrib.openid.urls',
             namespace='openid')))
 
 if 'socialregistration.contrib.twitter' in settings.INSTALLED_APPS:
     urlpatterns = urlpatterns + patterns('',
-        url('twitter/', include('socialregistration.contrib.twitter.urls',
+        url(r'^twitter/', include('socialregistration.contrib.twitter.urls',
             namespace='twitter')))
 
 if 'socialregistration.contrib.linkedin' in settings.INSTALLED_APPS:
     urlpatterns = urlpatterns + patterns('',
-        url('twitter/', include('socialregistration.contrib.linkedin.urls',
+        url(r'^linkedin/', include('socialregistration.contrib.linkedin.urls',
             namespace='linkedin')))
 
 if 'socialregistration.contrib.facebook' in settings.INSTALLED_APPS:
     urlpatterns = urlpatterns + patterns('',
-        url('twitter/', include('socialregistration.contrib.facebook.urls',
+        url(r'^facebook/', include('socialregistration.contrib.facebook.urls',
             namespace='facebook')))
+
+urlpatterns = urlpatterns + patterns('',
+    url(r'^setup/$', Setup.as_view(), name='setup'),
+    url(r'^logout/$', Logout.as_view(), name='logout'),
+)
+
 

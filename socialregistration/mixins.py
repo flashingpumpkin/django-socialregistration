@@ -6,9 +6,10 @@ from django.utils import importlib
 from django.views.generic.base import TemplateResponseMixin
 from socialregistration import signals
 
+
 SESSION_KEY = getattr(settings, 'SOCIALREGISTRATION_SESSION_KEY', 'socialregistration:')
 
-class CommonMixin(TemplateResponseMixin):    
+class CommonMixin(TemplateResponseMixin):
         
     def import_attribute(self, path):
         module = '.'.join(path.split('.')[:-1])
@@ -56,12 +57,12 @@ class ClientMixin(object):
 
 class ProfileMixin(object):
     # The profile model that we'll be working with
-    model = None
+    profile = None
         
     def get_model(self):
-        if self.model is None:
-            raise AttributeError('`self.model` is `None`')
-        return self.model
+        if self.profile is None:
+            raise AttributeError('`self.profile` is `None`')
+        return self.profile
 
     def create_user(self):
         return User()
@@ -84,6 +85,9 @@ class ProfileMixin(object):
         except self.get_model().DoesNotExist:
             profile = self.create_profile(user, save=save, **kwargs)
             return profile, True
+    
+    def get_lookup_kwargs(self, request, client):
+        raise NotImplementedError
 
 class SessionMixin(object):
     def store_profile(self, request, profile):

@@ -36,50 +36,6 @@ except ImportError:
     from cgi import parse_qsl
 
 
-
-
-
-
-
-
-
-class OpenID(object):
-    def __init__(self, request, return_to, endpoint):
-        """
-        @param request: : django.http.HttpRequest object
-        @param return_to: URL to redirect back to once the user authenticated
-            the application on the OpenID provider
-        @param endpoint: URL to the OpenID provider we're connecting to
-        """
-        self.request = request
-        self.return_to = return_to
-        self.endpoint = endpoint
-        self.store = OpenIDStore()
-        self.consumer = openid.Consumer(self.request.session, self.store)
-        self.result = None
-                    
-    def get_redirect(self):
-        auth_request = self.consumer.begin(self.endpoint)
-        redirect_url = auth_request.redirectURL(
-            'http%s://%s/' % (_https(), Site.objects.get_current().domain),
-            self.return_to
-        )
-        return HttpResponseRedirect(redirect_url)
-
-    def complete(self):
-        self.result = self.consumer.complete(
-            dict(self.request.GET.items()),
-            'http%s://%s%s' % (_https(), Site.objects.get_current(),
-                self.request.path)
-        )
-
-    def is_valid(self):
-        if self.result is None:
-            self.complete()
-
-        return self.result.status == openid.SUCCESS
-
-
 def get_token_prefix(url):
     """
     Returns a prefix for the token to store in the session so we can hold
@@ -94,7 +50,7 @@ def get_token_prefix(url):
     try:
         return urllib2.urlparse.urlparse(url).netloc
     except AttributeError:
-        return urllib2.rulparse.urlparse(url)[1]
+        return urllib2.urlparse.urlparse(url)[1]
 
 
 class OAuthError(Exception):

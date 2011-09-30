@@ -113,6 +113,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'socialregistration',
     'socialregistration.contrib.openid',
+    'socialregistration.contrib.twitter',
+    'socialregistration.contrib.linkedin',
     'example.app',
 )
 
@@ -145,6 +147,8 @@ LOGGING = {
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'socialregistration.contrib.openid.auth.OpenIDAuth',
+    'socialregistration.contrib.twitter.auth.TwitterAuth',
+    'socialregistration.contrib.linkedin.auth.LinkedInAuth',
 )
 
 MIDDLEWARE_CLASSES = (

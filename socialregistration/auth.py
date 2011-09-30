@@ -23,23 +23,7 @@ class Auth(object):
 #        except FacebookProfile.DoesNotExist:
 #            return None
 #
-#class TwitterAuth(Auth):
-#    def authenticate(self, twitter_id=None):
-#        try:
-#            return TwitterProfile.objects.get(
-#                twitter_id=twitter_id,
-#                site=Site.objects.get_current()
-#            ).user
-#        except TwitterProfile.DoesNotExist:
-#            return None
+
 #
-#class LinkedInAuth(Auth):
-#    def authenticate(self, linkedin_id=None):
-#        try:
-#            return LinkedInProfile.objects.get(
-#                linkedin_id=linkedin_id,
-#                site=Site.objects.get_current()
-#            ).user
-#        except LinkedInProfile.DoesNotExist:
-#            return None
+
 #

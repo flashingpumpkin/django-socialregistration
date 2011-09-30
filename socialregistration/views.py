@@ -1,7 +1,10 @@
 from django.conf import settings
 from django.contrib.auth import logout
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.views.generic.base import View
+from django.utils.translation import ugettext_lazy as _
+from socialregistration.clients.oauth import OAuthError
 from socialregistration.mixins import SocialRegistration
 
 
@@ -110,22 +113,80 @@ class Logout(View):
         return HttpResponseRedirect(url)
 
 
-#class OAuthRedirect(SocialRegistration):
-#    def get(self, request):
-#        request.session['next'] = self.get_next(request)
-#        client = self.client(request, self.api_key, self.secret_key)
-#        request.session[self.client.get_session_key()] = client
-#        return HttpResponseRedirect(client.get_redirect_url())
-#
-#class OAuthCallback(SocialRegistration):
-#    def get(self, request):
-#        request.session['next'] = self.get_next(request)
-#        client = request.session[self.client.get_session_key()]
-#        client.get_auth_token()
-#        return HttpResponseRedirect(reverse(self.callback_url))
+class OAuthRedirect(SocialRegistration, View):
+    client = None
+    template_name = None
+    
+    def post(self, request):
+        request.session['next'] = self.get_next(request)
+        client = self.get_client()()
+        request.session[self.get_client().get_session_key()] = client
+        try:
+            return HttpResponseRedirect(client.get_redirect_url())
+        except OAuthError, error:
+            return self.render_to_response({'error': error})
 
+class OAuthCallback(SocialRegistration, View):
+    def get_redirect(self):
+        raise NotImplementedError
+    
+    def get(self, request):
+        client = request.session[self.get_client().get_session_key()]
+        try:
+            client.complete(dict(request.GET.items()))
+            request.session[self.get_client().get_session_key()] = client
+            return HttpResponseRedirect(self.get_redirect())
+        except OAuthError, error:
+            return self.render_to_response({'error': error})
 
+class SetupCallback(SocialRegistration, View):
+    
+    def get(self, request):
+        client = request.session[self.get_client().get_session_key()]
+        
+        lookup_kwargs = self.get_lookup_kwargs(request, client)
+
+        # Logged in user connecting an account
+        if request.user.is_authenticated():
+            profile, created = self.get_or_create_profile(request.user,
+                save=True, **lookup_kwargs)
             
+            # Profile already existed - just redirect where the user wanted to
+            # go
+            if not created:
+                return self.redirect(request)
+            
+            # Profile didn't exist - store the profile, send the connect signal
+            # and redirect where the user wanted to go
+            self.send_connect_signal(request, request.user, profile, client)
+            
+            return self.redirect(request)
+
+        # Logged out user - let's see if we've got the identity saved already.
+        # If so - just log the user in. If not, create profile and redirect
+        # to the setup view        
+        user = self.authenticate(**lookup_kwargs)
+        
+        if user is None:
+            user = self.create_user()
+            profile = self.create_profile(user, **lookup_kwargs)
+            
+            self.store_user(request, user)
+            self.store_profile(request, profile)
+            self.store_client(request, client)
+            
+            return HttpResponseRedirect(reverse('socialregistration:setup'))
+
+        if not user.is_active:
+            return self.inactive_response()
+        
+        self.login(request, user)
+        
+        profile = self.get_profile(user=user, **lookup_kwargs)
+        
+        self.send_login_signal(request, user, profile, client)
+        
+        return self.redirect(request)
             
         
 #        

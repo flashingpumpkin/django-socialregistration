@@ -1,7 +1,7 @@
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from openid.consumer import consumer
-from socialregistration.client import Client
+from socialregistration.clients import Client
 from socialregistration.contrib.openid.storage import OpenIDStore
 import urlparse
 

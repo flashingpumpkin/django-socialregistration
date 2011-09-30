@@ -6,7 +6,7 @@ from django.utils import importlib
 from django.views.generic.base import TemplateResponseMixin
 from socialregistration import signals
 
-SESSION_KEY = getattr(settings, 'SOCIALREGISTRATION_SESSION_KEY', 'socialregistration_')
+SESSION_KEY = getattr(settings, 'SOCIALREGISTRATION_SESSION_KEY', 'socialregistration:')
 
 class CommonMixin(TemplateResponseMixin):    
         

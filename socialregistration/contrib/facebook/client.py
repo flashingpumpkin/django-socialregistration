@@ -8,9 +8,12 @@ import facebook
 class Facebook(OAuth2):
     client_id = getattr(settings, 'FACEBOOK_APP_ID', '')
     secret = getattr(settings, 'FACEBOOK_SECRET_KEY', '')
+    scope = getattr(settings, 'FACEBOOK_REQUEST_PERMISSIONS', '')
     
     auth_url = 'https://www.facebook.com/dialog/oauth'
     access_token_url = 'https://graph.facebook.com/oauth/access_token'
+    
+
     
     graph = None
     _user_info = None

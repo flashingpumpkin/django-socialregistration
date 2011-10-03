@@ -8,6 +8,7 @@ import json
 class Github(OAuth2):
     client_id = getattr(settings, 'GITHUB_CLIENT_ID', '')
     secret = getattr(settings, 'GITHUB_SECRET', '')
+    scope = getattr(settings, 'GITHUB_REQUEST_PERMISSIONS', '')
     
     auth_url = 'https://github.com/login/oauth/authorize'
     access_token_url = 'https://github.com/login/oauth/access_token'

@@ -1,9 +1,10 @@
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.sites.models import Site
-from socialregistration.auth import Auth
 from socialregistration.contrib.twitter.models import TwitterProfile
 
 
-class TwitterAuth(Auth):
+class TwitterAuth(ModelBackend):
+    
     def authenticate(self, twitter_id=None):
         try:
             return TwitterProfile.objects.get(

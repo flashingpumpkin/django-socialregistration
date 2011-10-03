@@ -116,6 +116,7 @@ class OAuth2(Client):
     
     auth_url = None
     access_token_url = None
+    scope = None
     
     _access_token = None
     
@@ -125,12 +126,12 @@ class OAuth2(Client):
     def client(self):
         return httplib2.Http()
     
-    def get_redirect_url(self, scope = '', state = ''):
+    def get_redirect_url(self,state = ''):
         params = {
             'response_type': 'code',
             'client_id': self.client_id, 
             'redirect_uri': self.get_callback_url(),
-            'scope': scope,
+            'scope': self.scope or '',
             'state': state,
         }
         

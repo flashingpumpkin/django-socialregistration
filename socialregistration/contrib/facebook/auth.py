@@ -1,9 +1,12 @@
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.sites.models import Site
-from socialregistration.auth import Auth
 from socialregistration.contrib.facebook.models import FacebookProfile
 
 
-class FacebookAuth(Auth):
+class FacebookAuth(ModelBackend):
+    supports_object_permissions = False
+    supports_anonymous_user = False
+    
     def authenticate(self, uid = None):
         try:
             return FacebookProfile.objects.get(

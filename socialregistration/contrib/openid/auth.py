@@ -1,10 +1,10 @@
-from socialregistration.auth import Auth
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.sites.models import Site
-
-
 from socialregistration.contrib.openid.models import OpenIDProfile
 
-class OpenIDAuth(Auth):
+
+
+class OpenIDAuth(ModelBackend):
     def authenticate(self, identity=None):
         try:
             return OpenIDProfile.objects.get(

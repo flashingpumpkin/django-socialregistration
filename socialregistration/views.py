@@ -67,7 +67,7 @@ class Setup(SocialRegistration, View):
                 error=_("A social profile is missing from your session.")))
          
         if GENERATE_USERNAME:
-            return self.generate_username_and_redirect(user, profile, client)
+            return self.generate_username_and_redirect(request, user, profile, client)
             
         form = self.get_form()(initial=self.get_initial_data(request, user, profile, client))
         

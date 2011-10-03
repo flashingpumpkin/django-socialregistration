@@ -1,6 +1,5 @@
 <html><head><title>Socialregistration example</title></head>
 <body>
-{% load openid twitter linkedin github facebook_tags %}
 
 {% if not request.user.is_authenticated %}
 	<h1>django-socialregistration login</h2>
@@ -8,22 +7,13 @@
 	<h1>Hi, {{ request.user }}</h1>
 {% endif %}
 
+{% load facebook twitter openid linkedin github %}
 <ol>
-    <li>
-        {% facebook_button %}
-    </li>
-	<li>
-		{% linkedin_button 'http://developer.linkedin.com/sites/default/files/linkedin-small.png' %}
-	</li>
-	<li>
-		{% twitter_button 'https://si0.twimg.com/images/dev/buttons/sign-in-with-twitter-l.png' %}
-	</li>
-    <li>
-        {% github_button %}
-    </li>
-	<li>
-		{% openid_form %}
-	</li>
+    <li>{% facebook_button %}</li>
+	<li>{% twitter_button %}</li>
+	<li>{% linkedin_button %}</li>
+    <li>{% github_button %}</li>
+	<li>{% openid_form %}</li>
 	<li>
 		<form action="{% url socialregistration:openid:redirect %}" method="post">
 			{% csrf_token %}

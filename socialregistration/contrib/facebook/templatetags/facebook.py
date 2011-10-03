@@ -1,6 +1,7 @@
 from django import template
+
 from socialregistration.templatetags import button
 
 register = template.Library()
 
-register.tag('linkedin_button', button('socialregistration/linkedin/linkedin_button.html'))
+register.tag('facebook_button', button('socialregistration/facebook/facebook_button.html'))

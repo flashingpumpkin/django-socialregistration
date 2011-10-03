@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db import models
-from socialregistration.signals import connect
+from socialregistration.signals import connect, login
 
 class FacebookProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
@@ -24,10 +24,7 @@ class FacebookAccessToken(models.Model):
     access_token = models.CharField(max_length=255)
 
 
-def save_facebook_token(sender, user, profile, client, **kwargs):
-    if not 'offline_access' in getattr(settings, 'FACEBOOK_REQUEST_PERMISSIONS', ''):
-        return
-    
+def save_facebook_token(sender, user, profile, client, **kwargs):    
     try:
         FacebookAccessToken.objects.get(profile=profile).delete()
     except FacebookAccessToken.DoesNotExist:
@@ -37,4 +34,6 @@ def save_facebook_token(sender, user, profile, client, **kwargs):
         access_token=client.graph.access_token)
     
 connect.connect(save_facebook_token, sender=FacebookProfile,
-    dispatch_uid='socialregistration_facebook_token')
+    dispatch_uid='socialregistration.facebook.connect')
+login.connect(save_facebook_token, sender = FacebookProfile,
+    dispatch_uid = 'socialregistration.facebook.login')

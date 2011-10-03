@@ -75,7 +75,7 @@ class ProfileMixin(object):
         return profile
     
     def get_profile(self, **kwargs):
-        self.get_model().objects.get(**kwargs)
+        return self.get_model().objects.get(**kwargs)
         
     def get_or_create_profile(self, user, save=False, **kwargs):
         try:

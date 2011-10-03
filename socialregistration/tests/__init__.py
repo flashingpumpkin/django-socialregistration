@@ -5,3 +5,5 @@ from socialregistration.tests.templatetags import *
 class SocialRegistrationTestCase(TestCase):
     def url(self, name, *args):
         return reverse(name, args=args)
+
+        

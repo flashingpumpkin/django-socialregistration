@@ -15,6 +15,9 @@ class Client(object):
     def get_redirect_url(self):
         raise NotImplementedError
     
+    def request(self):
+        raise NotImplementedError
+    
     @staticmethod
     def get_session_key():
         raise NotImplementedError

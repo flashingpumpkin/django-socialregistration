@@ -1,6 +1,6 @@
 <html><head><title>Socialregistration example</title></head>
 <body>
-{% load openid twitter linkedin %}
+{% load openid twitter linkedin github %}
 
 {% if not request.user.is_authenticated %}
 	<h1>django-socialregistration login</h2>
@@ -15,6 +15,9 @@
 	<li>
 		{% twitter_button 'https://si0.twimg.com/images/dev/buttons/sign-in-with-twitter-l.png' %}
 	</li>
+    <li>
+        {% github_button %}
+    </li>
 	<li>
 		{% openid_form %}
 	</li>

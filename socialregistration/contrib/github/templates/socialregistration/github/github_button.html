@@ -1,0 +1,7 @@
+<form action="{% url socialregistration:github:redirect %}" method="post">
+    {% csrf_token %}
+    {% if next %}
+        <input type="hidden" name="next" value="{{ next }}" />
+    {% endif %}
+    <input type="submit" value="Sign in with Github" />
+</form>

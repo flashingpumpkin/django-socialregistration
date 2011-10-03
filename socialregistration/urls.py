@@ -24,6 +24,11 @@ if 'socialregistration.contrib.facebook' in settings.INSTALLED_APPS:
         url(r'^facebook/', include('socialregistration.contrib.facebook.urls',
             namespace='facebook')))
 
+if 'socialregistration.contrib.github' in settings.INSTALLED_APPS:
+    urlpatterns = urlpatterns + patterns('',
+        url(r'^github/', include('socialregistration.contrib.github.urls',
+            namespace = 'github')))
+
 urlpatterns = urlpatterns + patterns('',
     url(r'^setup/$', Setup.as_view(), name='setup'),
     url(r'^logout/$', Logout.as_view(), name='logout'),

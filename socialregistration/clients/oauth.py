@@ -1,9 +1,10 @@
 from django.utils.translation import ugettext_lazy as _
 from socialregistration.clients import Client
-
+import httplib2
 import oauth2 as oauth
 import urllib
 import urlparse
+
 
 class OAuthError(Exception):
     pass
@@ -93,7 +94,6 @@ class OAuth(Client):
     
     def get_user_info(self):
         return self._access_token_dict or {}
-
     
     def request(self, url, method="GET", params=None, headers=None):
         params = params or {}
@@ -109,4 +109,79 @@ class OAuth(Client):
         
         return content
     
+    
+class OAuth2(Client):
+    client_id = None
+    secret = None
+    
+    auth_url = None
+    access_token_url = None
+    
+    _access_token = None
+    
+    def __init__(self, access_token = None):
+        self._access_token = access_token
+    
+    def client(self):
+        return httplib2.Http()
+    
+    def get_redirect_url(self, scope = '', state = ''):
+        params = {
+            'response_type': 'code',
+            'client_id': self.client_id, 
+            'redirect_uri': self.get_callback_url(),
+            'scope': scope,
+            'state': state,
+        }
+        
+        return '%s?%s' % (self.auth_url, urllib.urlencode(params))
+    
+    def _get_access_token(self, code):
+        params = {
+            'code': code,
+            'client_id': self.client_id,
+            'client_secret': self.secret,
+            'redirect_uri': self.get_callback_url(),
+        }
+        
+        resp, content = self.request(self.access_token_url, method = "POST",
+            params = params)
+        
+        content = dict(urlparse.parse_qsl(content))
+        
+        if 'error' in content:
+            raise OAuthError(_(
+                "Received error while obtaining access token from %s: %s") %( 
+                    self.access_token_url, content['error']))
+
+        return content
+    
+    def get_access_token(self, code = None):
+        if self._access_token is None:
+            if code is None:
+                raise ValueError(_('Invalid code.'))
+            self._access_token = self._get_access_token(code)['access_token']
+        
+        return self._access_token
+    
+    def complete(self, GET):
+        return self.get_access_token(GET.get('code'))        
+        
+    def request(self, url, method = "GET", params = None, headers = None):
+        params = params or {}
+        headers = headers or {}
+        
+        params.update(access_token = self._access_token)
+        
+        if method.upper() == "GET":
+            url = '%s?%s' % (url, urllib.urlencode(params))
+            return self.client().request(url, method = method, headers = headers)
+        return self.client().request(url, method, body = urllib.urlencode(params),
+            headers = headers)
+        
+    def get_user_info(self):
+        raise NotImplementedError
+    
+    def get_callback_url(self):
+        raise NotImplementedError
     

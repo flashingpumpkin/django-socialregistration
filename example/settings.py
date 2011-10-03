@@ -115,6 +115,7 @@ INSTALLED_APPS = (
     'socialregistration.contrib.openid',
     'socialregistration.contrib.twitter',
     'socialregistration.contrib.linkedin',
+    'socialregistration.contrib.github',
     'example.app',
 )
 
@@ -149,6 +150,7 @@ AUTHENTICATION_BACKENDS = (
     'socialregistration.contrib.openid.auth.OpenIDAuth',
     'socialregistration.contrib.twitter.auth.TwitterAuth',
     'socialregistration.contrib.linkedin.auth.LinkedInAuth',
+    'socialregistration.contrib.github.auth.GithubAuth',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -188,6 +190,11 @@ LINKEDIN_CONSUMER_SECRET_KEY = ''
 LINKEDIN_REQUEST_TOKEN_URL = 'https://api.linkedin.com/uas/oauth/requestToken'
 LINKEDIN_ACCESS_TOKEN_URL = 'https://api.linkedin.com/uas/oauth/accessToken'
 LINKEDIN_AUTHORIZATION_URL = 'https://www.linkedin.com/uas/oauth/authenticate'
+
+# Add your Github API keys here
+GITHUB_CLIENT_ID = ''
+GITHUB_SECRET = ''
+
 
 
 SOCIALREGISTRATION_USE_HTTPS = False

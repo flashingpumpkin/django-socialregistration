@@ -1,6 +1,6 @@
 <html><head><title>Socialregistration example</title></head>
 <body>
-{% load openid twitter linkedin github %}
+{% load openid twitter linkedin github facebook_tags %}
 
 {% if not request.user.is_authenticated %}
 	<h1>django-socialregistration login</h2>
@@ -9,6 +9,9 @@
 {% endif %}
 
 <ol>
+    <li>
+        {% facebook_button %}
+    </li>
 	<li>
 		{% linkedin_button 'http://developer.linkedin.com/sites/default/files/linkedin-small.png' %}
 	</li>

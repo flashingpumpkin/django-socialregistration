@@ -116,6 +116,7 @@ INSTALLED_APPS = (
     'socialregistration.contrib.twitter',
     'socialregistration.contrib.linkedin',
     'socialregistration.contrib.github',
+    'socialregistration.contrib.facebook',
     'example.app',
 )
 
@@ -151,6 +152,7 @@ AUTHENTICATION_BACKENDS = (
     'socialregistration.contrib.twitter.auth.TwitterAuth',
     'socialregistration.contrib.linkedin.auth.LinkedInAuth',
     'socialregistration.contrib.github.auth.GithubAuth',
+    'socialregistration.contrib.facebook.auth.FacebookAuth',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -173,28 +175,20 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 # Add your Facebook API keys here
 FACEBOOK_APP_ID = ''
-FACEBOOK_API_KEY = ''
 FACEBOOK_SECRET_KEY = ''
 FACEBOOK_REQUEST_PERMISSIONS = 'email,user_about_me'
 
 # Add your Twitter API keys here
 TWITTER_CONSUMER_KEY = ''
 TWITTER_CONSUMER_SECRET_KEY = ''
-TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
-TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
-TWITTER_AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authenticate'
 
 # Add your LinkedIn API keys here
 LINKEDIN_CONSUMER_KEY = ''
 LINKEDIN_CONSUMER_SECRET_KEY = ''
-LINKEDIN_REQUEST_TOKEN_URL = 'https://api.linkedin.com/uas/oauth/requestToken'
-LINKEDIN_ACCESS_TOKEN_URL = 'https://api.linkedin.com/uas/oauth/accessToken'
-LINKEDIN_AUTHORIZATION_URL = 'https://www.linkedin.com/uas/oauth/authenticate'
 
 # Add your Github API keys here
 GITHUB_CLIENT_ID = ''
 GITHUB_SECRET = ''
-
 
 
 SOCIALREGISTRATION_USE_HTTPS = False

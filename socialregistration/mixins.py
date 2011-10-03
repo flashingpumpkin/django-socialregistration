@@ -6,11 +6,10 @@ from django.utils import importlib
 from django.views.generic.base import TemplateResponseMixin
 from socialregistration import signals
 
-
 SESSION_KEY = getattr(settings, 'SOCIALREGISTRATION_SESSION_KEY', 'socialregistration:')
 
 class CommonMixin(TemplateResponseMixin):
-        
+    
     def import_attribute(self, path):
         module = '.'.join(path.split('.')[:-1])
         function = path.split('.')[-1]

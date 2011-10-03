@@ -7,11 +7,11 @@ from django.utils.translation import ugettext_lazy as _
 from socialregistration.clients.oauth import OAuthError
 from socialregistration.mixins import SocialRegistration
 
-
-
 GENERATE_USERNAME = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False)
+
 USERNAME_FUNCTION = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME_FUNCTION',
     'socialregistration.utils.generate_username')
+
 FORM_CLASS = getattr(settings, 'SOCIALREGISTRATION_SETUP_FORM',
     'socialregistration.forms.UserForm')
 
@@ -126,6 +126,7 @@ class OAuthRedirect(SocialRegistration, View):
         except OAuthError, error:
             return self.render_to_response({'error': error})
 
+
 class OAuthCallback(SocialRegistration, View):
     def get_redirect(self):
         raise NotImplementedError
@@ -139,8 +140,7 @@ class OAuthCallback(SocialRegistration, View):
         except OAuthError, error:
             return self.render_to_response({'error': error})
 
-class SetupCallback(SocialRegistration, View):
-    
+class SetupCallback(SocialRegistration, View):    
     def get(self, request):
         client = request.session[self.get_client().get_session_key()]
         
@@ -187,263 +187,3 @@ class SetupCallback(SocialRegistration, View):
         self.send_login_signal(request, user, profile, client)
         
         return self.redirect(request)
-            
-        
-#        
-#def facebook_login(request, template='socialregistration/facebook.html',
-#    extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
-#    """
-#    View to handle the Facebook login
-#    """
-#
-#    if not hasattr(request.facebook, 'uid'):
-#        extra_context.update(dict(error=FB_ERROR))
-#        return render_to_response(template, extra_context,
-#            context_instance=RequestContext(request))
-#
-#    user = authenticate(uid=request.facebook.uid)
-#
-#    if user is None:
-#        request.session['socialregistration_user'] = User()
-#        request.session['socialregistration_profile'] = FacebookProfile(uid=request.facebook.uid)
-#        request.session['socialregistration_client'] = request.facebook
-#        request.session['next'] = _get_next(request)
-#        return HttpResponseRedirect(reverse('socialregistration_setup'))
-#
-#    if not user.is_active:
-#        return render_to_response(account_inactive_template, extra_context,
-#            context_instance=RequestContext(request))
-#
-#    request.facebook.request = request
-#    _login(request, user, FacebookProfile.objects.get(user=user), request.facebook)
-#
-#    return HttpResponseRedirect(_get_next(request))
-#
-#def facebook_connect(request, template='socialregistration/facebook.html',
-#    extra_context=dict()):
-#    """
-#    View to handle connecting existing django accounts with facebook
-#    """
-#    if request.facebook.uid is None or request.user.is_authenticated() is False:
-#        extra_context.update(dict(error=FB_ERROR))
-#        return render_to_response(template, extra_context,
-#            context_instance=RequestContext(request))
-#
-#    try:
-#        profile = FacebookProfile.objects.get(uid=request.facebook.uid)
-#    except FacebookProfile.DoesNotExist:
-#        profile = FacebookProfile.objects.create(user=request.user,
-#            uid=request.facebook.uid)
-#        request.facebook.request = request
-#        _connect(request.user, profile, request.facebook)
-#
-#    return HttpResponseRedirect(_get_next(request))
-#
-#
-#
-#
-#def twitter(request, account_inactive_template='socialregistration/account_inactive.html',
-#    extra_context=dict(), client_class=None):
-#    """
-#    Actually setup/login an account relating to a twitter user after the oauth
-#    process is finished successfully
-#    """
-#    client = client_class(
-#        request, settings.TWITTER_CONSUMER_KEY,
-#        settings.TWITTER_CONSUMER_SECRET_KEY,
-#        settings.TWITTER_REQUEST_TOKEN_URL,
-#    )
-#
-#    user_info = client.get_user_info()
-#
-#    if request.user.is_authenticated():
-#        # Handling already logged in users connecting their accounts
-#        try:
-#            profile = TwitterProfile.objects.get(twitter_id=user_info['id'])
-#        except TwitterProfile.DoesNotExist: # There can only be one profile!
-#            profile = TwitterProfile.objects.create(user=request.user, twitter_id=user_info['id'])
-#            _connect(request.user, profile, client)
-#
-#        return HttpResponseRedirect(_get_next(request))
-#
-#    user = authenticate(twitter_id=user_info['id'])
-#
-#    if user is None:
-#        profile = TwitterProfile(twitter_id=user_info['id'])
-#        user = User()
-#        request.session['socialregistration_profile'] = profile
-#        request.session['socialregistration_user'] = user
-#        # Client is not pickleable with the request on it
-#        client.request = None
-#        request.session['socialregistration_client'] = client
-#        request.session['next'] = _get_next(request)
-#        return HttpResponseRedirect(reverse('socialregistration_setup'))
-#
-#    if not user.is_active:
-#        return render_to_response(
-#            account_inactive_template,
-#            extra_context,
-#            context_instance=RequestContext(request)
-#        )
-#
-#    _login(request, user, TwitterProfile.objects.get(user=user), client)
-#
-#    return HttpResponseRedirect(_get_next(request))
-#
-#
-#def linkedin(request, account_inactive_template='socialregistration/account_inactive.html',
-#    extra_context=dict(), client_class=None):
-#    """
-#    Actually setup/login an account relating to a linkedin user after the oauth
-#    process is finished successfully
-#    """
-#    client = client_class(
-#        request, settings.LINKEDIN_CONSUMER_KEY,
-#        settings.LINKEDIN_CONSUMER_SECRET_KEY,
-#        settings.LINKEDIN_REQUEST_TOKEN_URL,
-#    )
-#
-#    user_info = client.get_user_info()
-#
-#    if request.user.is_authenticated():
-#        # Handling already logged in users connecting their accounts
-#        try:
-#            profile = LinkedInProfile.objects.get(linkedin_id=user_info['id'])
-#        except LinkedInProfile.DoesNotExist: # There can only be one profile!
-#            profile = LinkedInProfile.objects.create(user=request.user, linkedin_id=user_info['id'])
-#            _connect(request.user, profile, client)
-#
-#        return HttpResponseRedirect(_get_next(request))
-#
-#    user = authenticate(linkedin_id=user_info['id'])
-#
-#    if user is None:
-#        profile = LinkedInProfile(linkedin_id=user_info['id'])
-#        user = User()
-#        request.session['socialregistration_profile'] = profile
-#        request.session['socialregistration_user'] = user
-#        # Client is not pickleable with the request on it
-#        client.request = None
-#        request.session['socialregistration_client'] = client
-#        request.session['next'] = _get_next(request)
-#        return HttpResponseRedirect(reverse('socialregistration_setup'))
-#
-#    if not user.is_active:
-#        return render_to_response(
-#            account_inactive_template,
-#            extra_context,
-#            context_instance=RequestContext(request)
-#        )
-#
-#    _login(request, user, LinkedInProfile.objects.get(user=user), client)
-#
-#    return HttpResponseRedirect(_get_next(request))
-#
-#def oauth_redirect(request, consumer_key=None, secret_key=None,
-#    request_token_url=None, access_token_url=None, authorization_url=None,
-#    callback_url=None, parameters=None, client_class=None):
-#    """
-#    View to handle the OAuth based authentication redirect to the service provider
-#    """
-#    request.session['next'] = _get_next(request)
-#    client = client_class(request, consumer_key, secret_key,
-#        request_token_url, access_token_url, authorization_url, callback_url, parameters)
-#    return client.get_redirect()
-#
-#def oauth_callback(request, consumer_key=None, secret_key=None,
-#    request_token_url=None, access_token_url=None, authorization_url=None,
-#    callback_url=None, template='socialregistration/oauthcallback.html',
-#    extra_context=dict(), parameters=None, client_class=None):
-#    """
-#    View to handle final steps of OAuth based authentication where the user
-#    gets redirected back to from the service provider
-#    """
-#    client = client_class(request, consumer_key, secret_key, request_token_url,
-#        access_token_url, authorization_url, callback_url, parameters)
-#
-#    extra_context.update(dict(oauth_client=client))
-#    if not client.is_valid():
-#        return render_to_response(
-#            template, extra_context, context_instance=RequestContext(request)
-#        )
-#
-#    # We're redirecting to the setup view for this oauth service
-#    return HttpResponseRedirect(reverse(client.callback_url))
-#
-#def openid_redirect(request, client_class=None):
-#    """
-#    Redirect the user to the openid provider
-#    """
-#    request.session['next'] = _get_next(request)
-#    request.session['openid_provider'] = request.GET.get('openid_provider')
-#
-#    client = client_class(
-#        request,
-#        'http%s://%s%s' % (
-#            _https(),
-#            Site.objects.get_current().domain,
-#            reverse('openid_callback')
-#        ),
-#        request.GET.get('openid_provider')
-#    )
-#    try:
-#        return client.get_redirect()
-#    except DiscoveryFailure:
-#        request.session['openid_error'] = True
-#        return HttpResponseRedirect(settings.LOGIN_URL)
-#
-#def openid_callback(request, template='socialregistration/openid.html',
-#    extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html',
-#    client_class=None):
-#    """
-#    Catches the user when he's redirected back from the provider to our site
-#    """
-#    client = client_class(
-#        request,
-#        'http%s://%s%s' % (
-#            _https(),
-#            Site.objects.get_current().domain,
-#            reverse('openid_callback')
-#        ),
-#        request.session.get('openid_provider')
-#    )
-#
-#    if client.is_valid():
-#        identity = client.result.identity_url
-#        if request.user.is_authenticated():
-#            # Handling already logged in users just connecting their accounts
-#            try:
-#                profile = OpenIDProfile.objects.get(identity=identity)
-#            except OpenIDProfile.DoesNotExist: # There can only be one profile with the same identity
-#                profile = OpenIDProfile.objects.create(user=request.user,
-#                    identity=identity)
-#                _connect(request.user, profile, client)
-#
-#            return HttpResponseRedirect(_get_next(request))
-#
-#        user = authenticate(identity=identity)
-#        if user is None:
-#            request.session['socialregistration_user'] = User()
-#            request.session['socialregistration_profile'] = OpenIDProfile(
-#                identity=identity
-#            )
-#            # Client is not pickleable with the request on it
-#            client.request = None
-#            request.session['socialregistration_client'] = client
-#            return HttpResponseRedirect(reverse('socialregistration_setup'))
-#
-#        if not user.is_active:
-#            return render_to_response(
-#                account_inactive_template,
-#                extra_context,
-#                context_instance=RequestContext(request)
-#            )
-#
-#        _login(request, user, OpenIDProfile.objects.get(user=user), client)
-#        return HttpResponseRedirect(_get_next(request))
-#
-#    return render_to_response(
-#        template,
-#        dict(),
-#        context_instance=RequestContext(request)
-#    )

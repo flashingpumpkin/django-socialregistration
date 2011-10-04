@@ -3,5 +3,9 @@
     {% if next %}
         <input type="hidden" name="next" value="{{ next }}" />
     {% endif %}
-    <input type="submit" value="Sign in with Foursquare" />
+    {% if button %}
+    	<input type="image" onclick="this.form.submit();" src="{{ button }}" />
+    {% else %}
+    	<input type="submit" value="Sign in with Foursquare" />
+    {% endif %}
 </form>

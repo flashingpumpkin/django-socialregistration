@@ -25,4 +25,6 @@ class Twitter(OAuth):
     def get_session_key():
         return 'socialreg:twitter'
 
+    def get_user_info(self):
+        return self._access_token_dict
 

@@ -1,6 +1,13 @@
 from django import template
-from socialregistration.templatetags import button
+
 
 register = template.Library()
 
-register.tag('openid_form', button('socialregistration/openid/form.html'))
+@register.inclusion_tag('socialregistration/openid/form.html', takes_context=True)
+def openid_form(context, provider=None, button=None):
+    return {
+        'provider': provider,
+        'button': button,
+        'request': context['request']
+    }
+    

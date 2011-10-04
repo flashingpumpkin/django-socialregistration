@@ -6,7 +6,7 @@ import json
 import urllib
 
 
-class TestTemplateTag(TemplateTagTest):
+class TestTemplateTag(TemplateTagTest, TestCase):
     def get_tag(self):
         return 'linkedin', 'linkedin_button'
 

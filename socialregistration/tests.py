@@ -47,9 +47,6 @@ class OAuthTest(object):
     def get_callback_setup_url(self):
         raise NotImplementedError
     
-    def get_user_info(self):
-        raise NotImplementedError
-    
     def get_redirect_mock_response(self, *args, **kwargs):
         raise NotImplementedError
     
@@ -128,6 +125,26 @@ class OAuthTest(object):
 
         self.assertEqual(1, self.client.session['_auth_user_id'])
 
+class OAuth2Test(OAuthTest):
+
+    def redirect(self):
+        response = self.client.post(self.get_redirect_url())
+        return response
+    
+    @mock.patch('socialregistration.clients.oauth.OAuth2.request')
+    def callback(self, MockRequest):
+        MockRequest.side_effect = get_mock_func(self.get_callback_mock_response)
+        response = self.client.get(self.get_callback_url(), {'code': 'abc'})
+        return response
+    
+    @mock.patch('socialregistration.clients.oauth.OAuth2.request')
+    def setup_callback(self, MockRequest):
+        MockRequest.side_effect = get_mock_func(self.get_setup_callback_mock_response)
+        response = self.client.get(self.get_setup_callback_url())
+        return response
+
+    
+    
 class TestContextProcessors(TestCase):
     def test_request_is_in_context(self):
         self.assertTrue('django.core.context_processors.request' in settings.TEMPLATE_CONTEXT_PROCESSORS)

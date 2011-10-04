@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from oauth2 import Client
+from socialregistration.signals import login, connect
 import mock
 import urllib
 import urlparse
@@ -42,6 +43,9 @@ class OAuthTest(object):
     Mixin for OAuth tests. This does not go out to the services that we're 
     testing but mocks instead the responses we *should* get back.
     """
+    
+    # The profile model to be used
+    profile = None
     
     def get_redirect_url(self):
         raise NotImplementedError
@@ -86,7 +90,10 @@ class OAuthTest(object):
     
     def login(self):
         self.client.login(username='alen', password='test')
-    
+        
+    def get_counter(self):
+        return type('Counter', (object,), {'counter' : 0})()
+        
     @mock.patch('oauth2.Client.request')
     def redirect(self, MockRequest):
         MockRequest.side_effect = get_mock_func(self.get_redirect_mock_response)
@@ -104,6 +111,11 @@ class OAuthTest(object):
         MockRequest.side_effect = get_mock_func(self.get_setup_callback_mock_response)
         response = self.client.get(self.get_setup_callback_url())
         return response
+    
+    def flow(self):
+        self.redirect()
+        self.callback()
+        self.setup_callback()
     
     def test_redirect_should_redirect_a_user(self,):
         response = self.redirect()
@@ -137,12 +149,53 @@ class OAuthTest(object):
         self.assertFalse(self.client.session.get('_auth_user_id', False))
         
         self.create_profile(user)
-        
-        self.redirect()
-        self.callback()
-        self.setup_callback()
+
+        self.flow()
 
         self.assertEqual(1, self.client.session['_auth_user_id'])
+    
+    def test_logged_in_user_should_be_connected(self):
+        user = self.create_user()
+        self.login()
+        
+        self.assertEqual(0, self.profile.objects.filter(user=user).count())
+        
+        self.flow()
+        
+        self.assertEqual(1, self.profile.objects.filter(user=user).count())
+    
+    def test_logging_in_should_send_the_login_signal(self):
+        counter = self.get_counter()
+        
+        user = self.create_user()
+        self.create_profile(user)
+        
+        def handler(sender, **kwargs):
+            counter.counter += 1
+            self.assertEqual(self.profile, sender)
+            
+        login.connect(handler, sender=self.profile, dispatch_uid='socialreg.test.login')
+        
+        self.flow()
+        
+        self.assertEqual(1, counter.counter)
+
+    def test_connecting_should_send_the_connect_signal(self):
+        counter = self.get_counter()
+        
+        user = self.create_user()
+        self.login()
+        
+        def handler(sender, **kwargs):
+            counter.counter += 1
+            self.assertEqual(self.profile, sender)
+        
+        connect.connect(handler, sender=self.profile, dispatch_uid='socialreg.test.connect')
+        
+        self.flow()
+        
+        self.assertEqual(1, counter.counter)
+
 
 class OAuth2Test(OAuthTest):
 

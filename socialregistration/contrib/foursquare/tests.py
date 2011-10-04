@@ -11,6 +11,7 @@ class TestTemplateTag(TemplateTagTest, TestCase):
         return 'foursquare', 'foursquare_button'
 
 class TestFoursquare(OAuth2Test, TestCase):
+    profile = FoursquareProfile
 
     def get_redirect_url(self):
         return reverse('socialregistration:foursquare:redirect')

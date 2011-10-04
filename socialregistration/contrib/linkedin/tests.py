@@ -12,7 +12,8 @@ class TestTemplateTag(TemplateTagTest, TestCase):
         return 'linkedin', 'linkedin_button'
 
 class TestLinkedIn(OAuthTest, TestCase):
-
+    profile = LinkedInProfile
+    
     def get_redirect_url(self):
         return reverse('socialregistration:linkedin:redirect')
     

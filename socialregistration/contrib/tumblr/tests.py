@@ -12,7 +12,8 @@ class TestTemplateTag(TemplateTagTest, TestCase):
         return 'tumblr', 'tumblr_button'
 
 class TestTumblr(OAuthTest, TestCase):
-
+    profile = TumblrProfile
+    
     def get_redirect_url(self):
         return reverse('socialregistration:tumblr:redirect')
     

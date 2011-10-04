@@ -12,7 +12,8 @@ class TestTemplateTag(TemplateTagTest, TestCase):
 
 
 class TestGithub(OAuth2Test, TestCase):
-
+    profile = GithubProfile
+    
     def get_redirect_url(self):
         return reverse('socialregistration:github:redirect')
     

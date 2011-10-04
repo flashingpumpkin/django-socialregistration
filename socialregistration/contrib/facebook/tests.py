@@ -12,6 +12,7 @@ class TestTemplateTag(TemplateTagTest, TestCase):
         return 'facebook', 'facebook_button'
 
 class TestFacebook(OAuth2Test, TestCase):
+    profile = FacebookProfile
 
     def get_redirect_url(self):
         return reverse('socialregistration:facebook:redirect')

@@ -11,6 +11,7 @@ class TestTemplateTag(TemplateTagTest, TestCase):
         return 'twitter', 'twitter_button'
 
 class TestTwitter(OAuthTest, TestCase):
+    profile = TwitterProfile
 
     def get_redirect_url(self):
         return reverse('socialregistration:twitter:redirect')

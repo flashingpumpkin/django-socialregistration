@@ -118,6 +118,7 @@ INSTALLED_APPS = (
     'socialregistration.contrib.github',
     'socialregistration.contrib.facebook',
     'socialregistration.contrib.foursquare',
+    'socialregistration.contrib.tumblr',
     'example.app',
 )
 
@@ -155,6 +156,7 @@ AUTHENTICATION_BACKENDS = (
     'socialregistration.contrib.github.auth.GithubAuth',
     'socialregistration.contrib.facebook.auth.FacebookAuth',
     'socialregistration.contrib.foursquare.auth.FoursquareAuth',
+    'socialregistration.contrib.tumblr.auth.TumblrAuth',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -199,6 +201,9 @@ FOURSQUARE_CLIENT_ID = ''
 FOURSQUARE_CLIENT_SECRET = ''
 FOURSQUARE_REQUEST_PERMISSIONS = ''
 
+# Add your tumblr API keys here
+TUMBLR_CONSUMER_KEY = ''
+TUMBLR_CONSUMER_SECRET_KEY = ''
 
 SOCIALREGISTRATION_USE_HTTPS = False
 SOCIALREGISTRATION_GENERATE_USERNAME = False

@@ -20,6 +20,7 @@ class OAuth(Client):
     _request_token = None
     _access_token = None
     _access_token_dict = None
+    _user_info = None
     
     def __init__(self, access_token=None, access_token_secret=None):
         self.consumer = oauth.Consumer(self.api_key, self.secret_key)
@@ -119,6 +120,7 @@ class OAuth2(Client):
     scope = None
     
     _access_token = None
+    _user_info = None
     
     def __init__(self, access_token=None):
         self._access_token = access_token

@@ -6,6 +6,7 @@ from socialregistration.contrib.foursquare.models import FoursquareProfile
 from socialregistration.contrib.github.models import GithubProfile
 from socialregistration.contrib.linkedin.models import LinkedInProfile
 from socialregistration.contrib.openid.models import OpenIDProfile
+from socialregistration.contrib.tumblr.models import TumblrProfile
 from socialregistration.contrib.twitter.models import TwitterProfile
 
 def index(request):
@@ -17,4 +18,5 @@ def index(request):
             linkedin=LinkedInProfile.objects.all(),
             github=GithubProfile.objects.all(),
             foursquare=FoursquareProfile.objects.all(),
+            tumblr=TumblrProfile.objects.all(),
     ), context_instance=RequestContext(request))

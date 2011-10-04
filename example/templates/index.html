@@ -7,13 +7,14 @@
 	<h1>Hi, {{ request.user }}</h1>
 {% endif %}
 
-{% load facebook twitter openid linkedin github foursquare %}
+{% load facebook twitter openid linkedin github foursquare tumblr %}
 <ol>
     <li>{% facebook_button %}</li>
 	<li>{% twitter_button %}</li>
 	<li>{% linkedin_button %}</li>
     <li>{% github_button %}</li>
     <li>{% foursquare_button %}</li>
+    <li>{% tumblr_button %}</li>
 	<li>{% openid_form %}</li>
 	<li>
 		<form action="{% url socialregistration:openid:redirect %}" method="post">
@@ -32,6 +33,7 @@
     <li>LinkedIn: {{ linkedin.count }}</li>
     <li>Github: {{ github.count }}</li>
     <li>Foursquare: {{ foursquare.count }}</li>
+    <li>Tumblr: {{ tumblr.count }}</li>
 	<li>OpenID: {{ openid.count }}</li>
 </ol>
 

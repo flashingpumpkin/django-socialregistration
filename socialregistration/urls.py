@@ -34,6 +34,11 @@ if 'socialregistration.contrib.foursquare' in settings.INSTALLED_APPS:
         url(r'^foursquare/', include('socialregistration.contrib.foursquare.urls',
             namespace='foursquare')))
 
+if 'socialregistration.contrib.tumblr' in settings.INSTALLED_APPS:
+    urlpatterns = urlpatterns + patterns('',
+        url(r'^tumblr/', include('socialregistration.contrib.tumblr.urls',
+            namespace='tumblr')))
+
 urlpatterns = urlpatterns + patterns('',
     url(r'^setup/$', Setup.as_view(), name='setup'),
     url(r'^logout/$', Logout.as_view(), name='logout'),

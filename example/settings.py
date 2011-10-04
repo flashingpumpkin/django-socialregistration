@@ -117,6 +117,7 @@ INSTALLED_APPS = (
     'socialregistration.contrib.linkedin',
     'socialregistration.contrib.github',
     'socialregistration.contrib.facebook',
+    'socialregistration.contrib.foursquare',
     'example.app',
 )
 
@@ -153,6 +154,7 @@ AUTHENTICATION_BACKENDS = (
     'socialregistration.contrib.linkedin.auth.LinkedInAuth',
     'socialregistration.contrib.github.auth.GithubAuth',
     'socialregistration.contrib.facebook.auth.FacebookAuth',
+    'socialregistration.contrib.foursquare.auth.FoursquareAuth',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -189,8 +191,13 @@ LINKEDIN_CONSUMER_SECRET_KEY = ''
 
 # Add your Github API keys here
 GITHUB_CLIENT_ID = ''
-GITHUB_SECRET = ''
+GITHUB_CLIENT_SECRET = ''
 GITHUB_REQUEST_PERMISSIONS = ''
+
+# Add your Foursquare API keys here
+FOURSQUARE_CLIENT_ID = ''
+FOURSQUARE_CLIENT_SECRET = ''
+FOURSQUARE_REQUEST_PERMISSIONS = ''
 
 
 SOCIALREGISTRATION_USE_HTTPS = False

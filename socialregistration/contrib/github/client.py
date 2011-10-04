@@ -7,7 +7,7 @@ import json
 
 class Github(OAuth2):
     client_id = getattr(settings, 'GITHUB_CLIENT_ID', '')
-    secret = getattr(settings, 'GITHUB_SECRET', '')
+    secret = getattr(settings, 'GITHUB_CLIENT_SECRET', '')
     scope = getattr(settings, 'GITHUB_REQUEST_PERMISSIONS', '')
     
     auth_url = 'https://github.com/login/oauth/authorize'
@@ -24,7 +24,7 @@ class Github(OAuth2):
         
     def get_user_info(self):
         if self._user_info is None:
-            resp, content =  self.request('https://api.github.com/user')
+            resp, content = self.request('https://api.github.com/user')
             self._user_info = json.loads(content)
         return self._user_info
     

@@ -120,16 +120,16 @@ class OAuth2(Client):
     
     _access_token = None
     
-    def __init__(self, access_token = None):
+    def __init__(self, access_token=None):
         self._access_token = access_token
     
     def client(self):
         return httplib2.Http()
     
-    def get_redirect_url(self,state = ''):
+    def get_redirect_url(self, state=''):
         params = {
             'response_type': 'code',
-            'client_id': self.client_id, 
+            'client_id': self.client_id,
             'redirect_uri': self.get_callback_url(),
             'scope': self.scope or '',
             'state': state,
@@ -137,48 +137,55 @@ class OAuth2(Client):
         
         return '%s?%s' % (self.auth_url, urllib.urlencode(params))
     
-    def _get_access_token(self, code):
-        params = {
+    def parse_access_token(self, content):
+        return dict(urlparse.parse_qsl(content))
+
+    def request_access_token(self, params):
+        return self.request(self.access_token_url, method="POST", params=params)
+    
+    def _get_access_token(self, code, **params):
+        params.update({
             'code': code,
             'client_id': self.client_id,
             'client_secret': self.secret,
             'redirect_uri': self.get_callback_url(),
-        }
+        })
         
-        resp, content = self.request(self.access_token_url, method = "POST",
-            params = params)
+        resp, content = self.request_access_token(params=params)
         
-        content = dict(urlparse.parse_qsl(content))
+        content = self.parse_access_token(content)
         
         if 'error' in content:
             raise OAuthError(_(
-                "Received error while obtaining access token from %s: %s") %( 
+                "Received error while obtaining access token from %s: %s") % (
                     self.access_token_url, content['error']))
 
         return content
     
-    def get_access_token(self, code = None):
+    def get_access_token(self, code=None, **params):
         if self._access_token is None:
             if code is None:
                 raise ValueError(_('Invalid code.'))
-            self._access_token = self._get_access_token(code)['access_token']
-        
+            self._access_token = self._get_access_token(code, **params)['access_token']
         return self._access_token
     
     def complete(self, GET):
-        return self.get_access_token(GET.get('code'))        
+        return self.get_access_token(code=GET.get('code'))        
+
+    def get_signing_params(self):
+        return dict(access_token=self._access_token)
         
-    def request(self, url, method = "GET", params = None, headers = None):
+    def request(self, url, method="GET", params=None, headers=None):
         params = params or {}
         headers = headers or {}
         
-        params.update(access_token = self._access_token)
+        params.update(self.get_signing_params())
         
         if method.upper() == "GET":
             url = '%s?%s' % (url, urllib.urlencode(params))
-            return self.client().request(url, method = method, headers = headers)
-        return self.client().request(url, method, body = urllib.urlencode(params),
-            headers = headers)
+            return self.client().request(url, method=method, headers=headers)
+        return self.client().request(url, method, body=urllib.urlencode(params),
+            headers=headers)
         
     def get_user_info(self):
         raise NotImplementedError

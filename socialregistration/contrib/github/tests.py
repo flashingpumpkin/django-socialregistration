@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from socialregistration.contrib.github.models import GithubProfile
@@ -30,3 +31,7 @@ class TestGithub(OAuth2Test, TestCase):
     
     def create_profile(self, user):
         GithubProfile.objects.create(user=user, github='123')
+
+class TestAuthenticationBackend(TestCase):
+    def test_authentication_backend_should_be_configured_in_settings(self):
+        self.assertTrue('socialregistration.contrib.github.auth.GithubAuth' in settings.AUTHENTICATION_BACKENDS)

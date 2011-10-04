@@ -38,6 +38,11 @@ def get_mock_func(func):
 
 
 class OAuthTest(object):
+    """
+    Mixin for OAuth tests. This does not go out to the services that we're 
+    testing but mocks instead the responses we *should* get back.
+    """
+    
     def get_redirect_url(self):
         raise NotImplementedError
     
@@ -48,12 +53,26 @@ class OAuthTest(object):
         raise NotImplementedError
     
     def get_redirect_mock_response(self, *args, **kwargs):
+        """
+        If the redirect view does any requests, this is the method that returns
+        the mocked response. In case of OAuth1 this will be the request token
+        response.
+        """
         raise NotImplementedError
     
     def get_callback_mock_response(self, *args, **kwargs):
+        """
+        If the callback view does any request, this is the method that returns
+        the mocked response. In case of OAuth{1,2} this will be the access token.
+        """
         raise NotImplementedError
     
     def get_setup_callback_mock_response(self, *args, **kwargs):
+        """
+        If the setup callback view does any requests, this is the method that
+        returns the mocked response. In case of OAuth{1,2} this will be the 
+        user information that we'll be authenticating with.
+        """
         raise NotImplementedError
     
     def create_profile(self):

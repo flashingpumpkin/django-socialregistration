@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from socialregistration.contrib.linkedin.models import LinkedInProfile
@@ -37,3 +38,8 @@ class TestLinkedIn(OAuthTest, TestCase):
     
     def create_profile(self, user):
         LinkedInProfile.objects.create(user=user, linkedin_id='123')
+
+
+class TestAuthenticationBackend(TestCase):
+    def test_authentication_backend_should_be_configured_in_settings(self):
+        self.assertTrue('socialregistration.contrib.linkedin.auth.LinkedInAuth' in settings.AUTHENTICATION_BACKENDS)

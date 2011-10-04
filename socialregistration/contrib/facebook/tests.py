@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from socialregistration.contrib.facebook.models import FacebookProfile
@@ -49,3 +50,7 @@ class TestFacebook(OAuth2Test, TestCase):
         MockFacebook.side_effect = get_mock_func(self.get_facebook_data)
         response = self.client.get(self.get_setup_callback_url())
         return response
+
+class TestAuthenticationBackend(TestCase):
+    def test_authentication_backend_should_be_configured_in_settings(self):
+        self.assertTrue('socialregistration.contrib.facebook.auth.FacebookAuth' in settings.AUTHENTICATION_BACKENDS)

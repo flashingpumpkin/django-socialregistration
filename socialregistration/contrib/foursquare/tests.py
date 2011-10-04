@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from socialregistration.contrib.foursquare.models import FoursquareProfile
@@ -34,3 +35,6 @@ class TestFoursquare(OAuth2Test, TestCase):
         FoursquareProfile.objects.create(user=user, foursquare='123')
 
     
+class TestAuthenticationBackend(TestCase):
+    def test_authentication_backend_should_be_configured_in_settings(self):
+        self.assertTrue('socialregistration.contrib.foursquare.auth.FoursquareAuth' in settings.AUTHENTICATION_BACKENDS)

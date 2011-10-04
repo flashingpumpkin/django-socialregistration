@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from socialregistration.contrib.tumblr.models import TumblrProfile
@@ -39,3 +40,7 @@ class TestTumblr(OAuthTest, TestCase):
 
     def create_profile(self, user):
         TumblrProfile.objects.create(user=user, tumblr='123')
+
+class TestAuthenticationBackend(TestCase):
+    def test_authentication_backend_should_be_configured_in_settings(self):
+        self.assertTrue('socialregistration.contrib.tumblr.auth.TumblrAuth' in settings.AUTHENTICATION_BACKENDS)

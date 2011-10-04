@@ -6,3 +6,4 @@ build/
 dist/
 
 example/localhost.py
+docs/_build/

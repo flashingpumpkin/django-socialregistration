@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-from setuptools import setup,find_packages
+from setuptools import setup, find_packages
+import socialregistration
 
 METADATA = dict(
     name='django-socialregistration',
-    version='0.4.6',
+    version=socialregistration.__version__,
     author='Alen Mujezinovic',
     author_email='alen@caffeinehit.com',
     description='Django application enabling registration through a variety of APIs',
@@ -22,7 +23,7 @@ METADATA = dict(
         'Programming Language :: Python',
         'Framework :: Django',
     ],
-    zip_safe = False,
+    zip_safe=False,
     packages=find_packages(),
     package_data={'socialregistration': ['templates/socialregistration/*.html'], }
 )

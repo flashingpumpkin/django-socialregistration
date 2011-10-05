@@ -2,17 +2,12 @@
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    installation.rst
    services.rst
+   api.rst
    settings.rst
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+Proudly sponsored by `Caffeinehit Ltd <http://www.caffeinehit.com/>`_. Hit us
+up if you need stuff done.

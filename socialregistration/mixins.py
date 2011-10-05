@@ -60,29 +60,35 @@ class CommonMixin(TemplateResponseMixin):
             
     def redirect(self, request):
         """
-        Redirect the user back to the `next` session/request variable.
+        Redirect the user back to the ``next`` session/request variable.
         """
         return HttpResponseRedirect(self.get_next(request))
 
 class ClientMixin(object):
     """
-    Views such as `OAuthRedirectView` require a client to work with. This is
+    Views such as ``OAuthRedirectView`` require a client to work with. This is
     the interface to it.
+
     """
-    # The client class we'll be working with
+    #: The client class we'll be working with
     client = None
 
     def get_client(self):
+        """
+        Return the client class or raise an ``AttributeError`` if 
+        ``self.client`` is not set.
+        """
         if self.client is None:
             raise AttributeError('`self.client` is `None`')
         return self.client
 
 class ProfileMixin(object):
     """
-    Views such as `SetupCallback` require a profile model to work with. This is
+    Views such as ``SetupCallback`` require a profile model to work with. This is
     the interface to it.
+
     """
-    # The profile model that we'll be working with
+    #: The profile model that we'll be working with
     profile = None
         
     def get_lookup_kwargs(self, request, client):
@@ -92,14 +98,29 @@ class ProfileMixin(object):
         raise NotImplementedError    
     
     def get_model(self):
+        """
+        Return the profile model or raise an ``AttributeError``
+        if ``self.profile`` is not set.
+        """
         if self.profile is None:
             raise AttributeError('`self.profile` is `None`')
         return self.profile
 
     def create_user(self):
+        """
+        Create and return an empty user model.
+        """
         return User()
 
     def create_profile(self, user, save=False, **kwargs):
+        """
+        Create a profile model.
+
+        :param user: A user object
+        :param save: If this is set, the profile will 
+            be saved to DB straight away
+        :type save: bool
+        """
         profile = self.get_model()(user=user, **kwargs)
         
         if save:
@@ -108,9 +129,19 @@ class ProfileMixin(object):
         return profile
     
     def get_profile(self, **kwargs):
+        """
+        Return a profile object
+        """
         return self.get_model().objects.get(**kwargs)
         
     def get_or_create_profile(self, user, save=False, **kwargs):
+        """
+        Return a profile from DB or if there is none, create a new one.
+
+        :param user: A user object
+        :param save: If set, a new profile will be saved.
+        :type save: bool
+        """
         try:
             profile = self.get_model().objects.get(user=user, **kwargs)
             return profile, False
@@ -126,21 +157,36 @@ class SessionMixin(object):
     """
     
     def store_profile(self, request, profile):
+        """
+        Store the profile data to the session
+        """
         request.session['%sprofile' % SESSION_KEY] = profile
     
     def store_user(self, request, user):
+        """
+        Store the user data to the session
+        """
         request.session['%suser' % SESSION_KEY] = user
     
     def store_client(self, request, client):
+        """
+        Store the client to the session
+        """
         request.session['%sclient' % SESSION_KEY] = client
         
     def get_session_data(self, request):
+        """
+        Return a tuple ``(user, profile, client)`` from the session.
+        """
         user = request.session['%suser' % SESSION_KEY]
         profile = request.session['%sprofile' % SESSION_KEY]
         client = request.session['%sclient' % SESSION_KEY]
         return user, profile, client
     
     def delete_session_data(self, request):
+        """
+        Clear all session data.
+        """
         del request.session['%suser' % SESSION_KEY]
         del request.session['%sprofile' % SESSION_KEY]
         del request.session['%sclient' % SESSION_KEY] 

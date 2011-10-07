@@ -142,9 +142,11 @@ class OpenID(object):
 
     def complete(self):
         self.result = self.consumer.complete(
-            dict(self.request.GET.items()),
+            # When a message is sent as a POST, OpenID parameters MUST only be
+            # sent in, and extracted from, the POST body.
+            dict(self.request.POST.items() if 'POST' == self.request.method else self.request.GET.items()),
             'http%s://%s%s' % (_https(), Site.objects.get_current(),
-                self.request.path)
+                self.request.get_full_path())
         )
 
     def is_valid(self):

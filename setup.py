@@ -11,7 +11,7 @@ METADATA = dict(
     long_description=open('README.rst').read(),
     url='http://github.com/flashingpumpkin/django-socialregistration',
     keywords='django facebook twitter oauth openid registration',
-    install_requires=['oauth2', 'python-openid'],
+    install_requires=['oauth2', 'python-openid', 'mock'],
     include_package_data=True,
     classifiers=[
         'Development Status :: 4 - Beta',

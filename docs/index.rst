@@ -9,5 +9,4 @@
    api.rst
    settings.rst
 
-Proudly sponsored by `Caffeinehit Ltd <http://www.caffeinehit.com/>`_. Hit us
-up if you need stuff done.
+Made by `Caffeinehit Ltd <http://www.caffeinehit.com/>`_. 

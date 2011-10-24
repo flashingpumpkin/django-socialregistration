@@ -27,7 +27,7 @@ The most basic configuration is to add ``socialregistration`` and
 
 	INSTALLED_APPS = (
         'django.contrib.sites',
-		'socialregistration'
+        'socialregistration'
 	)
 
 .. note::
@@ -52,11 +52,11 @@ Note on sessions
 ================
 
 When starting the registration process, all the user's temporary data is stored
-in the user's session. If you're developing on `http://127.0.0.1:8000`_, you will
-have to set your callback URLs to use `http://127.0.0.1:8000`_ too or you will get
+in the user's session. If you're developing on http://127.0.0.1:8000, you will
+have to set your callback URLs to begin with http://127.0.0.1:8000 too or you will get
 a new session when returning to the site and socialregistration won't be able
 to find the temporary data and subsequently throw a ``KeyError``.
 
-Also not that Twitter for example will not accept `http://localhost:8000`_ as a
-valid domain for the callback URL so you'll have to use `http://127.0.0.1:8000`_
+Also not that Twitter for example will not accept http://localhost:8000 as a
+valid domain for the callback URL so you'll have to use http://127.0.0.1:8000
 when developing your site.

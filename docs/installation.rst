@@ -30,7 +30,7 @@ The most basic configuration is to add ``socialregistration`` and
 		'socialregistration'
 	)
 
-..note::
+.. note::
 
     To make sure that your redirects and callbacks work properly you'll have to set
     the domain in the `Sites app <https://docs.djangoproject.com/en/1.3/ref/contrib/sites/>`_

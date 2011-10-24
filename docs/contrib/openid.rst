@@ -10,6 +10,16 @@ OpenID
 		'socialregistration.contrib.openid'
 	)
 
+
+- Add ``socialregistration.contrib.openid.auth.OpenIDAuth`` to your ``AUTHENTICATION_BACKENDS``
+
+::
+
+    AUTHENTICATION_BACKENDS = (
+        'django.contrib.auth.backends.ModelBackend',
+        'socialregistration.contrib.openid.auth.OpenIDAuth',
+    )
+
 - Anywhere in your templates:
 
 ::

@@ -10,6 +10,15 @@ Twitter
 		'socialregistration.contrib.twitter'
 	)
 
+- Add ``socialregistration.contrib.twitter.auth.TwitterAuth`` to your ``AUTHENTICATION_BACKENDS``
+
+::
+
+	AUTHENTICATION_BACKENDS = (
+		'django.contrib.auth.backends.ModelBackend',
+		'socialregistration.contrib.twitter.auth.TwitterAuth',
+	)
+
 - Add your API keys:
 
 ::

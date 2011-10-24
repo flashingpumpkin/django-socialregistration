@@ -10,6 +10,16 @@ Foursquare
 		'socialregistration.contrib.foursquare'
 	)
 
+
+- Add ``socialregistration.contrib.foursquare.auth.FoursquareAuth`` to your ``AUTHENTICATION_BACKENDS``
+
+::
+
+	AUTHENTICATION_BACKENDS = (
+		'django.contrib.auth.backends.ModelBackend',
+		'socialregistration.contrib.foursquare.auth.FoursquareAuth',
+	)
+
 - Add your API keys and (comma seperated) permissions you request:
 
 ::

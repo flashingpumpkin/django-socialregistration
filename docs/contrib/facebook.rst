@@ -10,6 +10,16 @@ Facebook
 		'socialregistration.contrib.facebook'
 	)
 
+
+- Add ``socialregistration.contrib.facebook.auth.FacebookAuth`` to your ``AUTHENTICATION_BACKENDS``
+
+::
+
+	AUTHENTICATION_BACKENDS = (
+		'django.contrib.auth.backends.ModelBackend',
+		'socialregistration.contrib.facebook.auth.FacebookAuth',
+	)
+
 - Add your API keys and (comma seperated) permissions you request:
 
 ::

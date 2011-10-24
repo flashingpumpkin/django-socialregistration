@@ -10,6 +10,16 @@ Github
 		'socialregistration.contrib.github'
 	)
 
+
+- Add ``socialregistration.contrib.github.auth.GithubAuth`` to your ``AUTHENTICATION_BACKENDS``
+
+::
+
+	AUTHENTICATION_BACKENDS = (
+		'django.contrib.auth.backends.ModelBackend',
+		'socialregistration.contrib.github.auth.GithubAuth',
+	)
+
 - Add your API keys and (comma seperated) permissions you request:
 
 ::

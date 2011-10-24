@@ -10,6 +10,16 @@ LinkedIn
 		'socialregistration.contrib.linkedin'
 	)
 
+
+- Add ``socialregistration.contrib.linkedin.auth.LinkedInAuth`` to your ``AUTHENTICATION_BACKENDS``
+
+::
+
+	AUTHENTICATION_BACKENDS = (
+		'django.contrib.auth.backends.ModelBackend',
+		'socialregistration.contrib.linkedin.auth.LinkedInAuth',
+	)
+
 - Add your API keys:
 
 ::

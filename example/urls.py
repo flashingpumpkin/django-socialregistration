@@ -6,6 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^social/', include('socialregistration.urls')),
+    url(r'^social/', include('socialregistration.urls',
+        namespace='socialregistration')),
     url(r'^$', 'example.app.views.index', name='index'),
 )

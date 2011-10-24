@@ -112,6 +112,13 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'socialregistration',
+    'socialregistration.contrib.openid',
+    'socialregistration.contrib.twitter',
+    'socialregistration.contrib.linkedin',
+    'socialregistration.contrib.github',
+    'socialregistration.contrib.facebook',
+    'socialregistration.contrib.foursquare',
+    'socialregistration.contrib.tumblr',
     'example.app',
 )
 
@@ -143,10 +150,13 @@ LOGGING = {
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'socialregistration.auth.FacebookAuth',
-    'socialregistration.auth.TwitterAuth',
-    'socialregistration.auth.LinkedInAuth',
-    'socialregistration.auth.OpenIDAuth',
+    'socialregistration.contrib.openid.auth.OpenIDAuth',
+    'socialregistration.contrib.twitter.auth.TwitterAuth',
+    'socialregistration.contrib.linkedin.auth.LinkedInAuth',
+    'socialregistration.contrib.github.auth.GithubAuth',
+    'socialregistration.contrib.facebook.auth.FacebookAuth',
+    'socialregistration.contrib.foursquare.auth.FoursquareAuth',
+    'socialregistration.contrib.tumblr.auth.TumblrAuth',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -155,7 +165,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'socialregistration.middleware.FacebookMiddleware',
+    'socialregistration.contrib.facebook.middleware.FacebookMiddleware',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -170,24 +180,30 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 # Add your Facebook API keys here
 FACEBOOK_APP_ID = ''
-FACEBOOK_API_KEY = ''
 FACEBOOK_SECRET_KEY = ''
-FACEBOOK_REQUEST_PERMISSIONS = 'email,user_about_me'
+FACEBOOK_REQUEST_PERMISSIONS = ''
 
 # Add your Twitter API keys here
 TWITTER_CONSUMER_KEY = ''
 TWITTER_CONSUMER_SECRET_KEY = ''
-TWITTER_REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
-TWITTER_ACCESS_TOKEN_URL = 'https://api.twitter.com/oauth/access_token'
-TWITTER_AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authenticate'
 
 # Add your LinkedIn API keys here
 LINKEDIN_CONSUMER_KEY = ''
 LINKEDIN_CONSUMER_SECRET_KEY = ''
-LINKEDIN_REQUEST_TOKEN_URL = 'https://api.linkedin.com/uas/oauth/requestToken'
-LINKEDIN_ACCESS_TOKEN_URL = 'https://api.linkedin.com/uas/oauth/accessToken'
-LINKEDIN_AUTHORIZATION_URL = 'https://www.linkedin.com/uas/oauth/authenticate'
 
+# Add your Github API keys here
+GITHUB_CLIENT_ID = ''
+GITHUB_CLIENT_SECRET = ''
+GITHUB_REQUEST_PERMISSIONS = ''
+
+# Add your Foursquare API keys here
+FOURSQUARE_CLIENT_ID = ''
+FOURSQUARE_CLIENT_SECRET = ''
+FOURSQUARE_REQUEST_PERMISSIONS = ''
+
+# Add your tumblr API keys here
+TUMBLR_CONSUMER_KEY = ''
+TUMBLR_CONSUMER_SECRET_KEY = ''
 
 SOCIALREGISTRATION_USE_HTTPS = False
 SOCIALREGISTRATION_GENERATE_USERNAME = False

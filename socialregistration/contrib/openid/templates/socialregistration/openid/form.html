@@ -1,0 +1,16 @@
+<form action="{% url socialregistration:openid:redirect %}" method="post">
+	{% csrf_token %}
+
+	{% if provider %}
+		<input type="hidden" name="openid_provider" value="{{ provider }}" />
+    {% else %}
+    	<input type="text" name="openid_provider" />
+    {% endif %}
+    
+    {% if button %}
+    	<input type="image" onclick="this.form.submit();" src="{{ button }}" />
+    {% else %}
+    	<input type="submit" value="Connect with OpenID" />
+    {% endif %}
+    
+</form>

@@ -1,0 +1,11 @@
+<form action="{% url socialregistration:foursquare:redirect %}" method="post">
+    {% csrf_token %}
+    {% if next %}
+        <input type="hidden" name="next" value="{{ next }}" />
+    {% endif %}
+    {% if button %}
+    	<input type="image" onclick="this.form.submit();" src="{{ button }}" />
+    {% else %}
+    	<input type="submit" value="Sign in with Foursquare" />
+    {% endif %}
+</form>

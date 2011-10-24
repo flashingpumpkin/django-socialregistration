@@ -1,14 +1,13 @@
-{% load socialregistration_tags %}
 <h1>Setup</h1>
 
 {% if error %}
-	<p>Your session timed out. Please try again.</p>
+	<p>{{ error }}</p>
 {% else %}
 	<form action="." method="post">
 	    <table>
 	        {{ form }}
 	    </table>
-	    {% social_csrf_token %}
+	    {% csrf_token %}
 	    <input type="submit" value="save" />
 	</form>
 {% endif %}

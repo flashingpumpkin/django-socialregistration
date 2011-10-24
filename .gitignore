@@ -5,3 +5,5 @@ django_socialregistration.egg-info
 build/
 dist/
 
+example/localhost.py
+docs/_build/

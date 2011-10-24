@@ -1,393 +1,284 @@
-import uuid
-
 from django.conf import settings
-from django.template import RequestContext
+from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response
-from django.utils.translation import gettext as _
 from django.http import HttpResponseRedirect
+from django.views.generic.base import View
+from django.utils.translation import ugettext_lazy as _
+from socialregistration.clients.oauth import OAuthError
+from socialregistration.mixins import SocialRegistration
 
-try:
-    from django.views.decorators.csrf import csrf_protect
-    has_csrf = True
-except ImportError:
-    has_csrf = False
+GENERATE_USERNAME = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False)
 
-from django.contrib.auth.models import User
-from django.contrib.auth import login, authenticate, logout as auth_logout
-from django.contrib.sites.models import Site
+USERNAME_FUNCTION = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME_FUNCTION',
+    'socialregistration.utils.generate_username')
 
-from socialregistration.forms import UserForm
-from socialregistration.utils import (OAuthClient, OAuthTwitter,
-    OpenID, _https, DiscoveryFailure)
-from socialregistration.models import FacebookProfile, TwitterProfile, LinkedInProfile, OpenIDProfile
-from socialregistration import signals 
+FORM_CLASS = getattr(settings, 'SOCIALREGISTRATION_SETUP_FORM',
+    'socialregistration.forms.UserForm')
+
+INITAL_DATA_FUNCTION = getattr(settings, 'SOCIALREGISTRATION_INITIAL_DATA_FUNCTION',
+    None)
 
 
-FB_ERROR = _('We couldn\'t validate your Facebook credentials')
-
-GENERATE_USERNAME = bool(getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False))
-
-def _get_next(request):
+class Setup(SocialRegistration, View):
     """
-    Returns a url to redirect to after the login
+    Setup view to create new Django users from third party APIs.
     """
-    if 'next' in request.session:
-        next = request.session['next']
-        del request.session['next']
-        return next
-    elif 'next' in request.GET:
-        return request.GET.get('next')
-    elif 'next' in request.POST:
-        return request.POST.get('next')
-    else:
-        return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+    template_name = 'socialregistration/setup.html'
 
-def _login(request, user, profile, client):
-    # we need to persist 'next' across the call to login() as
-    # it appears to reset the session data.
-    next = request.session.get('next')
-    login(request, user)
-    if next:
-        request.session['next'] = next
-    signals.login.send(sender = profile.__class__, 
-                                  user = user,
-                                  profile = profile, 
-                                  client = client)
-
-def _connect(user, profile, client):
-    signals.connect.send(sender = profile.__class__,
-                                    user = user,
-                                    profile = profile,
-                                    client = client)
-
-def setup(request, template='socialregistration/setup.html',
-    form_class=UserForm, extra_context=dict(), initial=dict()):
-    """
-    Setup view to create a username & set email address after authentication
-    """
-    try:
-        social_user = request.session['socialregistration_user']
-        social_profile = request.session['socialregistration_profile']
-        social_client = request.session['socialregistration_client']
-    except KeyError:
-        return render_to_response(
-            template, dict(error=True), context_instance=RequestContext(request))
-
-    if GENERATE_USERNAME:
-        social_user.username = str(uuid.uuid4())[:30]
-        social_user.save()
-
-        social_profile.user = social_user
-        social_profile.save()
-
-        user = social_profile.authenticate()
-
-    else:
-        if not request.method == "POST":
-            form = form_class(social_user, social_profile, initial=initial)
-            extra_context.update({'form': form})
-            return render_to_response(template, extra_context,
-                                      context_instance = RequestContext(request))
-
-        form = form_class(social_user, social_profile, request.POST, initial=initial)
-
-        if form.is_valid():
-            form.save(request = request)
-            user = form.profile.authenticate()
-            
-        else:
-            extra_context.update({'form': form})
-            return render_to_response(template, extra_context,
-                                      context_instance = RequestContext(request))
+    def get_form(self):
+        """
+        Return the form to be used. The return form is controlled
+        with ``SOCIALREGISTRATION_SETUP_FORM``.
+        """
+        return self.import_attribute(FORM_CLASS)
     
-    social_client.request = request
-     
-    # Removing unused bits. It's important to remove the
-    # client from the session because the session gets written
-    # to the storage on login and the client holds the request,
-    # which is going to fail. Might be worth to change the 
-    # clients to not hold the whole request.
-    if 'socialregistration_user' in request.session:
-        del request.session['socialregistration_user']
-    if 'socialregistration_profile' in request.session:
-        del request.session['socialregistration_profile']
-    if 'socialregistration_client' in request.session:
-        del request.session['socialregistration_client']
+    def get_username_function(self):
+        """
+        Return a function that can generate a username. The function
+        is controlled with ``SOCIALREGISTRATION_GENERATE_USERNAME_FUNCTION``.
+        """
+        return self.import_attribute(USERNAME_FUNCTION)
+    
+    def get_initial_data(self, request, user, profile, client):
+        """
+        Return initial data for the setup form. The function can be
+        controlled with ``SOCIALREGISTRATION_INITIAL_DATA_FUNCTION``.
 
-    _connect(user, social_profile, social_client)
-    _login(request, user, social_profile, social_client)
+        :param request: The current request object
+        :param user: The unsaved user object
+        :param profile: The unsaved profile object
+        :param client: The API client
+        """
+        if INITAL_DATA_FUNCTION:
+            func = self.import_attribute(INITAL_DATA_FUNCTION)
+            return func(request, user, profile, client)
+        return {}
 
-    return HttpResponseRedirect(_get_next(request))
+    def generate_username_and_redirect(self, request, user, profile, client):
+        """
+        Generate a username and then redirect the user to the correct place.
+        This method is called when ``SOCIALREGISTRATION_GENERATE_USERNAME`` 
+        is set. 
 
-
-if has_csrf:
-    setup = csrf_protect(setup)
-
-def facebook_login(request, template='socialregistration/facebook.html',
-    extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html'):
-    """
-    View to handle the Facebook login
-    """
-
-    if not hasattr(request.facebook, 'uid'):
-        extra_context.update(dict(error=FB_ERROR))
-        return render_to_response(template, extra_context,
-            context_instance=RequestContext(request))
-
-    user = authenticate(uid=request.facebook.uid)
-
-    if user is None:
-        request.session['socialregistration_user'] = User()
-        request.session['socialregistration_profile'] = FacebookProfile(uid=request.facebook.uid)
-        request.session['socialregistration_client'] = request.facebook
-        request.session['next'] = _get_next(request)
-        return HttpResponseRedirect(reverse('socialregistration_setup'))
-
-    if not user.is_active:
-        return render_to_response(account_inactive_template, extra_context,
-            context_instance=RequestContext(request))
-
-    request.facebook.request = request
-    _login(request, user, FacebookProfile.objects.get(user = user), request.facebook)
-
-    return HttpResponseRedirect(_get_next(request))
-
-def facebook_connect(request, template='socialregistration/facebook.html',
-    extra_context=dict()):
-    """
-    View to handle connecting existing django accounts with facebook
-    """
-    if request.facebook.uid is None or request.user.is_authenticated() is False:
-        extra_context.update(dict(error=FB_ERROR))
-        return render_to_response(template, extra_context,
-            context_instance=RequestContext(request))
-
-    try:
-        profile = FacebookProfile.objects.get(uid=request.facebook.uid)
-    except FacebookProfile.DoesNotExist:
-        profile = FacebookProfile.objects.create(user=request.user,
-            uid=request.facebook.uid)
-        request.facebook.request = request
-        _connect(request.user, profile, request.facebook)
-
-    return HttpResponseRedirect(_get_next(request))
-
-def logout(request, redirect_url=None):
-    """
-    Logs the user out of django. This is only a wrapper around
-    django.contrib.auth.logout. Logging users out of Facebook for instance
-    should be done like described in the developer wiki on facebook.
-    http://wiki.developers.facebook.com/index.php/Connect/Authorization_Websites#Logging_Out_Users
-    """
-    auth_logout(request)
-
-    url = redirect_url or getattr(settings, 'LOGOUT_REDIRECT_URL', '/')
-
-    return HttpResponseRedirect(url)
-
-def twitter(request, account_inactive_template='socialregistration/account_inactive.html',
-    extra_context=dict(), client_class=None):
-    """
-    Actually setup/login an account relating to a twitter user after the oauth
-    process is finished successfully
-    """
-    client = client_class(
-        request, settings.TWITTER_CONSUMER_KEY,
-        settings.TWITTER_CONSUMER_SECRET_KEY,
-        settings.TWITTER_REQUEST_TOKEN_URL,
-    )
-
-    user_info = client.get_user_info()
-
-    if request.user.is_authenticated():
-        # Handling already logged in users connecting their accounts
+        :param request: The current request object
+        :param user: The unsaved user object
+        :param profile: The unsaved profile object
+        :param client: The API client
+        """
+        func = self.get_username_function()
+        
+        user.username = func(user, profile, client)
+        user.save()
+        
+        profile.user = user
+        profile.save()
+        
+        user = profile.authenticate()
+        
+        self.send_connect_signal(request, user, profile, client)
+        
+        self.login(request, user)
+        
+        self.send_login_signal(request, user, profile, client)
+        
+        self.delete_session_data(request)
+        
+        return HttpResponseRedirect(self.get_next(request))
+        
+    def get(self, request):
+        """
+        When signing a new user up - either display a setup form, or
+        generate the username automatically.
+        """
         try:
-            profile = TwitterProfile.objects.get(twitter_id=user_info['id'])
-        except TwitterProfile.DoesNotExist: # There can only be one profile!
-            profile = TwitterProfile.objects.create(user=request.user, twitter_id=user_info['id'])
-            _connect(request.user, profile, client)
-
-        return HttpResponseRedirect(_get_next(request))
-
-    user = authenticate(twitter_id=user_info['id'])
-
-    if user is None:
-        profile = TwitterProfile(twitter_id=user_info['id'])
-        user = User()
-        request.session['socialregistration_profile'] = profile
-        request.session['socialregistration_user'] = user
-        # Client is not pickleable with the request on it
-        client.request = None
-        request.session['socialregistration_client'] = client
-        request.session['next'] = _get_next(request)
-        return HttpResponseRedirect(reverse('socialregistration_setup'))
-
-    if not user.is_active:
-        return render_to_response(
-            account_inactive_template,
-            extra_context,
-            context_instance=RequestContext(request)
-        )
-
-    _login(request, user, TwitterProfile.objects.get(user = user), client)
-
-    return HttpResponseRedirect(_get_next(request))
-
-
-def linkedin(request, account_inactive_template='socialregistration/account_inactive.html',
-    extra_context=dict(), client_class=None):
-    """
-    Actually setup/login an account relating to a linkedin user after the oauth
-    process is finished successfully
-    """
-    client = client_class(
-        request, settings.LINKEDIN_CONSUMER_KEY,
-        settings.LINKEDIN_CONSUMER_SECRET_KEY,
-        settings.LINKEDIN_REQUEST_TOKEN_URL,
-    )
-
-    user_info = client.get_user_info()
-
-    if request.user.is_authenticated():
-        # Handling already logged in users connecting their accounts
+            user, profile, client = self.get_session_data(request)
+        except KeyError:
+            return self.render_to_response(dict(
+                error=_("Social profile is missing from your session.")))
+         
+        if GENERATE_USERNAME:
+            return self.generate_username_and_redirect(request, user, profile, client)
+            
+        form = self.get_form()(initial=self.get_initial_data(request, user, profile, client))
+        
+        return self.render_to_response(dict(form=form))
+        
+    def post(self, request):
+        """
+        Save the user and profile, login and send the right signals.
+        """
         try:
-            profile = LinkedInProfile.objects.get(linkedin_id=user_info['id'])
-        except LinkedInProfile.DoesNotExist: # There can only be one profile!
-            profile = LinkedInProfile.objects.create(user=request.user, linkedin_id=user_info['id'])
-            _connect(request.user, profile, client)
+            user, profile, client = self.get_session_data(request)
+        except KeyError:
+            return self.render_to_response(dict(
+                error=_("A social profile is missing from your session.")))
+        
+        form = self.get_form()(request.POST, request.FILES,
+            initial=self.get_initial_data(request, user, profile, client))
+        
+        if not form.is_valid():
+            return self.render_to_response(dict(form=form))
+        
+        user, profile = form.save(request, user, profile, client)
+        
+        user = profile.authenticate()
+        
+        self.send_connect_signal(request, user, profile, client)
+        
+        self.login(request, user)
+        
+        self.send_login_signal(request, user, profile, client)
+        
+        self.delete_session_data(request)
+        
+        return HttpResponseRedirect(self.get_next(request))
 
-        return HttpResponseRedirect(_get_next(request))
 
-    user = authenticate(linkedin_id=user_info['id'])
-
-    if user is None:
-        profile = LinkedInProfile(linkedin_id=user_info['id'])
-        user = User()
-        request.session['socialregistration_profile'] = profile
-        request.session['socialregistration_user'] = user
-        # Client is not pickleable with the request on it
-        client.request = None
-        request.session['socialregistration_client'] = client
-        request.session['next'] = _get_next(request)
-        return HttpResponseRedirect(reverse('socialregistration_setup'))
-
-    if not user.is_active:
-        return render_to_response(
-            account_inactive_template,
-            extra_context,
-            context_instance=RequestContext(request)
-        )
-
-    _login(request, user, LinkedInProfile.objects.get(user = user), client)
-
-    return HttpResponseRedirect(_get_next(request))
-
-def oauth_redirect(request, consumer_key=None, secret_key=None,
-    request_token_url=None, access_token_url=None, authorization_url=None,
-    callback_url=None, parameters=None, client_class = None):
+class Logout(View):
     """
-    View to handle the OAuth based authentication redirect to the service provider
+    Log the user out of Django. This **does not** log the user out
+    of third party sites.
     """
-    request.session['next'] = _get_next(request)
-    client = client_class(request, consumer_key, secret_key,
-        request_token_url, access_token_url, authorization_url, callback_url, parameters)
-    return client.get_redirect()
+    def get(self, request):
+        logout(request)
+        url = getattr(settings, 'LOGOUT_REDIRECT_URL', '/')
+        return HttpResponseRedirect(url)
 
-def oauth_callback(request, consumer_key=None, secret_key=None,
-    request_token_url=None, access_token_url=None, authorization_url=None,
-    callback_url=None, template='socialregistration/oauthcallback.html',
-    extra_context=dict(), parameters=None, client_class = None):
+
+class OAuthRedirect(SocialRegistration, View):
     """
-    View to handle final steps of OAuth based authentication where the user
-    gets redirected back to from the service provider
+    Base class for both OAuth and OAuth2 redirects.
+
+    :param client: The API client class that should be used.
+    :param template_name: The error template.
     """
-    client = client_class(request, consumer_key, secret_key, request_token_url,
-        access_token_url, authorization_url, callback_url, parameters)
+    
+    # The OAuth{1,2} client to be used
+    client = None
+    
+    # The template to render in case of errors
+    template_name = None
+    
+    def post(self, request):
+        """
+        Create a client, store it in the user's session and redirect the user
+        to the API provider to authorize our app and permissions.
+        """
+        request.session['next'] = self.get_next(request)
+        client = self.get_client()()
+        request.session[self.get_client().get_session_key()] = client
+        try:
+            return HttpResponseRedirect(client.get_redirect_url())
+        except OAuthError, error:
+            return self.render_to_response({'error': error})
 
-    extra_context.update(dict(oauth_client=client))
-    if not client.is_valid():
-        return render_to_response(
-            template, extra_context, context_instance=RequestContext(request)
-        )
 
-    # We're redirecting to the setup view for this oauth service
-    return HttpResponseRedirect(reverse(client.callback_url))
-
-def openid_redirect(request, client_class = None):
+class OAuthCallback(SocialRegistration, View):
     """
-    Redirect the user to the openid provider
-    """
-    request.session['next'] = _get_next(request)
-    request.session['openid_provider'] = request.GET.get('openid_provider')
+    Base class for OAuth and OAuth2 callback views.
 
-    client = client_class(
-        request,
-        'http%s://%s%s' % (
-            _https(),
-            Site.objects.get_current().domain,
-            reverse('openid_callback')
-        ),
-        request.GET.get('openid_provider')
-    )
-    try:
-        return client.get_redirect()
-    except DiscoveryFailure:
-        request.session['openid_error'] = True
-        return HttpResponseRedirect(settings.LOGIN_URL)
-
-def openid_callback(request, template='socialregistration/openid.html',
-    extra_context=dict(), account_inactive_template='socialregistration/account_inactive.html',
-    client_class = None):
+    :param client: The API client class that should be used.
+    :param template_name: The error template.
     """
-    Catches the user when he's redirected back from the provider to our site
-    """
-    client = client_class(
-        request,
-        'http%s://%s%s' % (
-            _https(),
-            Site.objects.get_current().domain,
-            reverse('openid_callback')
-        ),
-        request.session.get('openid_provider')
-    )
+    
+    # The OAuth{1,2} client to be used
+    client = None
+    
+    # The template to render in case of errors
+    template_name = None
+    
+    def get_redirect(self):
+        """
+        Return a URL that will set up the correct models if the 
+        OAuth flow succeeded. Subclasses **must** override this
+        method.
+        """
+        raise NotImplementedError
+    
+    def get(self, request):
+        """
+        Called after the user is redirected back to our application. 
+        Tries to:
 
-    if client.is_valid():
-        identity = client.result.identity_url
+        - Complete the OAuth / OAuth2 flow 
+        - Redirect the user to another view that deals with login, connecting
+          or user creation.
+
+        """
+        client = request.session[self.get_client().get_session_key()]
+        try:
+            client.complete(dict(request.GET.items()))
+            request.session[self.get_client().get_session_key()] = client
+            return HttpResponseRedirect(self.get_redirect())
+        except OAuthError, error:
+            return self.render_to_response({'error': error})
+
+class SetupCallback(SocialRegistration, View):
+    """
+    Base class for OAuth and OAuth2 login / connects / registration.
+    """
+    
+    def get(self, request):
+        """
+        Called after authorization was granted and the OAuth flow 
+        successfully completed. 
+        
+        Tries to:
+
+        - Connect the remote account if the user is logged in already
+        - Log the user in if a local profile of the remote account 
+          exists already
+        - Create a user and profile object if none of the above succeed
+          and redirect the user further to either capture some data via
+          form or generate a username automatically
+        """
+        
+        client = request.session[self.get_client().get_session_key()]
+        
+        # Get the lookup dictionary to find the user's profile
+        lookup_kwargs = self.get_lookup_kwargs(request, client)
+
+        # Logged in user connecting an account
         if request.user.is_authenticated():
-            # Handling already logged in users just connecting their accounts
-            try:
-                profile = OpenIDProfile.objects.get(identity=identity)
-            except OpenIDProfile.DoesNotExist: # There can only be one profile with the same identity
-                profile = OpenIDProfile.objects.create(user=request.user,
-                    identity=identity)
-                _connect(request.user, profile, client)
+            profile, created = self.get_or_create_profile(request.user,
+                save=True, **lookup_kwargs)
+            
+            # Profile already existed - just redirect where the user wanted to
+            # go
+            if not created:
+                return self.redirect(request)
+            
+            # Profile didn't exist - store the profile, send the connect signal
+            # and redirect where the user wanted to go
+            self.send_connect_signal(request, request.user, profile, client)
+            
+            return self.redirect(request)
 
-            return HttpResponseRedirect(_get_next(request))
-
-        user = authenticate(identity=identity)
+        # Logged out user - let's see if we've got the identity saved already.
+        # If so - just log the user in. If not, create profile and redirect
+        # to the setup view 
+        user = self.authenticate(**lookup_kwargs)
+        
+        # No user existing - create a new one and redirect to the final setup view
         if user is None:
-            request.session['socialregistration_user'] = User()
-            request.session['socialregistration_profile'] = OpenIDProfile(
-                identity=identity
-            )
-            # Client is not pickleable with the request on it
-            client.request = None
-            request.session['socialregistration_client'] = client
-            return HttpResponseRedirect(reverse('socialregistration_setup'))
+            user = self.create_user()
+            profile = self.create_profile(user, **lookup_kwargs)
+            
+            self.store_user(request, user)
+            self.store_profile(request, profile)
+            self.store_client(request, client)
+            
+            return HttpResponseRedirect(reverse('socialregistration:setup'))
 
+        # Inactive user - displaying an error message.
         if not user.is_active:
-            return render_to_response(
-                account_inactive_template,
-                extra_context,
-                context_instance=RequestContext(request)
-            )
-
-        _login(request, user, OpenIDProfile.objects.get(user = user), client)
-        return HttpResponseRedirect(_get_next(request))
-
-    return render_to_response(
-        template,
-        dict(),
-        context_instance=RequestContext(request)
-    )
+            return self.inactive_response()
+        
+        # Active user with existing profile: login, send signal and redirect
+        self.login(request, user)
+        
+        profile = self.get_profile(user=user, **lookup_kwargs)
+        
+        self.send_login_signal(request, user, profile, client)
+        
+        return self.redirect(request)

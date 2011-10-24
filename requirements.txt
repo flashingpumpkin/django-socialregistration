@@ -1,4 +1,1 @@
-oauth2
-python-openid
-
--e git+https://github.com/pythonforfacebook/facebook-sdk#egg=facebook-sdk
+-e git+https://github.com/facebook/python-sdk.git#egg=Facebook

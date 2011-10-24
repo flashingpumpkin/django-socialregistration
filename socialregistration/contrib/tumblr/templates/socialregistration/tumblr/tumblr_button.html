@@ -1,0 +1,7 @@
+<form class="connect-button" name="login" method="post" action="{% url socialregistration:tumblr:redirect %}">
+{% csrf_token %}
+{% if next %}
+    <input type="hidden" name="next" value="{{ next }}" />
+{% endif %}
+<input type="image" onclick="this.form.submit();" src="{% if button %}{{ button }}{% else %}http://platform.tumblr.com/v1/share_2.png{% endif %}" />
+</form>

@@ -1,9 +1,5 @@
 <html><head><title>Socialregistration example</title></head>
 <body>
-{% load facebook_tags %}
-{% load twitter_tags %}
-{% load linkedin_tags %}
-{% load openid_tags %}
 
 {% if not request.user.is_authenticated %}
 	<h1>django-socialregistration login</h2>
@@ -11,21 +7,18 @@
 	<h1>Hi, {{ request.user }}</h1>
 {% endif %}
 
+{% load facebook twitter openid linkedin github foursquare tumblr %}
 <ol>
+    <li>{% facebook_button %}</li>
+	<li>{% twitter_button %}</li>
+	<li>{% linkedin_button %}</li>
+    <li>{% github_button %}</li>
+    <li>{% foursquare_button %}</li>
+    <li>{% tumblr_button %}</li>
+	<li>{% openid_form %}</li>
 	<li>
-		{% facebook_button 'http://static.ak.fbcdn.net/rsrc.php/zB6N8/hash/4li2k73z.gif' %}
-	</li>
-	<li>
-		{% twitter_button 'https://si0.twimg.com/images/dev/buttons/sign-in-with-twitter-l.png' %}
-	</li>
-	<li>
-		{% linkedin_button 'https://developer.linkedin.com/sites/default/files/linkedin-small.png' %}
-	</li>
-	<li>
-		{% openid_form %}
-	</li>
-	<li>
-		<form action="{% url openid_redirect %}" method="GET">
+		<form action="{% url socialregistration:openid:redirect %}" method="post">
+			{% csrf_token %}
 			<input type="hidden" name="openid_provider" value="https://www.google.com/accounts/o8/id" />
 			<input type="submit" value="Sign in with Google OpenID" />
 		</form>
@@ -37,14 +30,16 @@
 <ol>
 	<li>Facebook: {{ facebook.count }}</li>
 	<li>Twitter: {{ twitter.count }}</li>
+    <li>LinkedIn: {{ linkedin.count }}</li>
+    <li>Github: {{ github.count }}</li>
+    <li>Foursquare: {{ foursquare.count }}</li>
+    <li>Tumblr: {{ tumblr.count }}</li>
 	<li>OpenID: {{ openid.count }}</li>
-	<li>LinkedIn: {{ linkedin.count }}</li>
 </ol>
 
 {% if request.user.is_authenticated %}
-	<a href="{% url social_logout %}">Logout</a>
+	<a href="{% url socialregistration:logout %}">Logout</a>
 {% endif %}
-{% facebook_js %}
 
 <p><a href="https://github.com/flashingpumpkin/django-socialregistration">Code on Github</a></p>
 </body>

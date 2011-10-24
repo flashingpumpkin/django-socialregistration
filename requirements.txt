@@ -1,1 +1,1 @@
--e git+https://github.com/facebook/python-sdk.git#egg=facebook-sdk
+-e git+https://github.com/facebook/python-sdk.git#egg=Facebook

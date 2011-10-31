@@ -278,6 +278,10 @@ class OAuth2(Client):
         Complete the OAuth2 flow by fetching an access token with the provided
         code in the GET parameters.
         """
+        if 'error' in GET:
+            raise OAuthError(
+                _("Received error while obtaining access token from %s: %s") % (
+                    self.access_token_url, GET['error']))
         return self.get_access_token(code=GET.get('code'))        
 
     def get_signing_params(self):

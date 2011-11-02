@@ -1,4 +1,4 @@
 include AUTHORS
 include LICENSE
 include README.rst
-recursive-include socialregistration/templates *.html
+recursive-include example/templates *.html

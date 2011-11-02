@@ -7,10 +7,10 @@ METADATA = dict(
     version=socialregistration.__version__,
     author='Alen Mujezinovic',
     author_email='alen@caffeinehit.com',
-    description='Django application enabling registration through a variety of APIs',
+    description='Django app providing registration through a variety of APIs',
     long_description=open('README.rst').read(),
     url='http://github.com/flashingpumpkin/django-socialregistration',
-    keywords='django facebook twitter oauth openid registration',
+    keywords='django facebook twitter oauth openid registration foursquare linkedin github oauth2',
     install_requires=['oauth2', 'python-openid', 'mock'],
     include_package_data=True,
     classifiers=[
@@ -25,9 +25,14 @@ METADATA = dict(
     ],
     zip_safe=False,
     packages=find_packages(),
-    package_data={'socialregistration': ['templates/socialregistration/*.html'], }
+    package_data={
+        'socialregistration': [
+            'templates/*',
+            'contrib/*/templates/*'
+        ]
+    }
 )
 
 if __name__ == '__main__':
     setup(**METADATA)
-    
+

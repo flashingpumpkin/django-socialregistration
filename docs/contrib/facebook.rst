@@ -26,7 +26,7 @@ Facebook
 
 	FACEBOOK_APP_ID = ''
 	FACEBOOK_SECRET_KEY = ''
-	FOURSQUARE_REQUEST_PERMISSIONS = ''
+	FACEBOOK_REQUEST_PERMISSIONS = ''
 
 - Anywhere in your templates:
 

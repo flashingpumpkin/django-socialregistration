@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.utils import importlib
 from django.views.generic.base import TemplateResponseMixin
 from socialregistration import signals
+from django.utils.translation import ugettext_lazy as _
 
 SESSION_KEY = getattr(settings, 'SOCIALREGISTRATION_SESSION_KEY', 'socialreg:')
 

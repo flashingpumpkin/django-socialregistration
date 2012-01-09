@@ -10,7 +10,8 @@ METADATA = dict(
     description='Django app providing registration through a variety of APIs',
     long_description=open('README.rst').read(),
     url='http://github.com/flashingpumpkin/django-socialregistration',
-    keywords='django facebook twitter oauth openid registration foursquare linkedin github oauth2',
+    keywords='django facebook twitter oauth openid registration foursquare '\
+        'linkedin github oauth2',
     install_requires=['oauth2', 'python-openid', 'mock'],
     include_package_data=True,
     classifiers=[
@@ -27,12 +28,12 @@ METADATA = dict(
     packages=find_packages(),
     package_data={
         'socialregistration': [
-            'templates/*',
-            'contrib/*/templates/*'
+            'templates/socialregistration/*',
+            'contrib/*/templates/socialregistration/*/templates/'\
+                'socialregistration/*/*'
         ]
     }
 )
 
 if __name__ == '__main__':
     setup(**METADATA)
-

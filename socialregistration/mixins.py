@@ -3,7 +3,9 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.utils import importlib
+from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateResponseMixin
+
 from socialregistration import signals
 from socialregistration.settings import SESSION_KEY
 

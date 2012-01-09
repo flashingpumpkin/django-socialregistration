@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth2
+from socialregistration.settings import SESSION_KEY
 import json
 import facebook
 
@@ -12,8 +13,6 @@ class Facebook(OAuth2):
     
     auth_url = 'https://www.facebook.com/dialog/oauth'
     access_token_url = 'https://graph.facebook.com/oauth/access_token'
-    
-
     
     graph = None
     _user_info = None
@@ -34,4 +33,4 @@ class Facebook(OAuth2):
     
     @staticmethod
     def get_session_key():
-        return 'socialreg:facebook'
+        return '%sfacebook' % SESSION_KEY

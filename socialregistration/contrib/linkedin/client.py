@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth
+from socialregistration.settings import SESSION_KEY
 import json
 import urlparse
 
@@ -24,13 +25,13 @@ class LinkedIn(OAuth):
             'http://%s' % Site.objects.get_current().domain,
             reverse('socialregistration:linkedin:callback'))
     
-    @staticmethod
-    def get_session_key():
-        return 'socialreg:linkedin'
-
     def get_user_info(self):
         if self._user_info is None:
             self._user_info = json.loads(
                 self.request("http://api.linkedin.com/v1/people/~:(id)?format=json"))
             
         return self._user_info
+
+    @staticmethod
+    def get_session_key():
+        return '%slinkedin' % SESSION_KEY

@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from openid.consumer import consumer
 from socialregistration.clients import Client
 from socialregistration.contrib.openid.storage import OpenIDStore
+from socialregistration.settings import SESSION_KEY
 import urlparse
 
 class OpenIDClient(Client):
@@ -40,4 +41,4 @@ class OpenIDClient(Client):
     
     @staticmethod
     def get_session_key():
-        return 'socialreg:openid'
+        return '%sopenid' % SESSION_KEY

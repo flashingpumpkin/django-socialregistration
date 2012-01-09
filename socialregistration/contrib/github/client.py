@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth2
+from socialregistration.settings import SESSION_KEY
 import json
 
 
@@ -30,4 +31,4 @@ class Github(OAuth2):
     
     @staticmethod
     def get_session_key():
-        return 'socialreg:github'
+        return '%sgithub' % SESSION_KEY

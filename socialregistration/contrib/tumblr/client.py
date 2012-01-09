@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth
+from socialregistration.settings import SESSION_KEY
 import json
 import urlparse
 
@@ -30,6 +31,6 @@ class Tumblr(OAuth):
     
     @staticmethod
     def get_session_key():
-        return 'socialreg:tumblr'
+        return '%stumblr' % SESSION_KEY
 
 

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth
+from socialregistration.settings import SESSION_KEY
 import urlparse
 
 class Twitter(OAuth):
@@ -21,10 +22,10 @@ class Twitter(OAuth):
             'http://%s' % Site.objects.get_current().domain,
             reverse('socialregistration:twitter:callback'))
     
-    @staticmethod
-    def get_session_key():
-        return 'socialreg:twitter'
-
     def get_user_info(self):
         return self._access_token_dict
+
+    @staticmethod
+    def get_session_key():
+        return '%stwitter' % SESSION_KEY
 

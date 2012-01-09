@@ -5,8 +5,8 @@ from django.http import HttpResponseRedirect
 from django.utils import importlib
 from django.views.generic.base import TemplateResponseMixin
 from socialregistration import signals
+from socialregistration.settings import SESSION_KEY
 
-SESSION_KEY = getattr(settings, 'SOCIALREGISTRATION_SESSION_KEY', 'socialreg:')
 
 class CommonMixin(TemplateResponseMixin):
     """
@@ -187,9 +187,10 @@ class SessionMixin(object):
         """
         Clear all session data.
         """
-        del request.session['%suser' % SESSION_KEY]
-        del request.session['%sprofile' % SESSION_KEY]
-        del request.session['%sclient' % SESSION_KEY]
+        for key in ['user', 'profile', 'client']:
+            try: del request.session['%s%s' % (SESSION_KEY, key)]
+            except KeyError: pass
+        
 
 class SignalMixin(object):
     """

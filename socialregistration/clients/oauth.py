@@ -270,7 +270,13 @@ class OAuth2(Client):
         if self._access_token is None:
             if code is None:
                 raise ValueError(_('Invalid code.'))
-            self._access_token = self._get_access_token(code, **params)['access_token']
+            
+            access_token_dict = self._get_access_token(code, **params)
+            try:
+                self._access_token = access_token_dict['access_token']
+            except KeyError, e:
+                raise KeyError("'access_token_dict' contains no key 'access_token': %s" % access_token_dict)
+                
         return self._access_token
     
     def complete(self, GET):

@@ -205,11 +205,13 @@ class OAuthCallback(SocialRegistration, View):
           or user creation.
 
         """
-        client = request.session[self.get_client().get_session_key()]
         try:
+            client = request.session[self.get_client().get_session_key()]
             client.complete(dict(request.GET.items()))
             request.session[self.get_client().get_session_key()] = client
             return HttpResponseRedirect(self.get_redirect())
+        except KeyError:
+            return self.render_to_response({'erorr': "Session expired."})
         except OAuthError, error:
             return self.render_to_response({'error': error})
 

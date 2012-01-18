@@ -1,3 +1,4 @@
+from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from socialregistration.clients import Client
 import httplib2
@@ -85,12 +86,15 @@ class OAuth(Client):
             'oauth_callback': self.get_callback_url()
         }
         
+        
         response, content = self.client().request(self.request_token_url,
             "POST", body=urllib.urlencode(params))
         
+        content = smart_unicode(content)
+        
         if not response['status'] == '200':
             raise OAuthError(_(
-                "Invalid status code %s while obtaining request token from %s: %s") % (
+                u"Invalid status code %s while obtaining request token from %s: %s") % (
                     response['status'], self.request_token_url, content))
         
         token = dict(urlparse.parse_qsl(content))
@@ -105,9 +109,11 @@ class OAuth(Client):
         response, content = self.client(verifier).request(
             self.access_token_url, "POST")
         
+        content = smart_unicode(content)
+        
         if not response['status'] == '200':
             raise OAuthError(_(
-                "Invalid status code %s while obtaining access token from %s: %s") % 
+                u"Invalid status code %s while obtaining access token from %s: %s") % 
                 (response['status'], self.access_token_url, content))
         
         token = dict(urlparse.parse_qsl(content))
@@ -169,9 +175,11 @@ class OAuth(Client):
         response, content = self.client().request(url, method, headers=headers,
             body=urllib.urlencode(params))
         
+        content = smart_unicode(content)
+        
         if response['status'] != '200':
             raise OAuthError(_(
-                "Invalid status code %s while requesting %s: %s") % (
+                u"Invalid status code %s while requesting %s: %s") % (
                     response['status'], url, content))
         
         return content
@@ -254,11 +262,13 @@ class OAuth2(Client):
         
         resp, content = self.request_access_token(params=params)
         
+        content = smart_unicode(content)
+        
         content = self.parse_access_token(content)
         
         if 'error' in content:
             raise OAuthError(_(
-                "Received error while obtaining access token from %s: %s") % (
+                u"Received error while obtaining access token from %s: %s") % (
                     self.access_token_url, content['error']))
 
         return content

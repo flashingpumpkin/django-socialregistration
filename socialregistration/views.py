@@ -244,16 +244,11 @@ class SetupCallback(SocialRegistration, View):
         if request.user.is_authenticated():
             profile, created = self.get_or_create_profile(request.user,
                 save=True, **lookup_kwargs)
-            
-            # Profile already existed - just redirect where the user wanted to
-            # go
-            if not created:
-                return self.redirect(request)
-            
-            # Profile didn't exist - store the profile, send the connect signal
-            # and redirect where the user wanted to go
+
+            # Profile existed - but got reconnected. Send the signal and 
+            # send the 'em where they were about to go in the first place.
             self.send_connect_signal(request, request.user, profile, client)
-            
+
             return self.redirect(request)
 
         # Logged out user - let's see if we've got the identity saved already.

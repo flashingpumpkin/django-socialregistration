@@ -16,7 +16,7 @@ Socialregistration comes with two signals that you can subscribe to:
 		from socialregistration import signals
 		from socialregistration.contrib.facebook.models import FacebookProfile
 		
-		def connect_handler(sender, user, profile, client, request = None):
+		def connect_handler(sender, user, profile, client, request = None, **kwargs):
 			data = client.graph.request('me')
 		
 		signals.connect.connect(connect_handler, sender = FacebookProfile,
@@ -32,7 +32,7 @@ Socialregistration comes with two signals that you can subscribe to:
 
 	::
 
-		def login_handler(sender, user, profile, client, request = None):
+		def login_handler(sender, user, profile, client, request = None, **kwargs):
 			data = client.graph.request('me')
 		
 		signals.login.connect(login_handler, sender = FacebookProfile,

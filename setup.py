@@ -25,14 +25,7 @@ METADATA = dict(
         'Framework :: Django',
     ],
     zip_safe=False,
-    packages=find_packages(),
-    package_data={
-        'socialregistration': [
-            'templates/socialregistration/*',
-            'contrib/*/templates/socialregistration/*/templates/'\
-                'socialregistration/*/*'
-        ]
-    }
+    packages=filter(lambda pack: not pack.startswith('example'), find_packages()),
 )
 
 if __name__ == '__main__':

@@ -5,9 +5,9 @@ from django.contrib.auth import authenticate
 
 
 class OpenIDProfile(models.Model):
-    user = models.ForeignKey(User, unique=True)
+    user = models.ForeignKey(User)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
-    identity = models.TextField()
+    identity = models.TextField(unique=True)
 
     def __unicode__(self):
         try:

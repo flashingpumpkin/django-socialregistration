@@ -211,7 +211,7 @@ class OAuthCallback(SocialRegistration, View):
             request.session[self.get_client().get_session_key()] = client
             return HttpResponseRedirect(self.get_redirect())
         except KeyError:
-            return self.render_to_response({'erorr': "Session expired."})
+            return self.render_to_response({'error': "Session expired."})
         except OAuthError, error:
             return self.render_to_response({'error': error})
 

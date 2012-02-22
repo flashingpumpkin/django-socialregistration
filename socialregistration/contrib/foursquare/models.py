@@ -33,4 +33,4 @@ def save_foursquare_token(sender, user, profile, client, **kwargs):
 
 
 connect.connect(save_foursquare_token, sender=FoursquareProfile,
-    dispatch_uid='socialregistration_github_token')
+    dispatch_uid='socialregistration_foursquare_token')

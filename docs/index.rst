@@ -9,4 +9,14 @@
    api.rst
    settings.rst
 
+
+API
+===
+
+.. toctree::
+    :maxdepth: 3
+    
+    socialregistration.rst
+
+
 Made by `Caffeinehit Ltd <http://www.caffeinehit.com/>`_. 

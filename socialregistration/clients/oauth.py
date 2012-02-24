@@ -209,6 +209,9 @@ class OAuth2(Client):
     # The access token we obtained
     _access_token = None
     
+    # The dict holding all infos we got from the access token endpoint
+    access_token_dict = None
+    
     # Memoized user info fetched once an access token was obtained
     _user_info = None
     
@@ -282,9 +285,9 @@ class OAuth2(Client):
             if code is None:
                 raise ValueError(_('Invalid code.'))
             
-            access_token_dict = self._get_access_token(code, **params)
+            self.access_token_dict = self._get_access_token(code, **params)
             try:
-                self._access_token = access_token_dict['access_token']
+                self._access_token = self.access_token_dict['access_token']
             except KeyError, e:
                 raise OAuthError("Credentials could not be validated, the provider returned no access token.")
                 

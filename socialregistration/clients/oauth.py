@@ -5,7 +5,7 @@ import httplib2
 import oauth2 as oauth
 import urllib
 import urlparse
-
+import requests
 
 class OAuthError(Exception):
     """ 
@@ -247,7 +247,8 @@ class OAuth2(Client):
         requests. Individual clients can override this method to use the 
         correct HTTP method.
         """
-        return self.request(self.access_token_url, method="POST", params=params)
+        return self.request(self.access_token_url, method="POST", params=params,
+            is_signed=False)
     
     def _get_access_token(self, code, **params):
         """
@@ -308,14 +309,16 @@ class OAuth2(Client):
         """
         return dict(access_token=self._access_token)
         
-    def request(self, url, method="GET", params=None, headers=None):
+    def request(self, url, method="GET", params=None, headers=None, is_signed=True):
         """
-        Make signed requests against `url`.
+        Make a request against ``url``. By default, the request is signed with
+        an access token, but can be turned off by passing ``is_signed=False``.
         """
         params = params or {}
         headers = headers or {}
         
-        params.update(self.get_signing_params())
+        if is_signed:
+            params.update(self.get_signing_params())
         
         if method.upper() == "GET":
             url = '%s?%s' % (url, urllib.urlencode(params))

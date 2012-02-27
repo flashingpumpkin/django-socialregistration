@@ -3,7 +3,7 @@ Settings
 
 .. currentmodule:: socialregistration.conf.settings
 
-.. attribute:: USE_HTTPS
+.. attribute:: SOCIALREGISTRATION_USE_HTTPS
 
 	:Default: ``False``
 

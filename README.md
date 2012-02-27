@@ -1,6 +1,6 @@
 # django-socialregistration
 
-django-socialregistratin enables developers to add user registration
+django-socialregistration enables developers to add user registration
 with OAuth, OAuth2 and OpenID services.
 
 See

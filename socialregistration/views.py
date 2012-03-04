@@ -68,6 +68,7 @@ class Setup(SocialRegistration, View):
         func = self.get_username_function()
         
         user.username = func(user, profile, client)
+        user.set_unusable_password()
         user.save()
         
         profile.user = user

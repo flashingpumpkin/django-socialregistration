@@ -4,7 +4,7 @@ python:
   - "2.7"
 # command to install dependencies
 install: 
-    - pip install -r requirements.txt --use-mirrors
+    - pip install -r readthedocs.txt --use-mirrors
     - python setup.py develop
 script: python example/manage.py test -v2
   

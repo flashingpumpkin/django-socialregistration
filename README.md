@@ -7,3 +7,4 @@ See
 [documentation](http://django-socialregistration.readthedocs.org/en/latest/)
 for installation and configuration.
 
+[![](https://secure.travis-ci.org/flashingpumpkin/django-socialregistration.png)](http://travis-ci.org/flashingpumpkin/django-socialregistration)

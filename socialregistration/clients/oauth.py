@@ -5,7 +5,7 @@ import httplib2
 import oauth2 as oauth
 import urllib
 import urlparse
-import requests
+
 
 class OAuthError(Exception):
     """ 

@@ -48,6 +48,23 @@ Include ``socialregistration.urls`` into your root ``urls.py`` file
 
 	The ``namespace = 'socialregistration'`` argument is required.
 
+Include ``django.core.context_processors.request`` in your TEMPLATE_CONTEXT_PROCESSORS in your settings file
+
+::
+
+	TEMPLATE_CONTEXT_PROESSORS = (
+        'django.core.context_processors.request',
+	)
+
+.. note::
+
+	When your views render templates that include social registration tags (such as {% twitter_button %}) 
+	they will need to pass the RequestContext in as a parameter
+
+::
+
+	return render_to_response('template.html', c, context_instance=RequestContext(request))
+
 Note on sessions
 ================
 

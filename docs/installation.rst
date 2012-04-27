@@ -14,7 +14,8 @@ Installation
 ::
 
     pip install django-socialregistration
-    pip install -e git+https://github.com/facebook/python-sdk.git#egg=FacebookSDK
+    pip install -e git+https://github.com/pythonforfacebook/facebook-sdk#egg=FacebookSDK
+
 
 
 Configuration

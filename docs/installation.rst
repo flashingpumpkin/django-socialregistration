@@ -34,7 +34,10 @@ The most basic configuration is to add ``socialregistration`` and
 
     To make sure that your redirects and callbacks work properly you'll have to set
     the domain in the `Sites app <https://docs.djangoproject.com/en/1.3/ref/contrib/sites/>`_
-    to the correct value.
+    to the correct value. 
+    
+    If you find yourself redirected to example.com, check your Sites configuration through the 
+    Django admin interface.
 
 Include ``socialregistration.urls`` into your root ``urls.py`` file
 

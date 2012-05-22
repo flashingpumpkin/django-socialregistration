@@ -23,6 +23,7 @@ class UserForm(forms.Form):
     def save(self, request, user, profile, client):
         user.username = self.cleaned_data.get('username')
         user.email = self.cleaned_data.get('email')
+        user.set_unusable_password()
         user.save()
         profile.user = user
         profile.save()

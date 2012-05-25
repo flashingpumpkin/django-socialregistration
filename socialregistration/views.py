@@ -236,7 +236,10 @@ class SetupCallback(SocialRegistration, View):
           form or generate a username automatically
         """
         
-        client = request.session[self.get_client().get_session_key()]
+        try:
+            client = request.session[self.get_client().get_session_key()]
+        except KeyError:
+            return self.render_to_response({'error': "Session expired."})
         
         # Get the lookup dictionary to find the user's profile
         lookup_kwargs = self.get_lookup_kwargs(request, client)

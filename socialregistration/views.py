@@ -271,7 +271,7 @@ class SetupCallback(SocialRegistration, View):
             
             return HttpResponseRedirect(reverse('socialregistration:setup'))
 
-        # Inactive user - displaying an error message.
+        # Inactive user - displaying / redirect to the appropriate place.
         if not user.is_active:
             return self.inactive_response()
         

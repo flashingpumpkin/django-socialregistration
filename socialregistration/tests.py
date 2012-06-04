@@ -197,7 +197,8 @@ class OAuthTest(object):
         
         self.assertEqual(1, counter.counter)
 
-    def test_setup_callback_should_indicate_a_logged_in_inactive_user(self):
+    
+    def test_setup_callback_should_indicate_an_inactive_user(self):
         user = self.create_user(is_active=False)
         self.create_profile(user)
 
@@ -207,6 +208,21 @@ class OAuthTest(object):
 
         self.assertEqual(200, response.status_code, response.content)
         self.assertContains(response, "inactive", 1)
+
+    def test_setup_callback_should_redirect_an_inactive_user(self):
+        settings.LOGIN_INACTIVE_REDIRECT_URL = '/inactive/'
+
+        user = self.create_user(is_active=False)
+        self.create_profile(user)
+
+        self.redirect()
+        self.callback()
+        response = self.setup_callback()
+
+        self.assertEqual(302, response.status_code, response.content)
+        self.assertTrue('/inactive/' in response['Location'])
+
+        settings.LOGIN_INACTIVE_REDIRECT_URL = False
 
 class OAuth2Test(OAuthTest):
 

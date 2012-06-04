@@ -45,6 +45,7 @@ Include ``socialregistration.urls`` into your root ``urls.py`` file
 ::
 
 	urlpatterns = patterns('',
+    	# Here be other urls ...
 		url(r'^social/', include('socialregistration.urls',
 			namespace = 'socialregistration')))
 

@@ -289,6 +289,9 @@ class OAuth2(Client):
             try:
                 self._access_token = self.access_token_dict['access_token']
             except KeyError, e:
+                if settings.DEBUG:
+                    raise OAuthError("Credentials could not be validated, the provider returned no access token: %s" % (
+                            str(self.access_token_dict)))
                 raise OAuthError("Credentials could not be validated, the provider returned no access token.")
                 
         return self._access_token

@@ -119,6 +119,7 @@ INSTALLED_APPS = (
     'socialregistration.contrib.facebook',
     'socialregistration.contrib.foursquare',
     'socialregistration.contrib.tumblr',
+    'socialregistration.contrib.instagram',
     'example.app',
 )
 
@@ -157,6 +158,7 @@ AUTHENTICATION_BACKENDS = (
     'socialregistration.contrib.facebook.auth.FacebookAuth',
     'socialregistration.contrib.foursquare.auth.FoursquareAuth',
     'socialregistration.contrib.tumblr.auth.TumblrAuth',
+    'socialregistration.contrib.instagram.auth.InstagramAuth',
 )
 
 MIDDLEWARE_CLASSES = (

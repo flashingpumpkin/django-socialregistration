@@ -38,6 +38,12 @@ if 'socialregistration.contrib.tumblr' in settings.INSTALLED_APPS:
     urlpatterns = urlpatterns + patterns('',
         url(r'^tumblr/', include('socialregistration.contrib.tumblr.urls',
             namespace='tumblr')))
+    
+if 'socialregistration.contrib.instagram' in settings.INSTALLED_APPS:
+    urlpatterns = urlpatterns + patterns('',
+        url(r'^instagram/', include('socialregistration.contrib.instagram.urls',
+            namespace='instagram')))
+
 
 urlpatterns = urlpatterns + patterns('',
     url(r'^setup/$', Setup.as_view(), name='setup'),

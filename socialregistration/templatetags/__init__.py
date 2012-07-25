@@ -24,4 +24,4 @@ class ButtonTag(template.Node):
             raise AttributeError(_("Please add 'django.core.context_processors.request' "
                 "'to your settings.TEMPLATE_CONTEXT_PROCESSORS'"))
         
-        return template.loader.render_to_string(self.template, {'button': self.button}, context)
+        return template.loader.render_to_string(self.template, {'button': self.button, 'next': context.get('next', None)}, context)

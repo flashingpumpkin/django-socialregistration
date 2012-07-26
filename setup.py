@@ -25,7 +25,7 @@ METADATA = dict(
         'Framework :: Django',
     ],
     zip_safe=False,
-    packages=filter(lambda pack: not pack.startswith('example'), find_packages()),
+    packages=find_packages(),
 )
 
 if __name__ == '__main__':

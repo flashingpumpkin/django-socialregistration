@@ -8,6 +8,12 @@ Requirements
 -  `python-openid <http://pypi.python.org/pypi/python-openid>`_
 -  `facebook-python-sdk <https://github.com/facebook/python-sdk>`_
 
+.. note::
+
+   The v0.5.x versions of `django-socialregistration` require at least
+   Django v1.3.2 due to the use of class based views. For previous
+   versions of Django please use `django-socialregistration` v0.4.x.
+
 Installation
 ============
 

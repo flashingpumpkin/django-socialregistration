@@ -2,8 +2,8 @@ from django.conf import settings
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.views.generic.base import View
 from django.utils.translation import ugettext_lazy as _
+from django.views.generic.base import View, TemplateView
 from socialregistration.clients.oauth import OAuthError
 from socialregistration.mixins import SocialRegistration
 
@@ -216,10 +216,11 @@ class OAuthCallback(SocialRegistration, View):
         except OAuthError, error:
             return self.render_to_response({'error': error})
 
-class SetupCallback(SocialRegistration, View):
+class SetupCallback(SocialRegistration, TemplateView):
     """
     Base class for OAuth and OAuth2 login / connects / registration.
     """
+    template_name = 'socialregistration/setup.error.html'
     
     def get(self, request):
         """
@@ -244,13 +245,22 @@ class SetupCallback(SocialRegistration, View):
         # Get the lookup dictionary to find the user's profile
         lookup_kwargs = self.get_lookup_kwargs(request, client)
 
-        # Logged in user connecting an account
+        # Logged in user (re-)connecting an account
         if request.user.is_authenticated():
-            profile, created = self.get_or_create_profile(request.user,
-                save=True, **lookup_kwargs)
+            try:
+                profile = self.get_profile(**lookup_kwargs)
+                
+                # Make sure that there is only *one* account per profile.                
+                if not profile.user == request.user:
+                    self.delete_session_data(request)
+                    return self.render_to_response({
+                        'error': _('This profile is already connected to another user account.')
+                    })
+                
+            except self.get_model().DoesNotExist: 
+                profile, created = self.get_or_create_profile(request.user,
+                    save=True, **lookup_kwargs) 
 
-            # Profile existed - but got reconnected. Send the signal and 
-            # send the 'em where they were about to go in the first place.
             self.send_connect_signal(request, request.user, profile, client)
 
             return self.redirect(request)
@@ -258,6 +268,7 @@ class SetupCallback(SocialRegistration, View):
         # Logged out user - let's see if we've got the identity saved already.
         # If so - just log the user in. If not, create profile and redirect
         # to the setup view 
+        
         user = self.authenticate(**lookup_kwargs)
         
         # No user existing - create a new one and redirect to the final setup view

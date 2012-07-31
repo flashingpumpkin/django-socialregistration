@@ -79,7 +79,7 @@ class OAuthTest(object):
         """
         raise NotImplementedError
     
-    def create_profile(self):
+    def create_profile(self, user):
         raise NotImplementedError
     
     def create_user(self, is_active=True):
@@ -116,7 +116,7 @@ class OAuthTest(object):
     def flow(self):
         self.redirect()
         self.callback()
-        self.setup_callback()
+        return self.setup_callback()
     
     def test_redirect_should_redirect_a_user(self,):
         response = self.redirect()
@@ -152,7 +152,7 @@ class OAuthTest(object):
         self.create_profile(user)
 
         self.flow()
-
+        
         self.assertEqual(1, self.client.session['_auth_user_id'])
     
     def test_logged_in_user_should_be_connected(self):
@@ -164,6 +164,23 @@ class OAuthTest(object):
         self.flow()
         
         self.assertEqual(1, self.profile.objects.filter(user=user).count())
+    
+    def test_only_one_user_can_connect_with_a_provider(self):
+        user = self.create_user()
+        self.create_profile(user)
+        
+        other = User.objects.create(username='other')
+        other.is_active = True 
+        other.set_password('test')
+        other.save()
+        
+        self.client.login(username='other', password='test')
+        
+        response = self.flow()
+        
+        self.assertEqual(200, response.status_code, response.content)
+        self.assertContains(response, 'This profile is already connected to another user account')
+        
     
     def test_logging_in_should_send_the_login_signal(self):
         counter = self.get_counter()
@@ -196,7 +213,6 @@ class OAuthTest(object):
         self.flow()
         
         self.assertEqual(1, counter.counter)
-
     
     def test_setup_callback_should_indicate_an_inactive_user(self):
         user = self.create_user(is_active=False)

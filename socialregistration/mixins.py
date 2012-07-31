@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from django.contrib.auth.views import login
 from django.http import HttpResponseRedirect
 from django.utils import importlib
 from django.utils.translation import ugettext_lazy as _

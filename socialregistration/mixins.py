@@ -46,7 +46,7 @@ class CommonMixin(TemplateResponseMixin):
         if netloc and netloc != request.get_host():
             next = getattr(settings, 'LOGIN_REDIRECT_URL', '/')
 
-        return netloc
+        return next
 
     def authenticate(self, **kwargs):
         """

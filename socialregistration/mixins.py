@@ -1,13 +1,15 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
+from django.contrib.auth.views import login
 from django.http import HttpResponseRedirect
 from django.utils import importlib
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import TemplateResponseMixin
-
 from socialregistration import signals
 from socialregistration.settings import SESSION_KEY
+import urlparse
+
 
 
 class CommonMixin(TemplateResponseMixin):
@@ -30,16 +32,22 @@ class CommonMixin(TemplateResponseMixin):
         """
         Returns a url to redirect to after the login / signup.
         """
-        if 'next' in request.session:
+        if 'next' in request.session: 
             next = request.session['next']
             del request.session['next']
-            return next
         elif 'next' in request.GET:
-            return request.GET.get('next')
+            next = request.GET.get('next')
         elif 'next' in request.POST:
-            return request.POST.get('next')
+            next = request.POST.get('next')
         else:
-            return getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+            next = getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+        
+        netloc = urlparse.urlparse(next)[1]
+        
+        if netloc and netloc != request.get_host():
+            next = getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+
+        return netloc
 
     def authenticate(self, **kwargs):
         """

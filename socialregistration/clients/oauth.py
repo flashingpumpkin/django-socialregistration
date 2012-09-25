@@ -143,7 +143,7 @@ class OAuth(Client):
         return self._access_token
     
     
-    def get_redirect_url(self):
+    def get_redirect_url(self, **kwargs):
         """
         Return the authorization/authentication URL signed with the request 
         token.
@@ -221,7 +221,7 @@ class OAuth2(Client):
     def client(self):
         return httplib2.Http()
     
-    def get_redirect_url(self, state=''):
+    def get_redirect_url(self, state='', **kwargs):
         """
         Assemble the URL to where we'll be redirecting the user to to request
         permissions.
@@ -229,7 +229,7 @@ class OAuth2(Client):
         params = {
             'response_type': 'code',
             'client_id': self.client_id,
-            'redirect_uri': self.get_callback_url(),
+            'redirect_uri': self.get_callback_url(**kwargs),
             'scope': self.scope or '',
             'state': state,
         }

@@ -169,7 +169,7 @@ class OAuthRedirect(SocialRegistration, View):
         client = self.get_client()()
         request.session[self.get_client().get_session_key()] = client
         try:
-            return HttpResponseRedirect(client.get_redirect_url())
+            return HttpResponseRedirect(client.get_redirect_url(request=request))
         except OAuthError, error:
             return self.render_to_response({'error': error})
 

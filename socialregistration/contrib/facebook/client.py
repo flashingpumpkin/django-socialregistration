@@ -18,7 +18,7 @@ class Facebook(OAuth2):
     _user_info = None
     
     
-    def get_callback_url(self):
+    def get_callback_url(self, **kwargs):
         if self.is_https():
             return 'https://%s%s' % (Site.objects.get_current().domain,
                 reverse('socialregistration:facebook:callback'))

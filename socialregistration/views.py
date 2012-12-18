@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import View, TemplateView
 from socialregistration.clients.oauth import OAuthError
 from socialregistration.mixins import SocialRegistration
+import logging
 
 GENERATE_USERNAME = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False)
 
@@ -17,6 +18,8 @@ FORM_CLASS = getattr(settings, 'SOCIALREGISTRATION_SETUP_FORM',
 
 INITAL_DATA_FUNCTION = getattr(settings, 'SOCIALREGISTRATION_INITIAL_DATA_FUNCTION',
     None)
+
+logger = logging.getLogger(__name__)
 
 
 class Setup(SocialRegistration, View):
@@ -168,8 +171,10 @@ class OAuthRedirect(SocialRegistration, View):
         request.session['next'] = self.get_next(request)
         client = self.get_client()()
         request.session[self.get_client().get_session_key()] = client
+        url = client.get_redirect_url(request=request)
+        logger.debug("Redirecting to %s", url)
         try:
-            return HttpResponseRedirect(client.get_redirect_url(request=request))
+            return HttpResponseRedirect(url)
         except OAuthError, error:
             return self.render_to_response({'error': error})
 

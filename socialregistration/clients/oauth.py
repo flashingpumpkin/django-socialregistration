@@ -2,9 +2,12 @@ from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from socialregistration.clients import Client
 import httplib2
+import logging
 import oauth2 as oauth
 import urllib
 import urlparse
+
+logger = logging.getLogger(__name__)
 
 
 class OAuthError(Exception):
@@ -91,7 +94,7 @@ class OAuth(Client):
             "POST", body=urllib.urlencode(params))
         
         content = smart_unicode(content)
-        
+
         if not response['status'] == '200':
             raise OAuthError(_(
                 u"Invalid status code %s while obtaining request token from %s: %s") % (
@@ -110,7 +113,7 @@ class OAuth(Client):
             self.access_token_url, "POST")
         
         content = smart_unicode(content)
-        
+
         if not response['status'] == '200':
             raise OAuthError(_(
                 u"Invalid status code %s while obtaining access token from %s: %s") % 
@@ -171,11 +174,19 @@ class OAuth(Client):
         """
         params = params or {}
         headers = headers or {}
+
+        logger.debug("URL: %s", url)
+        logger.debug("Method: %s", method)
+        logger.debug("Headers: %s", headers)
+        logger.debug("Params: %s", params)
         
         response, content = self.client().request(url, method, headers=headers,
             body=urllib.urlencode(params))
         
         content = smart_unicode(content)
+
+        logger.debug("Status: %s", response['status'])
+        logger.debug("Content: %s", content)
         
         if response['status'] != '200':
             raise OAuthError(_(
@@ -263,10 +274,15 @@ class OAuth2(Client):
             'client_secret': self.secret,
             'redirect_uri': self.get_callback_url(),
         })
-        
+
+        logger.debug("Params: %s", params)
+
         resp, content = self.request_access_token(params=params)
-        
+
         content = smart_unicode(content)
+
+        logger.debug("Status: %s", resp['status'])
+        logger.debug("Content: %s", content)
         
         content = self.parse_access_token(content)
         

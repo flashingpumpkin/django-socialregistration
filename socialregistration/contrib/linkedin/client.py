@@ -16,7 +16,7 @@ class LinkedIn(OAuth):
     
     _user_info = None
     
-    def get_callback_url(self):
+    def get_callback_url(self, **kwargs):
         if self.is_https():
             return urlparse.urljoin(
                 'https://%s' % Site.objects.get_current().domain,

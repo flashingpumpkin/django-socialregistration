@@ -13,7 +13,7 @@ class Twitter(OAuth):
     access_token_url = 'https://api.twitter.com/oauth/access_token'
     auth_url = 'https://api.twitter.com/oauth/authenticate'
     
-    def get_callback_url(self):
+    def get_callback_url(self, **kwargs):
         if self.is_https():
             return urlparse.urljoin(
                 'https://%s' % Site.objects.get_current().domain,

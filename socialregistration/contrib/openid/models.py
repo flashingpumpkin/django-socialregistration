@@ -1,19 +1,20 @@
+from django.conf import settings
 from django.db import models
-from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.contrib.auth import authenticate
 
+AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 class OpenIDProfile(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(AUTH_USER_MODEL)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
     identity = models.TextField(unique=True)
 
     def __unicode__(self):
         try:
             return 'OpenID profile for %s, via provider %s' % (self.user, self.identity)
-        except User.DoesNotExist:
-            return 'OpenID profile for None, via provider None' 
+        except models.ObjectDoesNotExist:
+            return 'OpenID profile for None, via provider None'
 
     def authenticate(self):
         return authenticate(identity=self.identity)

@@ -1,18 +1,20 @@
+from django.conf import settings
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db import models
 from socialregistration.signals import connect
 
+AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+
 class LinkedInProfile(models.Model):
-    user = models.ForeignKey(User, unique=True)
+    user = models.ForeignKey(AUTH_USER_MODEL, unique=True)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
     linkedin_id = models.CharField(max_length=25)
 
     def __unicode__(self):
         try:
             return u'%s: %s' % (self.user, self.linkedin_id)
-        except User.DoesNotExist:
+        except models.ObjectDoesNotExist:
             return u'None'
 
     def authenticate(self):
@@ -38,11 +40,11 @@ def save_linkedin_token(sender, user, profile, client, **kwargs):
         LinkedInAccessToken.objects.get(profile=profile).delete()
     except LinkedInAccessToken.DoesNotExist:
         pass
-    
+
     LinkedInRequestToken.objects.create(profile=profile,
         oauth_token=client.get_request_token().key,
         oauth_token_secret=client.get_request_token().secret)
-    
+
     LinkedInAccessToken.objects.create(profile=profile,
         oauth_token=client.get_access_token().key,
         oauth_token_secret=client.get_access_token().secret)

@@ -16,7 +16,7 @@ class GoogleProfile(models.Model):
             return u'None'
 
     def authenticate(self):
-        return authenticate(id=self.google_id)
+        return authenticate(google_id=self.google_id)
 
 class GoogleAccessToken(models.Model):
     profile = models.OneToOneField(GoogleProfile, related_name='access_token')

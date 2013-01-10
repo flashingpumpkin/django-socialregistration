@@ -13,6 +13,8 @@ class Twitter(OAuth):
     access_token_url = 'https://api.twitter.com/oauth/access_token'
     auth_url = 'https://api.twitter.com/oauth/authenticate'
     
+    info_url = 'https://api.twitter.com/1/account/verify_credentials.json'
+
     def get_callback_url(self, **kwargs):
         if self.is_https():
             return urlparse.urljoin(
@@ -23,7 +25,7 @@ class Twitter(OAuth):
             reverse('socialregistration:twitter:callback'))
     
     def get_user_info(self):
-        return self._access_token_dict
+        return self.request(self.info_url)
 
     @staticmethod
     def get_session_key():

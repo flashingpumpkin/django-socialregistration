@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from socialregistration.clients.oauth import OAuth
 from socialregistration.settings import SESSION_KEY
 import urlparse
+import json
 
 class Twitter(OAuth):
     api_key = getattr(settings, 'TWITTER_CONSUMER_KEY', '')
@@ -25,7 +26,7 @@ class Twitter(OAuth):
             reverse('socialregistration:twitter:callback'))
     
     def get_user_info(self):
-        return self.request(self.info_url)
+        return json.loads(self.request(self.info_url))
 
     @staticmethod
     def get_session_key():

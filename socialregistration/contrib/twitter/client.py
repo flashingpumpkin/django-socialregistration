@@ -26,7 +26,9 @@ class Twitter(OAuth):
             reverse('socialregistration:twitter:callback'))
     
     def get_user_info(self):
-        return json.loads(self.request(self.info_url))
+        dct = self._access_token_dict or {}
+        dct.update(json.loads(self.request(self.info_url)))
+        return dct
 
     @staticmethod
     def get_session_key():

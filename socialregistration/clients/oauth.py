@@ -1,6 +1,9 @@
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from socialregistration.clients import Client
+
+from django.conf import settings
+
 import httplib2
 import logging
 import oauth2 as oauth
@@ -230,7 +233,8 @@ class OAuth2(Client):
         self._access_token = access_token
     
     def client(self):
-        return httplib2.Http()
+        ca_certs = getattr(settings, 'HTTPLIB2_CA_CERTS', None)
+        return httplib2.Http(ca_certs=ca_certs)
     
     def get_redirect_url(self, state='', **kwargs):
         """

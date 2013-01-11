@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
-from socialregistration.clients.oauth import OAuth
+from socialregistration.clients.oauth import OAuth, OAuthError
 from socialregistration.settings import SESSION_KEY
 import urlparse
 import json
@@ -27,7 +27,12 @@ class Twitter(OAuth):
     
     def get_user_info(self):
         dct = self._access_token_dict or {}
-        dct.update(json.loads(self.request(self.info_url)))
+
+        try:
+            dct.update(json.loads(self.request(self.info_url)))
+        except OAuthError:
+            pass
+
         return dct
 
     @staticmethod

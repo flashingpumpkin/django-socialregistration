@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import View, TemplateView
 from socialregistration.clients.oauth import OAuthError
@@ -91,6 +91,10 @@ class Setup(SocialRegistration, View):
         When signing a new user up - either display a setup form, or
         generate the username automatically.
         """
+
+        if request.user.is_authenticated():
+            return HttpResponseForbidden()
+
         try:
             user, profile, client = self.get_session_data(request)
         except KeyError:
@@ -108,6 +112,10 @@ class Setup(SocialRegistration, View):
         """
         Save the user and profile, login and send the right signals.
         """
+
+        if request.user.is_authenticated():
+            return HttpResponseForbidden()
+
         try:
             user, profile, client = self.get_session_data(request)
         except KeyError:

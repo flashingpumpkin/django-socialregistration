@@ -8,5 +8,5 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^social/', include('socialregistration.urls',
         namespace='socialregistration')),
-    url(r'^$', 'example.app.views.index', name='index'),
+    url(r'^$', 'tests.app.views.index', name='index'),
 )

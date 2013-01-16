@@ -213,6 +213,7 @@ class OAuthCallback(SocialRegistration, View):
         """
         try:
             client = request.session[self.get_client().get_session_key()]
+            logger.debug("API returned: %s", request.GET)            
             client.complete(dict(request.GET.items()))
             request.session[self.get_client().get_session_key()] = client
             return HttpResponseRedirect(self.get_redirect())

@@ -6,7 +6,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Tester', 'test@example.com'),
 )
 
 MANAGERS = ADMINS
@@ -94,7 +94,7 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
-ROOT_URLCONF = 'example.urls'
+ROOT_URLCONF = 'tests.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -112,15 +112,15 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'socialregistration',
-    'socialregistration.contrib.openid',
-    'socialregistration.contrib.twitter',
-    'socialregistration.contrib.linkedin',
-    'socialregistration.contrib.github',
     'socialregistration.contrib.facebook',
     'socialregistration.contrib.foursquare',
-    'socialregistration.contrib.tumblr',
+    'socialregistration.contrib.github',
     'socialregistration.contrib.instagram',
-    'example.app',
+    'socialregistration.contrib.linkedin',
+    'socialregistration.contrib.tumblr',
+    'socialregistration.contrib.twitter',
+    'socialregistration.contrib.openid',
+    'tests.app',
 )
 
 # A sample logging configuration. The only tangible logging

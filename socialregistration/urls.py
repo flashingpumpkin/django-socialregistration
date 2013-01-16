@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls.defaults import *
+from socialregistration.compat.urls import *
 from socialregistration.views import Logout, Setup
 
 urlpatterns = patterns('',)

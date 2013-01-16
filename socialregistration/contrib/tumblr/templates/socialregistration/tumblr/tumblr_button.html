@@ -1,4 +1,5 @@
-<form class="connect-button" name="login" method="post" action="{% url socialregistration:tumblr:redirect %}">
+{% load url from future %}
+<form class="connect-button" name="login" method="post" action="{% url 'socialregistration:tumblr:redirect' %}">
 {% csrf_token %}
 {% if next %}
     <input type="hidden" name="next" value="{{ next }}" />

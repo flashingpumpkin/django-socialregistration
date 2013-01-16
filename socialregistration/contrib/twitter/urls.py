@@ -1,6 +1,5 @@
-
 from django.conf import settings
-from django.conf.urls.defaults import *
+from socialregistration.compat.urls import *
 from socialregistration.contrib.twitter.views import TwitterRedirect, \
     TwitterCallback, TwitterSetup
 

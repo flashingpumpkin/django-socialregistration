@@ -11,7 +11,7 @@ class TumblrProfile(models.Model):
 
     def __unicode__(self):
         try:
-            return u'%s: %s' % (self.user, self.tumblr_name)
+            return u'%s: %s' % (self.user, self.tumblr)
         except User.DoesNotExist:
             return u'None'
 

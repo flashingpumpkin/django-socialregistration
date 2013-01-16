@@ -8,7 +8,7 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 class OpenIDProfile(models.Model):
     user = models.ForeignKey(AUTH_USER_MODEL)
     site = models.ForeignKey(Site, default=Site.objects.get_current)
-    identity = models.TextField(unique=True)
+    identity = models.TextField()
 
     def __unicode__(self):
         try:

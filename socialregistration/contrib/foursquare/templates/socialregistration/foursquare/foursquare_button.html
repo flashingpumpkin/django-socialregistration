@@ -1,4 +1,5 @@
-<form action="{% url socialregistration:foursquare:redirect %}" method="post">
+{% load url from future %}
+<form action="{% url 'socialregistration:foursquare:redirect' %}" method="post">
     {% csrf_token %}
     {% if next %}
         <input type="hidden" name="next" value="{{ next }}" />

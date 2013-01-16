@@ -22,7 +22,7 @@ class TemplateTagTest(object):
     
     def test_tag_renders_correctly(self):
         load, button = self.get_tag()
-        
+
         tpl = """{%% load %s %%}{%% %s %%}""" % (load, button)
         
         self.assertTrue('form' in template.Template(tpl).render(template.Context({'request': None})))

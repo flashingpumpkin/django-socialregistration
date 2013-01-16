@@ -1,5 +1,6 @@
 <html><head><title>Socialregistration example</title></head>
 <body>
+{% load url from future %}
 
 {% if not request.user.is_authenticated %}
 	<h1>django-socialregistration login</h2>
@@ -18,7 +19,7 @@
 	<li>{% openid_form %}</li>
 	<li>{% instagram_button %}</li>
 	<li>
-		<form action="{% url socialregistration:openid:redirect %}" method="post">
+		<form action="{% url 'socialregistration:openid:redirect' %}" method="post">
 			{% csrf_token %}
 			<input type="hidden" name="openid_provider" value="https://www.google.com/accounts/o8/id" />
 			<input type="submit" value="Sign in with Google OpenID" />
@@ -40,7 +41,7 @@
 </ol>
 
 {% if request.user.is_authenticated %}
-	<a href="{% url socialregistration:logout %}">Logout</a>
+	<a href="{% url 'socialregistration:logout' %}">Logout</a>
 {% endif %}
 
 <p><a href="https://github.com/flashingpumpkin/django-socialregistration">Code on Github</a></p>

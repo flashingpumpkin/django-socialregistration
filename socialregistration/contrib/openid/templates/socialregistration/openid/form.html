@@ -1,4 +1,5 @@
-<form action="{% url socialregistration:openid:redirect %}" method="post">
+{% load url from future %}
+<form action="{% url 'socialregistration:openid:redirect' %}" method="post">
 	{% csrf_token %}
 
 	{% if provider %}

@@ -93,7 +93,8 @@ class Setup(SocialRegistration, View):
         """
 
         if request.user.is_authenticated():
-            return HttpResponseForbidden()
+            return self.render_to_response(dict(
+                error=_("You are already logged in.")))
 
         try:
             user, profile, client = self.get_session_data(request)
@@ -114,7 +115,8 @@ class Setup(SocialRegistration, View):
         """
 
         if request.user.is_authenticated():
-            return HttpResponseForbidden()
+            return self.render_to_response(dict(
+                error=_("You are already logged in.")))
 
         try:
             user, profile, client = self.get_session_data(request)

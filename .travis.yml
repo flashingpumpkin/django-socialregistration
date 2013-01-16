@@ -11,4 +11,4 @@ install:
     - pip install -q $DJANGO --use-mirrors
     - pip install -q -r requirements.txt --use-mirrors
     - python setup.py develop
-script: python example/manage.py test
+script: tests/test.sh

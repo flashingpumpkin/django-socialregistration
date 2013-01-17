@@ -125,7 +125,7 @@ class Setup(SocialRegistration, View):
         form = self.get_form()(initial=self.get_initial_data(request, user, profile, client))
         
         additional_context = self.get_context(request, user, profile, client)
-        return self.render_to_response(dict(form=form).update(additional_context))
+        return self.render_to_response(dict({'form': form}, **additional_context))
         
     def post(self, request):
         """

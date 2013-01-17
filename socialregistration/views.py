@@ -146,7 +146,8 @@ class Setup(SocialRegistration, View):
             initial=self.get_initial_data(request, user, profile, client))
         
         if not form.is_valid():
-            return self.render_to_response(dict(form=form))
+            additional_context = self.get_context(request, user, profile, client)
+            return self.render_to_response(dict({'form': form}, **additional_context))
         
         user, profile = form.save(request, user, profile, client)
         

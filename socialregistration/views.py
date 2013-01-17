@@ -18,6 +18,8 @@ FORM_CLASS = getattr(settings, 'SOCIALREGISTRATION_SETUP_FORM',
 INITAL_DATA_FUNCTION = getattr(settings, 'SOCIALREGISTRATION_INITIAL_DATA_FUNCTION',
     None)
 
+CONTEXT_FUNCTION = getattr(settings, 'SOCIALREGISTRATION_SETUP_CONTEXT_FUNCTION',
+    None)
 
 class Setup(SocialRegistration, View):
     """
@@ -51,6 +53,21 @@ class Setup(SocialRegistration, View):
         """
         if INITAL_DATA_FUNCTION:
             func = self.import_attribute(INITAL_DATA_FUNCTION)
+            return func(request, user, profile, client)
+        return {}
+
+    def get_context(self, request, user, profile, client):
+        """
+        Return additional context for the setup view. The function can
+        be controlled with ``SOCIALREGISTRATION_SETUP_CONTEXT_FUNCTION``.
+
+        :param request: The current request object
+        :param user: The unsaved user object
+        :param profile: The unsaved profile object
+        :param client: The API client
+        """
+        if CONTEXT_FUNCTION:
+            func = self.import_attribute(CONTEXT_FUNCTION)
             return func(request, user, profile, client)
         return {}
 
@@ -107,7 +124,8 @@ class Setup(SocialRegistration, View):
             
         form = self.get_form()(initial=self.get_initial_data(request, user, profile, client))
         
-        return self.render_to_response(dict(form=form))
+        additional_context = self.get_context(request, user, profile, client)
+        return self.render_to_response(dict(form=form).update(additional_context))
         
     def post(self, request):
         """

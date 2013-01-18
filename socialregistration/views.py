@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import View, TemplateView
 from socialregistration.clients.oauth import OAuthError
@@ -110,8 +110,7 @@ class Setup(SocialRegistration, View):
         """
 
         if request.user.is_authenticated():
-            return self.render_to_response(dict(
-                error=_("You are already logged in.")))
+            return HttpResponseRedirect(self.get_next(request))
 
         try:
             user, profile, client = self.get_session_data(request)

@@ -28,7 +28,7 @@ def save_google_token(sender, user, profile, client, **kwargs):
     except GoogleAccessToken.DoesNotExist:
         pass
     
-    GoogleAccessToken.objects.create(access_token = client._refresh_token,
+    GoogleAccessToken.objects.create(access_token = client.get_access_token(),
         profile = profile)
 
 

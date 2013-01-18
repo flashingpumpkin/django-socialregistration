@@ -272,12 +272,18 @@ class OAuth2(Client):
         """
         Fetch an access token with the provided `code`.
         """
-        params.update({
-            'code': code,
-            'client_id': self.client_id,
-            'client_secret': self.secret,
-            'redirect_uri': self.get_callback_url(),
-        })
+        if params.get('grant_type') != 'refresh_token':
+            params.update({
+                'code': code,
+                'client_id': self.client_id,
+                'client_secret': self.secret,
+                'redirect_uri': self.get_callback_url(),
+            })
+        else:
+            params.update({
+                'client_id': self.client_id,
+                'client_secret': self.secret,
+                })
 
         logger.debug("Params: %s", params)
 
@@ -301,8 +307,8 @@ class OAuth2(Client):
         """
         Return the memoized access token or go out and fetch one.
         """
-        if self._access_token is None:
-            if code is None:
+        if self._access_token is None or True:
+            if code is None and False:
                 raise ValueError(_('Invalid code.'))
             
             self.access_token_dict = self._get_access_token(code, **params)
@@ -345,7 +351,8 @@ class OAuth2(Client):
         
         if method.upper() == "GET":
             url = '%s?%s' % (url, urllib.urlencode(params))
-            return self.client().request(url, method=method, headers=headers)
+            tt = self.client().request(url, method=method, headers=headers)
+            return tt
         return self.client().request(url, method, body=urllib.urlencode(params),
             headers=headers)
         

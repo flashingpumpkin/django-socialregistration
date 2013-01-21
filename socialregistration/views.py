@@ -1,3 +1,5 @@
+import socket
+
 from django.conf import settings
 from django.contrib.auth import logout
 from django.core.urlresolvers import reverse
@@ -200,6 +202,9 @@ class OAuthRedirect(SocialRegistration, View):
             return HttpResponseRedirect(client.get_redirect_url(request=request))
         except OAuthError, error:
             return self.error_to_response(request, {'error': error})
+        except socket.timeout:
+            return self.error_to_response(request, {'error': 
+                _('Could not connect to service (timed out)')})
 
 
 class OAuthCallback(SocialRegistration, View):

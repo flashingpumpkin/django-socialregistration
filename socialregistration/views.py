@@ -115,7 +115,7 @@ class Setup(SocialRegistration, View):
         try:
             user, profile, client = self.get_session_data(request)
         except KeyError:
-            return self.error_to_response(dict(
+            return self.error_to_response(request, dict(
                 error=_("Social profile is missing from your session.")))
          
         if GENERATE_USERNAME:
@@ -124,7 +124,7 @@ class Setup(SocialRegistration, View):
         form = self.get_form()(initial=self.get_initial_data(request, user, profile, client))
         
         additional_context = self.get_context(request, user, profile, client)
-        return self.error_to_response(dict({'form': form}, **additional_context))
+        return self.error_to_response(request, dict({'form': form}, **additional_context))
         
     def post(self, request):
         """
@@ -132,13 +132,13 @@ class Setup(SocialRegistration, View):
         """
 
         if request.user.is_authenticated():
-            return self.error_to_response(dict(
+            return self.error_to_response(request, dict(
                 error=_("You are already logged in.")))
 
         try:
             user, profile, client = self.get_session_data(request)
         except KeyError:
-            return self.error_to_response(dict(
+            return self.error_to_response(request, dict(
                 error=_("A social profile is missing from your session.")))
         
         form = self.get_form()(request.POST, request.FILES,
@@ -146,7 +146,7 @@ class Setup(SocialRegistration, View):
         
         if not form.is_valid():
             additional_context = self.get_context(request, user, profile, client)
-            return self.error_to_response(dict({'form': form}, **additional_context))
+            return self.error_to_response(request, dict({'form': form}, **additional_context))
         
         user, profile = form.save(request, user, profile, client)
         
@@ -199,7 +199,7 @@ class OAuthRedirect(SocialRegistration, View):
         try:
             return HttpResponseRedirect(client.get_redirect_url(request=request))
         except OAuthError, error:
-            return self.error_to_response({'error': error})
+            return self.error_to_response(request, {'error': error})
 
 
 class OAuthCallback(SocialRegistration, View):
@@ -268,7 +268,7 @@ class SetupCallback(SocialRegistration, TemplateView):
         try:
             client = request.session[self.get_client().get_session_key()]
         except KeyError:
-            return self.error_to_response({'error': "Session expired."})
+            return self.error_to_response(request, {'error': "Session expired."})
         
         # Get the lookup dictionary to find the user's profile
         lookup_kwargs = self.get_lookup_kwargs(request, client)
@@ -312,7 +312,7 @@ class SetupCallback(SocialRegistration, TemplateView):
 
         # Inactive user - displaying / redirect to the appropriate place.
         if not user.is_active:
-            return self.inactive_response()
+            return self.inactive_response(request)
         
         # Active user with existing profile: login, send signal and redirect
         self.login(request, user)

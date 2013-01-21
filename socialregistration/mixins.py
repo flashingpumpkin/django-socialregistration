@@ -9,7 +9,8 @@ from socialregistration import signals
 from socialregistration.settings import SESSION_KEY
 import urlparse
 
-
+ERROR_VIEW = getattr(settings, 'SOCIALREGISTRATION_ERROR_VIEW_FUNCTION',
+    None)
 
 class CommonMixin(TemplateResponseMixin):
     """
@@ -68,7 +69,7 @@ class CommonMixin(TemplateResponseMixin):
         if inactive_url:
             return HttpResponseRedirect(inactive_url)
         else:
-            return self.render_to_response({'error': _("This user account is marked as inactive.")})
+            return self.error_to_response({'error': _("This user account is marked as inactive.")})
 
     def redirect(self, request):
         """
@@ -227,8 +228,14 @@ class SignalMixin(object):
         signals.connect.send(sender=profile.__class__, user=user, profile=profile,
             client=client, request=request)
 
+class ErrorMixin(object):
+    def error_to_response(self, request, error_dict, **context):
+        if ERROR_VIEW:
+            return self.import_attribute(ERROR_VIEW)(request, error_dict, **context)
+        return self.render_to_response(error_dict, **context)
+
 class SocialRegistration(CommonMixin, ClientMixin, ProfileMixin, SessionMixin,
-    SignalMixin):
+    SignalMixin, ErrorMixin):
     """
     Combine all mixins into a single class.
     """

@@ -124,7 +124,7 @@ class Setup(SocialRegistration, View):
         form = self.get_form()(initial=self.get_initial_data(request, user, profile, client))
         
         additional_context = self.get_context(request, user, profile, client)
-        return self.error_to_response(request, dict({'form': form}, **additional_context))
+        return self.render_to_response(dict({'form': form}, **additional_context))
         
     def post(self, request):
         """
@@ -146,7 +146,7 @@ class Setup(SocialRegistration, View):
         
         if not form.is_valid():
             additional_context = self.get_context(request, user, profile, client)
-            return self.error_to_response(request, dict({'form': form}, **additional_context))
+            return self.render_to_response(dict({'form': form}, **additional_context))
         
         user, profile = form.save(request, user, profile, client)
         

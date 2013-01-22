@@ -23,6 +23,9 @@ INITAL_DATA_FUNCTION = getattr(settings, 'SOCIALREGISTRATION_INITIAL_DATA_FUNCTI
 CONTEXT_FUNCTION = getattr(settings, 'SOCIALREGISTRATION_SETUP_CONTEXT_FUNCTION',
     None)
 
+ALLOW_OPENID_SIGNUPS = getattr(settings, 'SOCIALREGISTRATION_ALLOW_OPENID_SIGNUPS',
+    True)
+
 class Setup(SocialRegistration, View):
     """
     Setup view to create new Django users from third party APIs.
@@ -309,6 +312,10 @@ class SetupCallback(SocialRegistration, TemplateView):
         
         # No user existing - create a new one and redirect to the final setup view
         if user is None:
+            if not ALLOW_OPENID_SIGNUPS:
+                return self.error_to_response(request, {
+                    'error': _('We are not currently accepting new OpenID signups.')
+                })
             user = self.create_user()
             profile = self.create_profile(user, **lookup_kwargs)
             

@@ -248,6 +248,9 @@ class OAuthCallback(SocialRegistration, View):
             return self.error_to_response(request, {'error': "Session expired."})
         except OAuthError, error:
             return self.error_to_response(request, {'error': error})
+        except socket.timeout:
+            return self.error_to_response(request, {'error':
+                _('Could not connect to service (timed out)')})
 
 class SetupCallback(SocialRegistration, TemplateView):
     """

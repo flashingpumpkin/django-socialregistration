@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.base import View, TemplateView
 from socialregistration.clients.oauth import OAuthError
 from socialregistration.mixins import SocialRegistration
+from socialregistration.contrib.openid.client import OpenIDClient
 
 GENERATE_USERNAME = getattr(settings, 'SOCIALREGISTRATION_GENERATE_USERNAME', False)
 
@@ -312,7 +313,7 @@ class SetupCallback(SocialRegistration, TemplateView):
         
         # No user existing - create a new one and redirect to the final setup view
         if user is None:
-            if not ALLOW_OPENID_SIGNUPS:
+            if not ALLOW_OPENID_SIGNUPS and self.client is OpenIDClient:
                 return self.error_to_response(request, {
                     'error': _('We are not currently accepting new OpenID signups.')
                 })

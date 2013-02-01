@@ -1,5 +1,5 @@
 from django import template
-
+from socialregistration.templatetags import resolve, get_bits
 
 register = template.Library()
 
@@ -17,8 +17,7 @@ def openid_form(parser, token):
 
     """
 
-    bits = token.split_contents()
-    bits = [bit.replace("'","").replace('"','') for bit in bits[1:]]
+    bits = get_bits(token)
 
     if len(bits) > 1:
         return FormNode(bits[0], bits[1:])
@@ -32,20 +31,13 @@ class FormNode(template.Node):
         self.params = params
 
     def render(self, context):
-        def resolve(what):
-            try:
-                return template.Variable(what).resolve(context)
-            except template.VariableDoesNotExist:
-                return what
-
         if self.provider:
-            provider = resolve(self.provider)
+            provider = resolve(self.provider, context)
         else:
             provider = None
 
         if self.params:
-            params = [resolve(bit) for bit in self.params]
-            button = ''.join(params)
+            button = ''.join([resolve(bit, context) for bit in self.params])
         else:
             button = None
 

@@ -3,32 +3,33 @@ from django.utils.translation import ugettext_lazy as _
 
 register = template.Library()
 
+def resolve(what, context):
+    try:
+        return template.Variable(what).resolve(context)
+    except template.VariableDoesNotExist:
+        return what
+
+def get_bits(token):
+    bits = token.split_contents()
+    return [bit.replace("'","").replace('"','') for bit in bits[1:]]
+
 def button(template_name):
     def tag(parser, token):
-        bits = token.split_contents()
-        if len(bits) > 1:
-            return ButtonTag(template_name, *bits[1:])
-        else:
-            # No custom button
-            return ButtonTag(template_name)
+        bits = get_bits(token)
+        return ButtonTag(template_name, get_bits(token))
     return tag
 
 class ButtonTag(template.Node):
-    def __init__(self, template_name, *input):
-        self.template = template_name
-        self.input = input
+    def __init__(self, template_name, params = []):
+        self.template_name = template_name
+        self.params = params
 
     def render(self, context):
-        output = []
-        for bit in self.input:
-            if not (bit[0] == bit[-1] and bit[0] in ('"', "'")):
-                output.append(template.Variable(bit).resolve(context))
-            else:
-                output.append(bit[1:-1])
-        self.button = ''.join(output)
-
         if not 'request' in context:
             raise AttributeError(_("Please add 'django.core.context_processors.request' "
                 "'to your settings.TEMPLATE_CONTEXT_PROCESSORS'"))
 
-        return template.loader.render_to_string(self.template, {'button': self.button, 'next': context.get('next', None)}, context)
+        button = ''.join([resolve(bit, context) for bit in self.params])
+        
+        return template.loader.render_to_string(self.template_name, {
+                'button': button}, context)

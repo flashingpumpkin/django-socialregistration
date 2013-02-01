@@ -27,9 +27,14 @@ class TemplateTagTest(object):
         
         self.assertTrue('form' in template.Template(tpl).render(template.Context({'request': None})))
         
-        tpl = """{%% load %s %%}{%% %s 'custom/button/url.jpg' %%}""" % (load, button)
+        tpl = """{%% load %s %%}{%% %s STATIC_URL 'custom/button/url.jpg' %%}""" % (load, button)
         
-        self.assertTrue('custom/button/url.jpg' in template.Template(tpl).render(template.Context({'request': None})))
+        rendered = template.Template(tpl).render(template.Context({
+                    'request': None,
+                    'STATIC_URL': '/static/'}))
+
+        self.assertTrue('custom/button/url.jpg' in rendered)
+        self.assertTrue('/static/' in rendered)
 
 
 def get_mock_func(func):

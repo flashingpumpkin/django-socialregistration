@@ -4,7 +4,7 @@ from django.test import TestCase
 from socialregistration.contrib.twitter.models import TwitterProfile
 from socialregistration.tests import TemplateTagTest, OAuthTest
 import urllib
-
+import json
 
 class TestTemplateTag(TemplateTagTest, TestCase):
     def get_tag(self):
@@ -34,7 +34,7 @@ class TestTwitter(OAuthTest, TestCase):
             'user_id': '123'})
     
     def get_setup_callback_mock_response(self, *args, **kwargs):
-        return {'status': '200'}, urllib.urlencode({})
+        return {'status': '200'}, json.dumps({})
     
     def create_profile(self, user):
         TwitterProfile.objects.create(user=user, twitter_id='123')

@@ -1,7 +1,11 @@
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
 from socialregistration.clients import Client
+
+from django.conf import settings
+
 import httplib2
+import socket
 import logging
 import oauth2 as oauth
 import urllib
@@ -9,6 +13,7 @@ import urlparse
 
 logger = logging.getLogger(__name__)
 
+TIMEOUT = getattr(settings, 'SOCIALREGISTRATION_SOCKET_TIMEOUT', 5)
 
 class OAuthError(Exception):
     """ 
@@ -64,19 +69,19 @@ class OAuth(Client):
         # We're just starting out and don't have neither request nor access
         # token. Return the standard client
         if not self._request_token and not self._access_token:
-            client = oauth.Client(self.consumer)
+            client = oauth.Client(self.consumer, timeout=TIMEOUT)
         
         # We're one step in, we've got the request token and can add that to 
         # the client.
         if self._request_token and not self._access_token:
             if verifier is not None:
                 self._request_token.set_verifier(verifier)
-            client = oauth.Client(self.consumer, self._request_token)
+            client = oauth.Client(self.consumer, self._request_token, timeout=TIMEOUT)
             
         # Two steps in, we've got an access token and can now properly sign 
         # our client requests with it.
         if self._access_token:
-            client = oauth.Client(self.consumer, self._access_token)
+            client = oauth.Client(self.consumer, self._access_token, timeout=TIMEOUT)
         
         return client
 
@@ -230,7 +235,8 @@ class OAuth2(Client):
         self._access_token = access_token
     
     def client(self):
-        return httplib2.Http()
+        ca_certs = getattr(settings, 'HTTPLIB2_CA_CERTS', None)
+        return httplib2.Http(ca_certs=ca_certs, timeout=TIMEOUT)
     
     def get_redirect_url(self, state='', **kwargs):
         """
@@ -342,7 +348,6 @@ class OAuth2(Client):
         if method.upper() == "GET":
             url = '%s?%s' % (url, urllib.urlencode(params))
             return self.client().request(url, method=method, headers=headers)
-        return self.client().request(url, method, body=urllib.urlencode(params),
-            headers=headers)
+        return self.client().request(url, method, body=urllib.urlencode(params), headers=headers)
         
 

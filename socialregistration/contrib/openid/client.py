@@ -17,7 +17,7 @@ class OpenIDClient(Client):
             return 'https://%s/' % Site.objects.get_current().domain
         return 'http://%s/' % Site.objects.get_current().domain
     
-    def get_callback_url(self):
+    def get_callback_url(self, **kwargs):
         return urlparse.urljoin(self.get_realm(),
             reverse('socialregistration:openid:callback'))
     

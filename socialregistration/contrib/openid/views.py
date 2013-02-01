@@ -39,7 +39,7 @@ class OpenIDCallback(SocialRegistration, View):
                 msg = _("Unfortunately we couldn't validate your identity: %s") % client.result.message
             else:
                 msg = _("Unfortunately we couldn't validate your identity")
-            return self.render_to_response({'error': msg})
+            return self.error_to_response(request, {'error': msg})
         
         # Save the client back to the session or we're not carrying the result
         # to the next view.

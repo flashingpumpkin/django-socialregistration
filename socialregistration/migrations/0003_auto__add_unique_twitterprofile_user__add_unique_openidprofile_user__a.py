@@ -11,9 +11,6 @@ class Migration(SchemaMigration):
         # Adding unique constraint on 'TwitterProfile', fields ['user']
         db.create_unique('socialregistration_twitterprofile', ['user_id'])
 
-        # Adding unique constraint on 'OpenIDProfile', fields ['user']
-        db.create_unique('socialregistration_openidprofile', ['user_id'])
-
         # Adding unique constraint on 'FacebookProfile', fields ['user']
         db.create_unique('socialregistration_facebookprofile', ['user_id'])
 
@@ -22,9 +19,6 @@ class Migration(SchemaMigration):
         
         # Removing unique constraint on 'FacebookProfile', fields ['user']
         db.delete_unique('socialregistration_facebookprofile', ['user_id'])
-
-        # Removing unique constraint on 'OpenIDProfile', fields ['user']
-        db.delete_unique('socialregistration_openidprofile', ['user_id'])
 
         # Removing unique constraint on 'TwitterProfile', fields ['user']
         db.delete_unique('socialregistration_twitterprofile', ['user_id'])

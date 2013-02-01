@@ -44,6 +44,10 @@ if 'socialregistration.contrib.instagram' in settings.INSTALLED_APPS:
         url(r'^instagram/', include('socialregistration.contrib.instagram.urls',
             namespace='instagram')))
 
+if 'socialregistration.contrib.google' in settings.INSTALLED_APPS:
+    urlpatterns = urlpatterns + patterns('',
+        url(r'^google/', include('socialregistration.contrib.google.urls',
+            namespace='google')))
 
 urlpatterns = urlpatterns + patterns('',
     url(r'^setup/$', Setup.as_view(), name='setup'),

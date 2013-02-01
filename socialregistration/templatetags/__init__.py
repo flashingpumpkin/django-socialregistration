@@ -15,7 +15,6 @@ def get_bits(token):
 
 def button(template_name):
     def tag(parser, token):
-        bits = get_bits(token)
         return ButtonTag(template_name, get_bits(token))
     return tag
 
